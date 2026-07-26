@@ -1,7 +1,10 @@
 # EXP-008 — Does Hyperliquid's lag change under volatility?
 
-**Status:** run. **It gets worse.** The lag roughly doubles to triples under stress while the
-CEX stay synchronised with each other.
+**Status:** **RETRACTED by [EXP-009](EXP-009-volatility-buckets.md).** The widening reported
+below is an artefact of the grid step, which this experiment named in its limitations and
+failed to quantify. Across 144 hours, the partial correlation between volatility and the
+follower index — controlling for grid step — is **−0.001**. The lag does not change with
+volatility. This file stands as the error that motivated the correction.
 **Date:** 2026-07-26
 **Data:** perplog tape, BTC, six hours selected on realised range, all four venues.
 
