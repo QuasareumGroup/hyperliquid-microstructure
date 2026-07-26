@@ -97,16 +97,54 @@ carries 61.8%, the top 10% carries 76.6%.
 **What holds without qualification:** the 3.8× factor, its robustness across unit definitions,
 the growth of tranching with size, the measured compression, and the tail-index gap.
 
-## Why this might matter beyond Hyperliquid
+## What CEX feeds actually count — checked, not assumed
 
-Existing cascade work (e.g. Lim 2026, minute-level Binance/Bybit) rests on venue-published
-liquidation feeds. Those are throttled and anonymised rather than fill-level, so this specific
-bias may not apply to them — **that has not been checked and should not be assumed**. The
-defensible claim today is narrower and still useful:
+The section above originally said this bias "may not apply" to CEX feeds and that it "has not
+been checked". It has now been checked, against venue documentation.
 
-> Anyone building liquidation statistics from Hyperliquid's node-fills archive by counting fills
-> overstates event counts ~3.8× and compresses the size tail. The correct unit is the
-> (user, transaction) episode, and the choice is robust.
+| venue | stream | publishes | limitation |
+|---|---|---|---|
+| **Binance** | `forceOrder` | **orders** | *"only the **largest one** liquidation order within 1000ms will be pushed as the snapshot"* (since April 2021) |
+| **OKX** | `liquidation-orders` | orders | at most **one update per second per contract** |
+| **Bybit** *(old)* | `liquidation` | orders | at most 1/s per symbol — **deprecated** |
+| **Bybit** *(current)* | `allLiquidation` | **all liquidations** | complete, pushed every 500 ms |
+
+**The fill-counting bias does not transfer.** CEX feeds publish *orders*, not fills, so there is
+no tranching to inflate. Flagging it as unverified was correct.
+
+**But a heavier problem exists there.** Binance does not publish a sample of liquidations — it
+publishes a sequence of **per-second maxima**. That is a different statistical object:
+
+- **event counts are unrecoverable** — nothing states how many liquidations each snapshot
+  suppressed;
+- **the body of the distribution is destroyed** — small liquidations never appear;
+- **the tail index may survive**. Block maxima are a *valid* EVT approach, and a block maximum
+  inherits the tail index of its parent distribution. So Binance data can yield a roughly
+  correct tail and a worthless count.
+
+That nuance matters: it does not invalidate everything built on these feeds, it invalidates
+specific things — anything resting on counting events, or on the shape of the body.
+
+**Caveat.** Lim (2026) works minute-level on Binance and Bybit, but the paper has not been read
+here and it is unknown which streams it uses or what it concludes from them. Nothing above is a
+claim about that work — only about what the data can support.
+
+### Consequence for Hyperliquid as a substrate
+
+| | completeness | native unit |
+|---|---|---|
+| Hyperliquid node fills | **complete, per-user** | fill → aggregate to episode |
+| Bybit `allLiquidation` | complete since Feb 2025 | order, anonymous |
+| Binance / OKX | **per-second maxima** | truncated order |
+
+Hyperliquid is the only venue publishing a complete *and named* record — `liquidatedUser`,
+`startPosition`, `closedPnl`. That is what makes the α ≈ 1.15 estimate above hard to reproduce
+elsewhere: fitting a tail index needs the body as well as the tail, and Binance withholds it.
+
+> The defensible claim: on Hyperliquid's node-fills archive, counting fills overstates event
+> counts ~3.8× and compresses the size tail from α ≈ 1.15 to α ≈ 2.05. The correct unit is the
+> (user, transaction) episode, and that choice is robust. On CEX feeds the failure mode is
+> different and, for counting purposes, worse.
 
 ## Limits
 
@@ -122,5 +160,7 @@ defensible claim today is narrower and still useful:
 1. ~~Re-run retaining per-fill notionals~~ — **done**; compression is measured and the tail
    index is fitted above.
 2. Split majors from HIP-3 assets — the mechanics may differ.
-3. Check what venue-published CEX feeds actually count, before any claim about the wider
-   literature. Not assumed here.
+3. ~~Check what venue-published CEX feeds actually count~~ — **done**, see above. The fill
+   bias does not transfer; a block-maxima bias applies there instead.
+4. Whether the α ≈ 1.15 estimate is stable across assets and over the archive's full year —
+   12 hours is not a census, and the tail index is the load-bearing number now.
