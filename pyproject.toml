@@ -1,0 +1,52 @@
+[project]
+name = "qfr"
+version = "0.1.0"
+description = "Quantum finance research on on-chain perpetual futures (Hyperliquid)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    # data substrate
+    "websockets>=13.0",
+    "httpx>=0.27",
+    "pyarrow>=17.0",
+    "duckdb>=1.1",
+    "pytz",  # duckdb needs it to convert tz-aware timestamps back to Python
+    "polars>=1.0",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scipy>=1.13",
+]
+
+[project.optional-dependencies]
+# Quantum stack. Kept separate so the recorder can run on a minimal install.
+quantum = [
+    "qiskit>=2.5",
+    "qiskit-ibm-runtime>=0.30",
+    "qiskit-aer>=0.15",
+]
+# Classical / quantum-inspired solvers for track A (O1).
+solvers = [
+    "ortools>=9.10",          # CP-SAT: ground truth on small instances
+    "dimod>=0.12",            # QUBO/BQM model interchange
+    "dwave-neal>=0.6",        # tuned simulated annealing baseline
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["qfr*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

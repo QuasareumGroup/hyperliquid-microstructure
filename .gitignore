@@ -1,0 +1,28 @@
+# Recorded and folded market data — never committed, rebuilt from S3.
+# Leading slash matters: a bare `data/` would also exclude `qfr/data/`, the
+# package that holds the loader source.
+/data/
+/logs/
+*.parquet
+*.duckdb
+*.lz4
+
+# Secrets. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
