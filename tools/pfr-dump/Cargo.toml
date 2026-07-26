@@ -1,0 +1,17 @@
+[package]
+name = "pfr-dump"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Dump perplog .pfr trade-tape frames to CSV for analysis"
+
+# Path dependency into the perplog workspace. Deliberate: the PFR codec is
+# theirs and is tested there. Reimplementing bincode+lz4 framing in Python to
+# avoid the coupling would mean guessing at a binary format — the failure mode
+# is silent wrong numbers, which is exactly what this project cannot afford.
+[dependencies]
+perplog-flow = { path = "../../../perplog/rust/crates/flow" }
+
+[[bin]]
+name = "pfr-dump"
+path = "src/main.rs"
