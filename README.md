@@ -153,6 +153,22 @@ caught ([EXP-004](experiments/EXP-004-oracle-perp-lead-lag.md)).
 **Use `mid_px` for anything about price dynamics.** `mark_px` is designed for margining,
 liquidation and PnL, and is correct for those.
 
+## Published datasets
+
+`experiments/data/*.csv` are the reduced outputs of each campaign, versioned so results are
+checkable without re-running a campaign.
+
+Liquidation datasets carry a **derived account id**, not the address (`hlm/data/anon.py`).
+Addresses are public on-chain, so this is not confidentiality — it avoids publishing a
+*compiled* map of 350k accounts to their losses, which is far more usable for profiling than
+the same facts spread across an archive. No result needs the address: every one depends on
+grouping by account, never on which account. Re-running the analyses on the derived ids
+reproduces every number bit for bit.
+
+The hash is unsalted and therefore deterministic, so a known address can still be tested for
+membership. That is a deliberate trade for third-party reproducibility. **Do not call the
+datasets anonymised.**
+
 ## Method
 
 Every experiment is **pre-registered**: hypothesis and success criterion written down in

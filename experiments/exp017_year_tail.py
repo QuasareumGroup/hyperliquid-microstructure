@@ -37,6 +37,8 @@ from pathlib import Path
 
 import lz4.frame
 
+from hlm.data.anon import account_id
+
 REPO = Path(__file__).resolve().parent.parent
 BUCKET = "s3://hl-mainnet-node-data/node_fills_by_block/hourly"
 #: The archive begins here.
@@ -111,7 +113,9 @@ def _row(user: str, coin: str, run: list[dict]) -> dict:
         "coin": coin,
         # HIP-3 builder-deployed perps carry a `dex:` prefix; majors do not.
         "hip3": int(":" in coin),
-        "user": user,
+        # Derived id, not the address — see hlm/data/anon.py. Grouping is
+        # unchanged, so every number is identical.
+        "user": account_id(user),
         "fills": len(run),
         "notional": round(sum(f["ntl"] for f in run), 4),
     }

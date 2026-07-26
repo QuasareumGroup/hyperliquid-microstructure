@@ -40,6 +40,8 @@ from pathlib import Path
 import lz4.frame
 import numpy as np
 
+from hlm.data.anon import account_id
+
 REPO = Path(__file__).resolve().parent.parent
 BUCKET = "s3://hl-mainnet-node-data/node_fills_by_block/hourly"
 
@@ -164,7 +166,7 @@ def main() -> None:
         {
             "ts": min(f["ts"] for f in e),
             "coin": e[0]["coin"],
-            "user": e[0]["user"],
+            "user": account_id(e[0]["user"]),
             "fills": len(e),
             "notional": round(sum(f["ntl"] for f in e), 2),
             "txs": len({f["tx"] for f in e}),
@@ -186,7 +188,7 @@ def main() -> None:
         for i, e in enumerate(eps):
             for f in e:
                 w.writerow({
-                    "ts": f["ts"], "coin": f["coin"], "user": f["user"],
+                    "ts": f["ts"], "coin": f["coin"], "user": account_id(f["user"]),
                     "episode": i, "notional": round(f["ntl"], 6),
                 })
     print(f"wrote per-fill notionals -> {args.fills_out}")
