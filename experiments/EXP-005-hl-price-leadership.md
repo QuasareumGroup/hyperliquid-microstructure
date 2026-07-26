@@ -1,7 +1,10 @@
 # EXP-005 — Does Hyperliquid lead or follow the major CEX perp venues?
 
-**Status:** **run. P1 confirmed — Binance leads Hyperliquid by ~500 ms in trade prints.**
-The first result in this repo with an effect size that matters.
+**Status:** run. **Headline superseded by [EXP-006](EXP-006-block-aligned-lead-lag.md).**
+The ~500 ms figure below conflates a mechanical sampling artefact with a genuine
+informational lead. Block-aligning both series separates them: the offset is largely
+mechanical, while a 4–8× directional asymmetry survives. Read EXP-006 for the corrected
+result; this file stands as the measurement that motivated it.
 **Date:** 2026-07-26
 **Data:** perplog tape, tick-level trade prints, `venue ∈ {hl, binance}`, BTC,
 2026-07-24 hours 12–14 (sealed, no gaps).
