@@ -1,4 +1,4 @@
-# EXP-017 — Does α ≈ 1.15 survive a year and an unbiased sample? Majors vs HIP-3
+# EXP-017 — Does the size-tail measurement survive a year and an unbiased sample? Majors vs HIP-3
 
 **Status:** run. **P3 and P4 rejected.** α < 2 survives everywhere. The "not stable in k"
 conclusion below is **superseded by [EXP-018](EXP-018-hill-plot.md)**, which finds a genuine
@@ -6,6 +6,8 @@ plateau at α ≈ 0.93 using a continuum rather than three points.
 **Date:** 2026-07-26
 **Scripts:** `experiments/exp017_year_tail.py` (collection),
 `experiments/exp017_analyse.py` (analysis).
+
+> **Current position: [FINDINGS.md](FINDINGS.md).** This file is a running record and keeps its original wording plus corrections; the state of claims lives there.
 
 ---
 

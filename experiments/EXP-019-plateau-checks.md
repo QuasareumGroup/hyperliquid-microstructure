@@ -1,10 +1,12 @@
-# EXP-019 — Three checks on the α ≈ 0.93 plateau: two pass, the Pareto fit is rejected
+# EXP-019 — Three checks on the plateau: robust to width and bootstrap, but the Pareto fit is rejected
 
 **Status:** run. **Window width and bootstrap hold. Goodness-of-fit is rejected at every k.**
 The number survives as an empirical summary; its parametric reading does not.
 **Date:** 2026-07-26
 **Data:** `experiments/data/exp017_episodes.csv`, majors only (n = 289,283).
 **Script:** `experiments/exp019_plateau_checks.py`.
+
+> **Current position: [FINDINGS.md](FINDINGS.md).** This file is a running record and keeps its original wording plus corrections; the state of claims lives there.
 
 ---
 

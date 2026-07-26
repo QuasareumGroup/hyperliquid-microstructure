@@ -1,4 +1,4 @@
-# EXP-018 — Hill plot over a continuum of k: the plateau sits at α ≈ 0.93
+# EXP-018 — Hill plot over a continuum of k: locating the estimator's plateau
 
 **Status:** run, then **largely undone by [EXP-020](EXP-020-alternatives.md)**. The plateau is
 real as an artefact and empty as an estimate: the tail is lognormal/Weibull, not Pareto, and a
@@ -8,6 +8,8 @@ The plateau location and its robustness (EXP-019) still stand as facts about the
 **Date:** 2026-07-26
 **Data:** `experiments/data/exp017_episodes.csv` — 351,540 episodes, one archive year.
 **Script:** `experiments/exp018_hill_plot.py`. Figure: `reports/exp018_hill_plot.svg` (+ dark).
+
+> **Current position: [FINDINGS.md](FINDINGS.md).** This file is a running record and keeps its original wording plus corrections; the state of claims lives there.
 
 ---
 

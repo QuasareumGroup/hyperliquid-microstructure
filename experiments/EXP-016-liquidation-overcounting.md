@@ -1,4 +1,4 @@
-# EXP-016 — What is "one liquidation"? Fill-counting inflates 3.8×, and flattens the tail
+# EXP-016 — What is "one liquidation"? Fill-counting inflates the count and compresses sizes
 
 **Status:** run, then rerun with per-fill notionals. The inflation factor is **robust to how a
 liquidation is defined**, is
@@ -9,6 +9,8 @@ size distribution**.
 12 hours sampled over 10 months (2025-10 → 2026-07).
 Script `experiments/exp016_liquidation_units.py`, per-episode output
 `experiments/data/exp016_units.csv`.
+
+> **Current position: [FINDINGS.md](FINDINGS.md).** This file is a running record and keeps its original wording plus corrections; the state of claims lives there.
 
 ---
 
