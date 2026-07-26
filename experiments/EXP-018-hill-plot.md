@@ -41,11 +41,15 @@ a computed summary over the numbers under it.
 
 The majors plateau spans 0.8%–4.2% of the sample — a defensible tail fraction, not the body.
 
-**α ≈ 0.93 is below 1.** At k = 5,000 the CI is [0.88, 0.93], excluding 1. Stated carefully:
-the fitted tail is heavy enough that **the sample mean is not a stable statistic**, not merely
-the variance. Real data has an upper bound, so "infinite mean" is a property of the fitted model
-rather than a literal claim about the ledger — but any risk calculation averaging liquidation
-sizes is resting on a quantity that does not converge.
+**α ≈ 0.93 is below 1.** At k = 5,000 the CI is [0.88, 0.93], excluding 1.
+
+> **Retracted by [EXP-019](EXP-019-plateau-checks.md).** The sentence that stood here — that the
+> fitted tail is heavy enough that the sample mean is not a stable statistic — rested on α < 1
+> **inside a Pareto model**, and a KS test with parametric-bootstrap p-values rejects that model
+> at every k tested (p ≤ 0.01). The asymptotic CI was also optimistic: correct subsampling
+> widens it to [0.831, 0.998], so α < 1 holds only narrowly. What survives is α ≈ 0.93 as an
+> **empirical** tail-heaviness summary, robust to window width — and the episode/fill gap, which
+> assumes no parametric form at all.
 
 **The episode/fill gap is wider than previously reported**: plateau to plateau, **0.93 vs 3.07**,
 against EXP-016's 1.15 vs 2.05. The two curves do not converge at any depth — visible in the
