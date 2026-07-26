@@ -128,6 +128,12 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--hours", type=int, default=len(DEFAULT_HOURS))
     ap.add_argument("--out", type=Path, default=REPO / "experiments" / "data" / "exp016_units.csv")
+    ap.add_argument(
+        "--fills-out",
+        type=Path,
+        default=REPO / "experiments" / "data" / "exp016_fills.csv",
+        help="per-fill notionals — needed to measure tail compression rather than bound it",
+    )
     args = ap.parse_args()
 
     all_fills: list[dict] = []
@@ -171,6 +177,20 @@ def main() -> None:
         w.writeheader()
         w.writerows(rows)
 
+    # Per-fill rows, tagged with their episode. EXP-016 v1 approximated apparent
+    # size by splitting an episode equally across its fills, which only bounds
+    # the compression. These are the real ones.
+    with args.fills_out.open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["ts", "coin", "user", "episode", "notional"])
+        w.writeheader()
+        for i, e in enumerate(eps):
+            for f in e:
+                w.writerow({
+                    "ts": f["ts"], "coin": f["coin"], "user": f["user"],
+                    "episode": i, "notional": round(f["ntl"], 6),
+                })
+    print(f"wrote per-fill notionals -> {args.fills_out}")
+
     ntl = np.array([r["notional"] for r in rows])
     fl = np.array([r["fills"] for r in rows], dtype=float)
     keep = ntl > 0
@@ -181,8 +201,8 @@ def main() -> None:
     for lo, hi, lbl in zip(qs[:-1], qs[1:], ["p0-50", "p50-90", "p90-99", "p99-100"], strict=False):
         m = keep & (ntl >= lo) & (ntl < hi if hi < qs[-1] else ntl <= hi)
         if m.sum():
-            print(f"  {lbl:<9} notional {lo:>12,.0f} - {hi:>12,.0f}  "
-                  f"n={m.sum():>6,}  median fills {np.median(fl[m]):>5.0f}  mean {fl[m].mean():>6.1f}")
+            print(f"  {lbl:<9} notional {lo:>12,.0f} - {hi:>12,.0f}  n={m.sum():>6,}  "
+                  f"median fills {np.median(fl[m]):>5.0f}  mean {fl[m].mean():>6.1f}")
     print(f"\nwrote {len(rows):,} episodes -> {args.out}")
 
 

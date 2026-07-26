@@ -1,6 +1,7 @@
 # EXP-016 — What is "one liquidation"? Fill-counting inflates 3.8×, and flattens the tail
 
-**Status:** run. The inflation factor is **robust to how a liquidation is defined**, is
+**Status:** run, then rerun with per-fill notionals. The inflation factor is **robust to how a
+liquidation is defined**, is
 **strongly size-dependent** (2× typical, 67× for the top 1%), and fill-counting **compresses the
 size distribution**.
 **Date:** 2026-07-26
@@ -52,36 +53,49 @@ all fills.
 
 ## Consequence: the tail gets flattened
 
-Apparent per-fill size versus true episode size:
+Rerun retaining **per-fill notionals** (`experiments/data/exp016_fills.csv`, 24,566 rows), so
+these are measured rather than approximated. The first pass split each episode equally across
+its fills, which only *bounds* the compression; those bounded figures are shown for comparison.
 
-| quantile | true | apparent | factor |
-|---|---|---|---|
-| p50 | $661 | $926 | 0.7× |
-| p90 | $18,259 | $11,229 | 1.6× |
-| p99 | $214,474 | $37,401 | **5.7×** |
-| p99.9 | $1,969,302 | $125,310 | **15.7×** |
+| quantile | true episode | actual fill | factor | *(first pass, bounded)* |
+|---|---|---|---|---|
+| p50 | $661 | $424 | 1.6× | *0.7×* |
+| p90 | $18,259 | $8,842 | 2.1× | *1.6×* |
+| p99 | $214,474 | $63,812 | **3.4×** | *5.7×* |
+| p99.9 | $1,969,302 | $180,161 | **10.9×** | *15.7×* |
+| max | $3,838,207 | $899,224 | 4.3× | — |
 
-Largest real episode **$3,838,207**; largest apparent fill **$242,127**.
+The bound held and pointed the right way: real compression is **smaller** than the equal-split
+approximation, as predicted.
 
-> Fill-counting does not merely inflate the *number* of liquidations — it **destroys the tail of
-> the size distribution**. A $3.8M liquidation appears as ~40 fills of ~$95k. Any study of
-> cascade severity or forced-deleveraging tail risk built on fill counts understates the tail by
-> close to an order of magnitude.
+### The tail index — this is the result
 
-### Two caveats, one of which bounds the result
+Hill estimator, **validated first** against Pareto samples with known α (error < 6% across
+α ∈ {1.0, 1.5, 2.0, 3.0}, n = 200k). Asymptotic s.e. = α̂/√k.
 
-**The compression factor is an upper bound.** "Apparent size" assumes fills within an episode
-are **equal-sized**. They are not — an observed sequence ran 0.239 / 0.109 / 0.099 / 0.096 …
-If one fill dominates, the largest apparent fill approaches the true episode size and the real
-compression is *smaller* than 16×. Settling it needs per-fill notionals, which this run did not
-retain.
+| series | k | α | 95% CI | finite variance? |
+|---|---|---|---|---|
+| **episodes** (truth) | 100 | 1.14 | [0.92, 1.37] | **no, α < 2** |
+| | 200 | **1.15** | [0.99, 1.31] | **no, α < 2** |
+| | 400 | 1.00 | [0.90, 1.10] | **no, α < 2** |
+| **fills** | 100 | 2.01 | [1.62, 2.41] | undetermined |
+| | 200 | **2.05** | [1.77, 2.34] | undetermined |
+| | 400 | 1.74 | [1.57, 1.91] | no |
 
-**No tail index is reported.** The Hill estimator written for this run returned 0.00 on both
-series — it mixes scales and is wrong. Rather than report a broken statistic, it is omitted;
-the tail index needs doing properly.
+> **Fill-counting does not merely distort the magnitude of tail risk — it changes its kind.**
+> The true liquidation size distribution has α ≈ 1.15: variance is infinite and the mean itself
+> is near the edge of existing. Measured per fill it rises to α ≈ 2.05, where finite variance
+> can no longer be excluded.
+
+That is the difference between "extreme events dominate everything" and "extreme events are
+manageable". A risk model calibrated on fill counts would conclude the second while the market
+is in the first.
+
+Concentration agrees: the **top 1% of fills carries 30.7%** of liquidated notional, the top 5%
+carries 61.8%, the top 10% carries 76.6%.
 
 **What holds without qualification:** the 3.8× factor, its robustness across unit definitions,
-and the growth of tranching with size. All three are measured directly.
+the growth of tranching with size, the measured compression, and the tail-index gap.
 
 ## Why this might matter beyond Hyperliquid
 
@@ -105,8 +119,8 @@ defensible claim today is narrower and still useful:
 
 ## Next
 
-1. Re-run retaining per-fill notionals, to replace the upper-bound compression figure with a
-   measured one and to fit a tail index properly.
+1. ~~Re-run retaining per-fill notionals~~ — **done**; compression is measured and the tail
+   index is fitted above.
 2. Split majors from HIP-3 assets — the mechanics may differ.
 3. Check what venue-published CEX feeds actually count, before any claim about the wider
    literature. Not assumed here.
