@@ -1,5 +1,5 @@
 [project]
-name = "qfr"
+name = "hlm"
 version = "0.1.0"
 description = "Quantum finance research on on-chain perpetual futures (Hyperliquid)"
 readme = "README.md"
@@ -42,11 +42,17 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["qfr*"]
+include = ["hlm*"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+# Selected explicitly. Left implicit, the enabled set follows whatever the
+# installed ruff defaults to, which drifts between versions — the same code
+# linted clean and then failed on an unchanged tree.
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -59,7 +59,7 @@ SCHEMAS: dict[str, pa.Schema] = {
     #
     # The public feed carries NO liquidation flag — only `users`, the two
     # counterparties. Labelling liquidations is therefore a downstream
-    # derivation (see `qfr/problems/liquidation_tail.py`), which is why both
+    # derivation (see `hlm/problems/liquidation_tail.py`), which is why both
     # counterparties and `extra` are preserved verbatim here: the label can be
     # revised later, but unrecorded fields are gone for good.
     "trade": pa.schema(
@@ -203,8 +203,8 @@ class ParquetWriter:
         by_date: dict[str, list[dict[str, Any]]] = {}
         for row in buffered:
             raw_time = row.get("time")
-            date = utc_date(int(raw_time)) if raw_time is not None else utc_date(int(time.time() * 1000))
-            by_date.setdefault(date, []).append(row)
+            stamp = int(raw_time) if raw_time is not None else int(time.time() * 1000)
+            by_date.setdefault(utc_date(stamp), []).append(row)
 
         written = 0
         for date, rows in by_date.items():

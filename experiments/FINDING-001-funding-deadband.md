@@ -3,7 +3,7 @@
 **Status:** closed. **No discovery.** One validated dataset, one unplanned observation.
 **Date:** 2026-07-26
 **Data:** full `asset_ctxs` archive — 1,137 days (2023-05-20 → 2026-06-29),
-4,169,753 asset-hours, 230 assets. Folded by `qfr/data/archive.py`.
+4,169,753 asset-hours, 230 assets. Folded by `hlm/data/archive.py`.
 
 ---
 
@@ -125,4 +125,4 @@ follow-up: does the discount coincide with the growth of delta-neutral basis cap
 of the whole perp universe: premium (mean/min/max), funding published and modelled, OI,
 mark/oracle/mid, both impact prices, volume, plus derived `regime` and `model_exact`.
 
-Rebuild: `python -m qfr.data.archive --all --out data/ctx_hourly`
+Rebuild: `python -m hlm.data.archive --all --out data/ctx_hourly`

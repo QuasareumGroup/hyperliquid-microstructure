@@ -56,7 +56,7 @@ Novelty is claimed **narrowly and deliberately**. A precise claim is defensible;
 ## Layout
 
 ```
-qfr/
+hlm/
   data/        recorder.py  hl_client.py  store.py      # substrate — running now
   problems/    action_budget.py  liquidation_tail.py  funding_process.py
   solvers/     classical.py  annealing.py  bifurcation.py  tensor.py  qaoa.py
@@ -108,9 +108,9 @@ Scope is deliberately narrow. `perplog-recorder` subscribes to `trades` and `l2B
 gap is the entire reason this recorder exists, and it happens to be exactly what O1 and O3 need.
 
 ```bash
-.venv/bin/python -m qfr.data.recorder            # funding/context only (default)
-.venv/bin/python -m qfr.data.recorder --status   # summarise what is on disk
-.venv/bin/python -m qfr.data.recorder --full     # add trades and book (standalone mode)
+.venv/bin/python -m hlm.data.recorder            # funding/context only (default)
+.venv/bin/python -m hlm.data.recorder --status   # summarise what is on disk
+.venv/bin/python -m hlm.data.recorder --full     # add trades and book (standalone mode)
 ```
 
 | dataset | coverage | throttle | purpose |
@@ -134,7 +134,7 @@ consuming the remainder of the volume.
 ### Reading it back
 
 ```python
-from qfr.data.store import Store
+from hlm.data.store import Store
 store = Store("data")
 store.scan("asset_ctx").limit(10).show()
 ```

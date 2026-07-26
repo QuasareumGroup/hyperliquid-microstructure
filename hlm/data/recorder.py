@@ -25,9 +25,9 @@ funding events. `perplog/rust/crates/archive` already implements the SigV4
 signing and lz4 decoding for those.
 
 Usage:
-    python -m qfr.data.recorder --status
-    python -m qfr.data.recorder            # funding/context only (default)
-    python -m qfr.data.recorder --full     # add trades and book
+    python -m hlm.data.recorder --status
+    python -m hlm.data.recorder            # funding/context only (default)
+    python -m hlm.data.recorder --full     # add trades and book
 """
 
 from __future__ import annotations
@@ -47,10 +47,10 @@ from typing import Any
 
 import websockets
 
-from qfr.data.hl_client import InfoClient
-from qfr.data.store import DEFAULT_DATA_DIR, ParquetWriter, Store
+from hlm.data.hl_client import InfoClient
+from hlm.data.store import DEFAULT_DATA_DIR, ParquetWriter, Store
 
-logger = logging.getLogger("qfr.recorder")
+logger = logging.getLogger("hlm.recorder")
 
 #: Hyperliquid closes idle sockets; the docs' reference client pings well
 #: inside that window.

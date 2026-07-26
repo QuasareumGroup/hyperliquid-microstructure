@@ -1,7 +1,7 @@
 """Async client for the Hyperliquid public `info` API.
 
 Read-only. The recorder uses mainnet, which needs no credentials and carries no
-risk. Signing and the `exchange` endpoint live in `qfr.strategy`, testnet only.
+risk. Signing and the `exchange` endpoint live in `hlm.strategy`, testnet only.
 
 The IP rate limit is a weighted budget of 1200 per minute, and the weights are
 uneven enough that a naive request counter would be wrong by a factor of 10:
@@ -207,7 +207,9 @@ class InfoClient:
                 )
                 await asyncio.sleep(backoff)
 
-        raise RuntimeError(f"info request {info_type!r} failed after {self.max_retries} attempts") from last_error
+        raise RuntimeError(
+            f"info request {info_type!r} failed after {self.max_retries} attempts"
+        ) from last_error
 
     # --- typed helpers -------------------------------------------------
 

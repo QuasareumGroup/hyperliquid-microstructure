@@ -19,9 +19,9 @@ Requester-pays: the caller's AWS credentials are billed for transfer. At ~8.7 GB
 for the full archive this sits inside AWS's 100 GB/month free egress allowance.
 
 Usage:
-    python -m qfr.data.archive --list
-    python -m qfr.data.archive --all --out data/ctx_hourly
-    python -m qfr.data.archive --days 20260601 20260602
+    python -m hlm.data.archive --list
+    python -m hlm.data.archive --all --out data/ctx_hourly
+    python -m hlm.data.archive --days 20260601 20260602
 """
 
 from __future__ import annotations
@@ -88,14 +88,14 @@ HOURLY_SCHEMA = pa.schema(
         ("day_ntl_vlm", pa.float64()),
         # Derived, so downstream analysis need not re-derive them inconsistently.
         ("funding_model", pa.float64()),  # controller applied to premium_mean
-        ("model_exact", pa.bool_()),  # |model − published| < 1e-9
+        ("model_exact", pa.bool_()),  # |model - published| < 1e-9
         ("regime", pa.string()),  # deadband | responsive_high | responsive_low
     ]
 )
 
 
 def model_funding_hourly(premium: float) -> float:
-    """Documented controller: F_8h = P + clamp(interest − P, ±0.0005), paid /8."""
+    """Documented controller: F_8h = P + clamp(interest - P, +/-0.0005), paid /8."""
     return (premium + max(min(INTEREST_8H - premium, CLAMP), -CLAMP)) / 8.0
 
 
