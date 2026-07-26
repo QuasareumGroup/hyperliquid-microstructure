@@ -1,7 +1,11 @@
 # EXP-006 — Block-aligned lead-lag: how much of Hyperliquid's lag is mechanical?
 
-**Status:** run. **Part mechanical, part informational — and the split is measurable.**
-Supersedes EXP-005's headline, which conflated the two.
+**Status:** run, but **the split below is revised by [EXP-010](EXP-010-hayashi-yoshida.md).**
+The "roughly half is mechanical" inference rested on the estimate falling from 500 ms to
+264 ms under block alignment. Hayashi-Yoshida — grid-free and validated against known lags —
+returns ~550 ms, so that fall was most likely grid coarsening rather than removal of a
+mechanical component. The mechanical/informational split is **reopened, not answered**.
+What stands here is the sampling-asymmetry diagnosis and the block-quantum measurement.
 **Date:** 2026-07-26
 **Data:** perplog tape, BTC and HYPE, 2026-07-24 hours 12–14.
 
