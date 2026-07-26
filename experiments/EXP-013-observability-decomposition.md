@@ -70,6 +70,13 @@ weights by returns — which occur at trade instants — so effective staleness 
 the mean interval. **0.5 is therefore a rough upper bound, not a sharp prediction**, and the
 10× gap should be read with that slack.
 
+> **Correction ([EXP-014](EXP-014-empirical-waiting-time.md)).** The reasoning above is wrong in
+> its main term. Under the inspection paradox, information landing at an arbitrary instant is
+> more likely to fall inside a *long* gap, so the true wait is `E[I²]/(2E[I]) ≥ E[I]/2` —
+> **longer** than half the mean interval, not shorter. Both effects are real and partly cancel;
+> EXP-014 measures the quantity empirically instead of arguing about it, and reaches the same
+> conclusion far more strongly.
+
 The level check does not depend on that assumption, and it is the more decisive of the two.
 
 The pooled R² of 0.232 comes mostly from the asset fixed effects, not from b₁. It is not
