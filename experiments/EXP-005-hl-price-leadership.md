@@ -146,9 +146,49 @@ observations. But it survived by luck of the check, not by design.
 
 **Rule: when a filter returns an implausible n, the bug is upstream of the filter.**
 
+## Follow-up run — HYPE, the asset where Hyperliquid holds primary liquidity
+
+**Registered:** P1 flip (peak k > 0, HL leads) / P2 no flip / P3 synchronised.
+
+HYPE is the case where the answer could plausibly reverse: Hyperliquid is the native venue,
+holds primary spot liquidity, and its oracle uses **HL spot instead of external sources** for
+exactly this class of asset. The block-cadence bias works *against* HL here, so a flip would
+have to overcome a handicap — which would make it strong evidence.
+
+Same hours, same method, BTC kept as control:
+
+| grid | BTC peak | HYPE peak | HYPE ρ | HYPE n |
+|---|---|---|---|---|
+| 250 ms | k = −2, ρ 0.266 | k = 0, ρ 0.153 | Σ neg +0.36 / pos +0.04 | 739 |
+| 500 ms | k = −1, ρ 0.474 | **k = −1 (−500 ms)**, ρ 0.322 | Σ neg +0.58 / pos **−0.09** | 1,838 |
+| 1000 ms | k = −1, ρ 0.534 | **k = −1**, ρ 0.470 | Σ neg +0.72 / pos +0.05 | 3,178 |
+
+**P1 rejected.** Same sign, same shape, slightly smaller. Binance leads Hyperliquid even on
+Hyperliquid's own token. The HL-leads side is flat, briefly negative.
+
+### But this result carries less weight than the BTC one
+
+| | median gap between distinct HL timestamps |
+|---|---|
+| BTC | 264 ms |
+| **HYPE** | **662 ms** |
+
+HL trades HYPE less often, so its distinct timestamps are 2.5× further apart — **wider than
+the 500 ms grid itself**. The mechanical handicap is not merely present, it is amplified, and
+n is 4–5× smaller.
+
+**The methodological consequence outweighs the test.** Block sparsity and apparent lag are the
+same quantity, so this protocol penalises Hyperliquid *in proportion to how thinly the asset
+trades there*. It therefore cannot answer the question for thin assets at all — and at this
+resolution HYPE is a thin asset, despite its status.
+
+The honest conclusion is not "HL leads nowhere". It is **no evidence of a flip, on a
+measurement too confounded to settle it.**
+
 ## Next
 
-1. More hours, more assets, and OKX/Bybit — this is three hours of one asset on one day.
-2. Align HL prints by block index to strip the mechanical component.
-3. Reverse direction: does HL lead on any asset where it holds primary liquidity (HYPE)?
-   That is the case where the answer could plausibly flip, and it is the interesting one.
+1. **Align HL prints by block index rather than wall clock.** Now the top priority, not the
+   second: every result of this shape carries the same bias, and the bias grows as liquidity
+   falls. Nothing else should be run at scale until this is stripped.
+2. More hours, more assets, and OKX/Bybit — this is three hours on one day.
+3. Quotes rather than prints: a venue can lead in quotes while trailing in trades.
