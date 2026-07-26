@@ -1,6 +1,7 @@
 # FINDING-001 — Funding controller deadband on Hyperliquid: full-archive measurement
 
-**Status:** closed. **No discovery.** One validated dataset, one unplanned observation.
+**Status:** closed. **No discovery.** A validated dataset — and nothing else.
+The "unplanned observation" below was later explained by the market cycle; see EXP-003.
 **Date:** 2026-07-26
 **Data:** full `asset_ctxs` archive — 1,137 days (2023-05-20 → 2026-06-29),
 4,169,753 asset-hours, 230 assets. Folded by `hlm/data/archive.py`.
@@ -110,14 +111,19 @@ result: deviations are entirely an artifact of stale markets, not of the model.
 This is reproducibility infrastructure, not a discovery — but anyone building on Hyperliquid
 funding data needs it, and no one appears to have published it.
 
-**2. An unplanned observation: the premium-sign regime flipped and stayed flipped.**
-`premium high` (perp rich, longs pay more) collapses from 51.0% / 55.6% in 2023Q4–2024Q1 to
-**1.8% – 2.7%** through 2026, while `premium low` runs 32.8% – 48.1%. Hyperliquid perps moved
-from persistently rich to persistently cheap, and have stayed there for four quarters.
+**2. ~~An unplanned observation: the premium-sign regime flipped and stayed flipped.~~**
+~~It is the most interesting thing in the file.~~
 
-This was not looked for. It is the most interesting thing in the file, and it has an obvious
-follow-up: does the discount coincide with the growth of delta-neutral basis capital
-(short perp, long spot), which mechanically pushes the perp below spot?
+**Retracted the same day.** `premium high` does collapse from 51.0% / 55.6% in 2023Q4–2024Q1
+to 1.8% – 2.7% through 2026 — the measurement stands. The *interpretation* does not.
+**EXP-003** shows `corr(perp-rich %, quarterly major return) = 0.786`: perps trade rich when
+the market rises, and 2025–2026 mostly did not. It is the market cycle, not a structural
+change in the venue.
+
+Three explanations were tested and rejected before the obvious one was tried
+(delta-neutral capital in EXP-002, composition and sensitivity in EXP-003). Calling this "the
+most interesting thing in the file" before controlling for the cycle was the day's largest
+error, and it stood for several hours.
 
 ## Reusable output
 
