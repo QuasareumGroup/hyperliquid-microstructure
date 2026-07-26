@@ -1,7 +1,8 @@
 # EXP-017 — Does α ≈ 1.15 survive a year and an unbiased sample? Majors vs HIP-3
 
-**Status:** run. **P3 and P4 rejected.** α < 2 survives everywhere, but the index is **not
-stable in k** — which qualifies EXP-016's headline number.
+**Status:** run. **P3 and P4 rejected.** α < 2 survives everywhere. The "not stable in k"
+conclusion below is **superseded by [EXP-018](EXP-018-hill-plot.md)**, which finds a genuine
+plateau at α ≈ 0.93 using a continuum rather than three points.
 **Date:** 2026-07-26
 **Scripts:** `experiments/exp017_year_tail.py` (collection),
 `experiments/exp017_analyse.py` (analysis).
@@ -138,3 +139,5 @@ honest statement is **α ∈ [0.9, 1.2] depending on tail depth**.
    arbitrary points — the right way to report an index that moves.
 2. An estimator that does not assume clean Pareto behaviour, given the drift.
 3. Whether the inflation factor is stable over the year or trends with venue growth.
+
+*(1 and 2 are done — see EXP-018.)*
