@@ -1,7 +1,10 @@
 # EXP-018 — Hill plot over a continuum of k: the plateau sits at α ≈ 0.93
 
-**Status:** run. **There is a plateau**, at k ∈ [2,420 – 12,050], α ≈ **0.93** — below 1.
-Corrects EXP-017's "no stable index", which came from three badly-chosen k.
+**Status:** run, then **largely undone by [EXP-020](EXP-020-alternatives.md)**. The plateau is
+real as an artefact and empty as an estimate: the tail is lognormal/Weibull, not Pareto, and a
+lognormal tail is *known* to make the Hill estimator drift. EXP-017's drift was the signature of
+the true distribution; this file smoothed over a real symptom and read a parameter off it.
+The plateau location and its robustness (EXP-019) still stand as facts about the estimator.
 **Date:** 2026-07-26
 **Data:** `experiments/data/exp017_episodes.csv` — 351,540 episodes, one archive year.
 **Script:** `experiments/exp018_hill_plot.py`. Figure: `reports/exp018_hill_plot.svg` (+ dark).
