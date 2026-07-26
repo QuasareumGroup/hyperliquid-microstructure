@@ -92,7 +92,15 @@ is what exposed that; as a caveat it would have survived indefinitely.
 liquidation mechanism, not of the market** — thin builder markets and BTC deleverage the same
 way. HIP-3 carries 17.7% of episodes but 9.3% of notional: more liquidations, smaller, same tail.
 
-## The finding that was not predicted
+## The finding that was not predicted — later corrected
+
+> **Superseded by [EXP-018](EXP-018-hill-plot.md).** A Hill plot over a continuum finds a
+> genuine plateau at k ∈ [2,420 – 12,050] with slope +0.00/decade, α ≈ **0.93**. The "drift"
+> below was read from three points, one of which (k=5,000) sits *inside* that plateau and one
+> (k=500) in the noisy small-k region. The index is stable — in a window neither point
+> bracketed.
+
+
 
 ```
 α on episodes:   k=500 → 1.22     k=2,000 → 1.02     k=5,000 → 0.93
