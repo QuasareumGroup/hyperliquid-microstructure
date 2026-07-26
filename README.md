@@ -142,6 +142,17 @@ store.scan("asset_ctx").limit(10).show()
 Note: the funding poller re-fetches an overlapping window each cycle so gaps cannot open. Deduplicate
 on `(coin, time)` at read time.
 
+## Using the folded dataset — one warning
+
+`mark_px` is **mechanically entangled** with `oracle_px`. The mark formula includes
+`oracle + EMA_150s(mid − oracle)`, so `ln(mark) − ln(oracle)` is an EMA that mean-reverts by
+definition, not by arbitrage. Combining `mark_px` with `oracle_px` or `premium` measures the
+formula rather than the market — it produced a spurious R² = 0.14 result here before being
+caught ([EXP-004](experiments/EXP-004-oracle-perp-lead-lag.md)).
+
+**Use `mid_px` for anything about price dynamics.** `mark_px` is designed for margining,
+liquidation and PnL, and is correct for those.
+
 ## Method
 
 Every experiment is **pre-registered**: hypothesis and success criterion written down in

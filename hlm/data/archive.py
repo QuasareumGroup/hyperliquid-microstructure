@@ -68,6 +68,15 @@ _NUMERIC = (
     "impact_ask_px",
 )
 
+# WARNING on mark_px. Per the docs, mark price is the median of three inputs,
+# the first being `oracle + EMA_150s(mid - oracle)`. So `mark_px` is anchored to
+# `oracle_px` by construction, and `ln(mark) - ln(oracle)` is a 2.5-minute-half-life
+# EMA that mean-reverts definitionally. Combining mark_px with oracle_px or
+# premium measures the mark formula, not the market — it produced a spurious
+# R^2 = 0.14 result before being caught (see experiments/EXP-004).
+#
+#   Use `mid_px` for price dynamics. `mark_px` is for margining, liquidation
+#   and PnL, which is what it is designed for.
 HOURLY_SCHEMA = pa.schema(
     [
         ("date", pa.string()),
