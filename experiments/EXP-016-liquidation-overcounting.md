@@ -87,6 +87,15 @@ Hill estimator, **validated first** against Pareto samples with known α (error 
 > is near the edge of existing. Measured per fill it rises to α ≈ 2.05, where finite variance
 > can no longer be excluded.
 
+> **Qualified by [EXP-017](EXP-017-year-tail.md).** On 351,540 episodes over a full year, the
+> index is **not stable in k**: 1.22 at k=500, 1.02 at k=2,000, 0.93 at k=5,000. "α ≈ 1.15" was
+> one depth on 6,546 episodes; the honest statement is **α ∈ [0.9, 1.2] depending on tail
+> depth**. What survives unchanged: α < 2 everywhere, and the gap to the fill-based index. The
+> claim above holds; its single number does not.
+>
+> The 3.8× inflation figure also **rose to 5.72×** on the unbiased sample — the "may be slightly
+> high" caveat below pointed the wrong way.
+
 That is the difference between "extreme events dominate everything" and "extreme events are
 manageable". A risk model calibrated on fill counts would conclude the second while the market
 is in the first.
