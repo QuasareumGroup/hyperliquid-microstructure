@@ -17,9 +17,9 @@ what has been withdrawn and why, what is open. Read it before any individual exp
 
 ### Hyperliquid follows the CEX market by ~550 ms
 
-Binance leads Hyperliquid by a median **575 ms** on BTC — in **100% of 144 measured hours**, and
-in 100% of 576 asset-hours across BTC, ETH, SOL and HYPE. The same estimator returns **25 ms**
-between OKX and Binance, a factor of 23.
+Binance leads Hyperliquid by a median **575 ms** on BTC — in **100% of 191 measured hours, every
+hour in the window** — and in 100% of 576 asset-hours across BTC, ETH, SOL and HYPE. The same
+estimator returns **25 ms** between OKX and Binance, a factor of 23.
 
 It survives volatility regimes, trade sparsity, liquidation cascades, and every asset the tape
 covers. The CEX do not lead one another, which is what makes this Hyperliquid's property rather
@@ -74,6 +74,7 @@ are.
 6. Check what a grouping key means before grouping by it.
 7. Look at the values under a summary statistic.
 8. A fit on its constraint boundary is not a result.
+9. A mechanism read off the code is a hypothesis, not a measured effect.
 
 ---
 

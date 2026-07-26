@@ -13,9 +13,10 @@ in place, but they are a running record — this is the current position.
 
 ### 1. Hyperliquid follows the CEX market by ~550 ms
 
-Binance leads Hyperliquid by a **median 575 ms** (mean 601, 95% CI on the mean [577, 624]) on
-BTC, **in 100% of 144 measured hours**, and in 100% of 576 asset-hours across BTC/ETH/SOL/HYPE.
-The same estimator returns **25 ms** between OKX and Binance — a factor of 23.
+Binance leads Hyperliquid by a **median 575 ms** (bootstrap 95% CI on the median [550, 575];
+mean 607) on BTC, **in 100% of 191 measured hours — every hour in the window** — and in 100% of
+576 asset-hours across BTC/ETH/SOL/HYPE. The same estimator returns **25 ms** between OKX and
+Binance, a factor of 23.
 
 Survives: volatility regimes (EXP-009, EXP-011), trade sparsity (EXP-014), liquidation cascades
 (EXP-015), and every asset the recorder covers (EXP-012). The CEX do not lead one another
@@ -25,15 +26,16 @@ Estimator: Hayashi-Yoshida, grid-free, validated to zero error against known lag
 **Open:** how much is mechanical (block cadence, network) versus price discovery. Observability
 is ruled out as the explanation for the *level* (EXP-014); nothing has replaced it.
 
-**Scope qualification — the volatility range is narrower than it looks.** The 144 hours are
-144 of 216 available. The other 72 were removed by perplog's `gapped` coverage flag, since
-found to fire on **market silence rather than downtime** (a reconnect computed
-`missed_ms = now − last_event`). Hyperliquid has the lowest event rate of the three venues and
-drew the most spurious flags. The excluded hours are therefore expected to skew quiet, so
-"survives volatility regimes" was established on a distribution likely missing part of its low
-end. Whether the invariance holds there is **untested**, and is EXP-021.
+**Sample selection — checked and closed (EXP-021).** EXP-011 measured 144 of the window's 193
+hours; the rest were dropped by perplog's `gapped` flag, later found to fire on reconnects
+rather than on real recording holes. Re-deriving completeness **from the tape** — a venue was
+down only if another venue kept printing through its silence — shows **95.9% of flagged hours
+were complete**, and that the flag is uncorrelated with market activity (Spearman +0.034 with
+volatility, −0.015 with event count; Mann-Whitney p = 0.635). The dropped hours were therefore
+an unbiased subset, and all 191 complete hours now measure **575 ms, 100%**, over a volatility
+range 38% wider at the top (max `range_bps` 135.9 → 187.8).
 
-→ EXP-005 – EXP-015
+→ EXP-005 – EXP-015, EXP-021
 
 ### 2. Counting liquidation fills misrepresents liquidations
 
@@ -85,6 +87,7 @@ at every threshold tried (p ≤ 0.01).
 | "the plateau sits at α ≈ 0.93" (EXP-018) | The plateau is a real property of the estimator and empty as an estimate. |
 | "Hyperliquid's lag widens under stress" (EXP-008) | Artefact of the sampling grid; the partial correlation controlling for grid step is −0.001 (EXP-009). |
 | "the deadband is a novel finding" (FINDING-001) | Published algebra; the control-system framing was also already in the literature. |
+| "the gap filter biased the sample toward active hours" (EXP-021 §1) | A mechanism argued from how `missed_ms` is computed, never measured. The flag is uncorrelated with activity on both volatility and event count (EXP-021). It was noise, not bias. |
 
 **The episode-versus-fill comparison is unaffected by any of this.** It contrasts two curves
 computed identically on the same data and assumes no parametric form — which is why it is the
@@ -102,8 +105,8 @@ only headline that survived the day without correction.
    many more, and a bounded coupling statistic.
 4. **The premium-sign regime flip** — measured, then explained by the market cycle (r = 0.786).
    Whether a residual survives the cycle is untested at daily frequency.
-5. **Whether the lag holds on quiet hours** — the hours a biased coverage filter removed. Tests
-   the volatility-invariance claim where it was never measured (EXP-021, pre-registered).
+5. ~~Whether the lag holds on the hours the coverage filter removed~~ — **closed by EXP-021.**
+   It holds, on all 47 of them, and the filter turned out not to be selective.
 
 ---
 
@@ -119,3 +122,6 @@ Each cost a real error, and each is recorded where it was paid.
 6. **Check what a grouping key means before grouping by it.** (EXP-015/016: `hash` is a transaction, not a liquidation.)
 7. **Look at the values under a summary statistic.** (EXP-018: a "plateau" that was a monotone decline.)
 8. **A fit on its constraint boundary is not a result.** (EXP-020: `pareto_cutoff` at α = 0.01.)
+9. **A mechanism read off the code is a hypothesis, not a measured effect.** Knowing *why* a
+   filter should bias a sample is not evidence that it did. (EXP-021: the bias was argued from
+   `missed_ms = now − last_event`, sounded compelling, and measured to zero.)
