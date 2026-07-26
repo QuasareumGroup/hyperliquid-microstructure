@@ -36,6 +36,13 @@ class LeadLag:
     """Result of a Hayashi-Yoshida scan."""
 
     taus_ms: np.ndarray
+    #: NOT a correlation coefficient. The HY normalisation
+    #: `sqrt(sum(rx^2) * sum(ry^2))` does not bound this to [-1, 1] the way
+    #: Pearson does: one Y return can be counted against several overlapping X
+    #: intervals. Over a full hour it stays below 1; over short windows it can
+    #: exceed it (1.34 observed on 2-minute windows, EXP-015). Use it for
+    #: RELATIVE comparison at equal window length only. The peak *location* is
+    #: the validated quantity — this is a diagnostic beside it.
     corr: np.ndarray
     #: tau maximising |corr|, in milliseconds. Positive => Y leads X.
     peak_ms: float
