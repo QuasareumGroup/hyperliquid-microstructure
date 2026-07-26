@@ -25,6 +25,14 @@ Estimator: Hayashi-Yoshida, grid-free, validated to zero error against known lag
 **Open:** how much is mechanical (block cadence, network) versus price discovery. Observability
 is ruled out as the explanation for the *level* (EXP-014); nothing has replaced it.
 
+**Scope qualification — the volatility range is narrower than it looks.** The 144 hours are
+144 of 216 available. The other 72 were removed by perplog's `gapped` coverage flag, since
+found to fire on **market silence rather than downtime** (a reconnect computed
+`missed_ms = now − last_event`). Hyperliquid has the lowest event rate of the three venues and
+drew the most spurious flags. The excluded hours are therefore expected to skew quiet, so
+"survives volatility regimes" was established on a distribution likely missing part of its low
+end. Whether the invariance holds there is **untested**, and is EXP-021.
+
 → EXP-005 – EXP-015
 
 ### 2. Counting liquidation fills misrepresents liquidations
@@ -94,6 +102,8 @@ only headline that survived the day without correction.
    many more, and a bounded coupling statistic.
 4. **The premium-sign regime flip** — measured, then explained by the market cycle (r = 0.786).
    Whether a residual survives the cycle is untested at daily frequency.
+5. **Whether the lag holds on quiet hours** — the hours a biased coverage filter removed. Tests
+   the volatility-invariance claim where it was never measured (EXP-021, pre-registered).
 
 ---
 
