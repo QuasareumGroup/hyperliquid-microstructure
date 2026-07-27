@@ -11,6 +11,9 @@
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
 
 \title{\bfseries Counting fills misrepresents liquidations:\\
 evidence from a complete on-chain derivatives ledger}
@@ -40,19 +43,23 @@ counting fills rather than episodes inflates the event count by a factor of \tex
 inflation is not a constant: it is \emph{size-dependent}, rising from a median of 2 fills per
 episode below the median size to a median of 72 in the top percentile, so the bias is
 concentrated on precisely the events that liquidation studies are about. The top 1\% of episodes
-generate 23.1\% of all fills. We further characterise the episode-size distribution as far as
-the data permits, and report a negative result that we believe is the more useful one: the tail
-is unambiguously heavy---an exponential is rejected decisively---and it is not a power law, but
+generate 23.1\% of all fills. We also characterise the episode-size distribution and report a negative
+result: the tail is unambiguously heavy---an exponential is rejected decisively---and it is not a power law, but
 it \emph{cannot be named} beyond that. Lognormal and Weibull specifications both dominate a
 Pareto fit at every estimable threshold across nearly three orders of magnitude of cut-off, yet
 which of the two wins reverses with the threshold, so any named family would report the
-analyst's cut-off rather than the distribution. Finally, we place this beside the liquidation-data
-bias that is already documented and observe that it runs the \emph{other way}: rate-limited
+analyst's cut-off. Finally, the bias already documented in the literature runs the \emph{other
+way}: rate-limited
 centralised-exchange feeds undercount, publishing per-second maxima rather than samples, while
 fill-level on-chain records overcount. Pooling the two sources combines a downward-biased count
 with an upward-biased one, and they do not cancel. All data, code and pre-registrations are
 public.
 \end{abstract}
+
+\vspace{0.5em}
+\noindent\textbf{Keywords:} forced liquidation; perpetual futures; market microstructure; measurement error; heavy tails; decentralised exchange.
+
+\noindent\textbf{JEL:} G14, G23, C46, C81.
 
 \section{Introduction}
 
@@ -279,6 +286,45 @@ by a factor of
 
 The factor is comparable across segments: 5.78$\times$ for majors (289{,}283 episodes from
 1{,}672{,}034 fills) and 5.43$\times$ for HIP-3 (62{,}257 from 338{,}008).
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=1.5cm},
+  width=0.47\textwidth, height=6cm,
+  tick label style={font=\footnotesize},
+  label style={font=\footnotesize},
+  legend style={font=\footnotesize, draw=none, fill=none, at={(0.03,0.03)}, anchor=south west},
+  grid=both, grid style={line width=0.2pt, draw=gray!25},
+]
+
+\nextgroupplot[
+  xmode=log, ymode=log, xmin=100, xmax=3e8, ymin=2e-6, ymax=1.2,
+  xlabel={notional (USD)}, ylabel={$P(X > x)$}, title={\footnotesize (a) size distribution},
+]
+\addplot[thick, black, no marks] table[x=x, y=y] {fig_data/ccdf_episode.dat};
+\addplot[thick, black, dashed, no marks] table[x=x, y=y] {fig_data/ccdf_fill.dat};
+\legend{episodes, fills}
+
+\nextgroupplot[
+  xmode=log, ymode=log, xmin=100, xmax=3e8, ymin=1, ymax=1500,
+  xlabel={episode notional (USD)}, ylabel={median fills per episode},
+  title={\footnotesize (b) tranching grows with size},
+]
+\addplot[only marks, mark=*, mark size=1.4pt, black] table[x=x, y=y] {fig_data/fills_by_size.dat};
+
+\end{groupplot}
+\end{tikzpicture}
+\caption{Both effects, on the one-year sample. \textbf{(a)} The survival function of episode
+notionals against that of the fills they decompose into. The curves separate progressively:
+the gap is the compression measured in Table~\ref{tab:compression}, and it widens into the tail
+rather than shifting the distribution uniformly. \textbf{(b)} Median fills per episode against
+episode size, in log-spaced bins of at least 30 episodes. A typical liquidation is two fills; the
+largest are hundreds. This is why the count inflation of Table~\ref{tab:size} cannot be applied
+as a scalar correction.}
+\label{fig:both}
+\end{figure}
 
 \subsection{The inflation is size-dependent}
 
@@ -584,6 +630,37 @@ place of the address itself. Addresses are public on-chain, so this is not confi
 avoids publishing a compiled map of 151{,}730 accounts to their losses. Every result reproduces
 bit for bit on the derived identifiers. The hash is unsalted and deterministic, so a known
 address can still be tested for membership: these datasets are pseudonymous, not anonymised.
+
+\section*{Declarations}
+
+\paragraph{Competing interests.} The author operates \emph{perplog}, a commercial orderflow
+analytics product for Hyperliquid, and trades on the venue. This is a material interest in a
+paper that argues Hyperliquid's liquidation record is uniquely suited to a measurement no other
+venue supports, and it is declared here rather than left to be discovered. No data from that
+product is used in this paper: every figure derives from Hyperliquid's public requester-pays
+node-fills archive, reachable by anyone with an AWS account. The finding itself is unflattering
+to the venue's ecosystem---it says a widely quoted class of statistic about Hyperliquid is
+inflated fivefold---which is the opposite of what a commercial interest would motivate.
+
+\paragraph{Funding.} None. The archive access cost is within AWS's free monthly egress
+allowance.
+
+\paragraph{Data availability.} All reduced datasets are versioned in the repository at
+\url{https://github.com/QuasareumGroup/hyperliquid-microstructure} under
+\texttt{experiments/data/}, licensed CC BY 4.0. The per-fill notionals underlying
+Section~\ref{sec:compression} are published as \texttt{exp024\_fill\_notionals.csv.gz}
+(2{,}010{,}314 records). The full joinable per-fill file is 119\,MB and is not committed; it
+regenerates from the source archive with a single documented command. The source archive is
+published by Hyperliquid and is not ours to redistribute.
+
+\paragraph{Code availability.} All collection and analysis code is in the same repository,
+licensed MIT. Each experiment carries a pre-registration committed before its run, so the
+ordering of hypothesis and result is checkable in the version history.
+
+\paragraph{Use of AI tools.} Analysis code, figures and manuscript text were drafted with the
+assistance of a large language model under the author's direction. All results were computed from
+the cited data, and every figure quoted in this paper was recomputed from the versioned datasets
+at the time of writing. The author is responsible for the content.
 
 \begin{thebibliography}{9}
 
