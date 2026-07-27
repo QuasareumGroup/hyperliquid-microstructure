@@ -1,6 +1,9 @@
 # EXP-025 — Can liquidation tranches be identified at all, and do they move the price?
 
-**Status:** pre-registered, collection running, **no output inspected**
+**Status:** run. **P1 confirmed — tranches are identifiable, and the instrument works.
+P2 rejected: the documented 30-second cooldown leaves no trace in the timing even once
+tranches are located correctly. P3 and P4 are statistically overwhelming and
+NOT INTERPRETABLE**, for the reason §1(a) predicted before the run.
 **Registered:** 2026-07-27
 **Author:** Thomas Erhel / Quasareum
 **Script:** `experiments/exp017_year_tail.py --with-prices` (per-fill price, size and position)
@@ -113,4 +116,77 @@ that pass is never needed.
 
 ## 6. Results
 
-*(empty until the analysis runs)*
+Run on the **corrected** collection (`event[0] == liquidatedUser`); the first pass double-counted
+every fill and its position accounting was incoherent — 11 runs out of 19,933 satisfied
+`cumsum(sz) = P₀ − startPosition`. On corrected data that check passes **19,811 / 20,000**, which
+is itself the strongest validation the fix received.
+
+### P1 — confirmed. The 20% rule is identifiable.
+
+Of 8,781 pauses inside a forced close, **70.8%** fall within ±0.02 of a multiple of 0.2, against
+**16.3%** under a uniform null. The histogram is not subtle: 53% of all pauses sit in the single
+bin 0.15–0.20, with a second peak at 0.35–0.40.
+
+**Position accounting works where elapsed time failed.** That is the reusable result of this
+experiment: a venue mechanism invisible in the timing of a public record is recoverable from its
+position arithmetic.
+
+### P2 — rejected. The cooldown is not there.
+
+Among 7,963 closes above \$100k split into more than one tranche (17,896 transitions):
+
+| gap between tranche boundaries | share |
+|---|---|
+| under 2 s | **75.3%** |
+| 2–25 s | 15.9% |
+| **25 s and over** | **8.8%** |
+
+Median **0.0 s**. Three quarters of tranche boundaries are crossed inside a continuous sweep of
+the book, not after a wait. The 20% slicing is real; the 30-second cooldown that the
+documentation attaches to it is not visible in the record, by timing or by position accounting.
+
+### P3 and P4 — confirmed, and unusable
+
+Signed so that positive means the liquidated account executes worse:
+
+| | n | mean | median | % adverse |
+|---|---|---|---|---|
+| all transitions | 17,896 | **+15.3 bps** | +1.3 | 80.1% |
+| continuous (< 2 s) | 13,471 | +11.2 | +0.9 | 82.2% |
+| **gapped (≥ 25 s)** | 1,578 | **+59.8** | **+42.1** | **94.9%** |
+| gapped (≥ 60 s) | 1,276 | +61.6 | +43.3 | 96.2% |
+
+Difference between gapped and continuous: **+48.6 bps**, Mann-Whitney p ≈ 0, Welch t = +23.9.
+Impact also declines monotonically with tranche index (+23.7, +12.9, +6.3, +4.8 bps;
+Spearman −0.20, p < 0.001), so P4's registered prediction holds.
+
+**None of this can be read as the market pricing in announced flow**, and §1(a) said so before
+the data existed. A second tranche is sent only if the account is *still* below maintenance
+margin after the first executed. A 25-second-plus gap followed by another tranche therefore
+exists **precisely when the price moved against the account during that gap**. The 42 bps median
+is the condition for the observation to exist, not a consequence of it.
+
+The §4 claim that within-close comparison "handles the selection by design" was **too strong**.
+It holds for continuous transitions, which are pieces of one order and unselected. It fails for
+gapped ones, which are exactly the selected subset. That distinction was not drawn in the
+pre-registration and is a defect in it.
+
+### What would separate the two
+
+The ambient price move over the same window for the same instrument, from all fills rather than
+liquidation fills alone — the "second, targeted pass" §5 describes and deliberately did not
+launch. Anticipation predicts that the gapped move exceeds the ambient move; selection predicts
+it does not. Roughly 5 GB over the 346 archive hours that contain these closes.
+
+Until that runs, the honest statement is: **the price moves 42 bps against the account during a
+cooldown gap, and we cannot yet say whether that is the market or the margin engine.**
+
+## 7. What this experiment produced
+
+- A working instrument: tranche boundaries from `startPosition` and `sz` (P1).
+- A negative result on a documented mechanism: the 30-second cooldown is not observable in the
+  venue's own complete fill record (P2).
+- A measured effect that is real and uninterpretable, with the specific data that would resolve
+  it named and costed.
+- And, incidentally, the bug that halved the paper's headline — found because this experiment
+  needed a column the collector had thrown away.

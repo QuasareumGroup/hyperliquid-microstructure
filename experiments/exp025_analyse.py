@@ -118,3 +118,32 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# Tranche-level analysis (P2, P3, P4). Runs only if P1 passed: tranche
+# boundaries are located by position accounting, never by elapsed time.
+# ---------------------------------------------------------------------------
+
+def tranches(run: list[dict]) -> list[list[dict]]:
+    """Split a run at fills after which cumulative closed size crosses k*0.2*P0."""
+    p0 = run[0]["sp"]
+    if p0 <= 0:
+        return [run]
+    out, cur, cum, nxt = [], [], 0.0, 0.2
+    for f in run:
+        cur.append(f); cum += f["sz"]
+        frac = cum / p0
+        while nxt < 1.0 and frac >= nxt - TOL:
+            nxt += 0.2
+            if frac <= 0.98:
+                out.append(cur); cur = []
+            break
+    if cur:
+        out.append(cur)
+    return [t for t in out if t]
+
+
+def vwap(t: list[dict]) -> float:
+    s = sum(f["sz"] for f in t)
+    return sum(f["px"] * f["sz"] for f in t) / s if s else float("nan")
