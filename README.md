@@ -18,11 +18,11 @@ what has been withdrawn and why, what is open. Read it before any individual exp
 ### Hyperliquid follows the CEX market by ~550 ms
 
 Binance leads Hyperliquid by a median **575 ms** on BTC — in **100% of 191 measured hours, every
-hour in the window** — and in 100% of 576 asset-hours across BTC, ETH, SOL and HYPE. The same
-estimator returns **25 ms** between OKX and Binance, a factor of 23.
+hour in the window** — and in 100% of **758 asset-hours** across BTC, ETH, SOL and HYPE, with
+**zero reversals**. The same estimator returns **25 ms** between OKX and Binance, a factor of 23.
 
-It survives volatility regimes, trade sparsity, liquidation cascades, and every asset the tape
-covers. The CEX do not lead one another, which is what makes this Hyperliquid's property rather
+It survives trade sparsity, liquidation cascades, and every asset the tape
+covers, with no material dependence on volatility. The CEX do not lead one another, which is what makes this Hyperliquid's property rather
 than Binance's. Measured with a grid-free Hayashi-Yoshida estimator validated to zero error
 against known lags.
 

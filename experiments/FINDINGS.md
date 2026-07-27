@@ -15,12 +15,22 @@ in place, but they are a running record — this is the current position.
 
 Binance leads Hyperliquid by a **median 575 ms** (bootstrap 95% CI on the median [550, 575];
 mean 607) on BTC, **in 100% of 191 measured hours — every hour in the window** — and in 100% of
-576 asset-hours across BTC/ETH/SOL/HYPE. The same estimator returns **25 ms** between OKX and
-Binance, a factor of 23.
+**758 asset-hours** across BTC/ETH/SOL/HYPE, with **zero reversals**. The same estimator returns
+**25 ms** between OKX and Binance, a factor of 23.
 
-Survives: volatility regimes (EXP-009, EXP-011), trade sparsity (EXP-014), liquidation cascades
-(EXP-015), and every asset the recorder covers (EXP-012). The CEX do not lead one another
-(EXP-007), which is what makes it Hyperliquid's property rather than Binance's.
+Per asset (EXP-023, tape-derived coverage): BTC 575 ms, ETH 550, HYPE 550, SOL 650.
+
+Survives: trade sparsity (EXP-014), liquidation cascades (EXP-015), and every asset the recorder
+covers (EXP-012, EXP-023). The CEX do not lead one another (EXP-007), which is what makes it
+Hyperliquid's property rather than Binance's.
+
+**Volatility: no material dependence, but not literal invariance (EXP-023).** The invariance was
+established on BTC (EXP-009, EXP-011) and reconfirmed there (EXP-021, ρ = −0.099; EXP-023
+partial −0.044, p = 0.55). It was never tested hour-by-hour on the other three, and on those the
+marginal association runs −0.18 to −0.35. Pooled over 758 asset-hours, holding trade frequency
+constant, **ρ(range, peak) = −0.100, p = 0.006** — higher volatility, marginally shorter lag. An
+effect explaining 1% of variance does not move a 575 ms median, so the result stands; the word
+"invariant" does not.
 
 Estimator: Hayashi-Yoshida, grid-free, validated to zero error against known lags (EXP-010).
 **Open:** how much is mechanical (block cadence, network) versus price discovery. Observability
@@ -114,6 +124,12 @@ only headline that survived the day without correction.
 
 1. **The mechanical/informational split** in the 550 ms. Needs an instrument that sees order
    *submission*, not execution — none of the current ones do.
+   **One route now closed (EXP-023).** EXP-012 proposed quantifying the observability
+   component by regressing the lag on trade frequency *within* each asset. Done, on 758
+   asset-hours: the cross-asset correlation is −0.656, the within-asset partial is **−0.090**
+   (p = 0.014), sitting beside a volatility partial of the same size. Observability operates
+   between instruments and barely within one, so this route quantifies nothing. Measured rather
+   than assumed, which is the only progress available here.
 2. ~~What the liquidation tail actually is~~ — **closed by EXP-022, negatively.** `xmin` is now
    selected rather than assumed, and the answer is that no name is available: the winner between
    lognormal and Weibull reverses across the threshold range. What remains genuinely open is
