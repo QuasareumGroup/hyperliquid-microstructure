@@ -1,0 +1,29 @@
+Copyright (c) 2026 Thomas Erhel — Quasareum
+
+The paper in this directory, and the reduced datasets in `../experiments/data/`,
+are licensed under the
+
+    Creative Commons Attribution 4.0 International License (CC BY 4.0)
+
+Full legal code:  https://creativecommons.org/licenses/by/4.0/legalcode
+Human-readable summary:  https://creativecommons.org/licenses/by/4.0/
+
+In short: you may copy, redistribute, remix and build on this material, for any
+purpose including commercially, provided you give appropriate credit, link to
+the licence, and indicate whether changes were made.
+
+Suggested citation:
+
+    Erhel, T. (2026). Counting fills misrepresents liquidations: evidence from a
+    complete on-chain derivatives ledger. Quasareum.
+    https://github.com/QuasareumGroup/hyperliquid-microstructure
+    ORCID: 0009-0007-1772-9892
+
+---
+
+The CODE in this repository is licensed separately under the MIT License — see
+`../LICENSE`.
+
+The underlying market data is published by Hyperliquid and by the venues named in
+the paper. This licence covers the reductions, analysis and text produced here,
+not the source data.
