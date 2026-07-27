@@ -74,6 +74,20 @@ check is now Section 4.2, and it exists because the docs were read properly.
 | copyright | **Quasareum** — conditional on a written assignment of rights from the author to the company, which French law does not grant automatically to a non-salaried founder. Not a blocker for arXiv; worth executing once. |
 | licence | **CC BY 4.0** — stated on the title page, `paper/LICENSE`, and to be selected at arXiv submission |
 
+## Affiliation consistency
+
+Write the affiliation **exactly** as `Quasareum, Paris, France` on every output. Without an
+organisation identifier, aggregators (Google Scholar, Semantic Scholar, OpenAlex) group
+affiliations by string matching — "Quasareum SAS" on one paper and "Quasareum Group" on another
+become two entities that never reconcile.
+
+**ROR is out of scope and should not be pursued now.** Its published criteria exclude
+"single-person organizations such as consultancies", and separately require evidence that the
+organisation is "acknowledged by name in multiple reputable research outlets by multiple
+people". Quasareum meets neither today. Revisit if several people publish under the affiliation.
+
+The author-side identifier is already covered by ORCID, which is the more important of the two.
+
 ## Intended venue
 
 arXiv `q-fin.ST` (statistical finance), cross-list `q-fin.TR`. The contribution is a
