@@ -36,11 +36,15 @@ replaced it.
 
 Hyperliquid's node-fills archive is the only public record of liquidations that is complete
 *and* names the liquidated account, with its position size and realised loss. Counting **fills**
-rather than liquidation episodes inflates event counts **5.72×** over an unbiased archive year,
-and the inflation grows with size: a typical liquidation is 2 fills, the largest are 41.
+rather than liquidation episodes inflates event counts **5.72×** over an unbiased archive year
+— 351,540 episodes from 2,010,042 fills. The inflation grows with size: a typical liquidation is
+2 fills, those in the top percentile a median of **72**. The top 1% of episodes generate **23.1%
+of all fills** and carry **67.3%** of liquidated notional, so the bias is worst exactly where
+liquidation research concentrates.
 
-It also compresses the size distribution — 3.4× at p99, 10.9× at p99.9 — so the largest single
-liquidation ($3.84M) appears as fills of at most $899k.
+It also compresses the size distribution — 3.4× at p99, 10.9× at p99.9, measured on a 12-hour
+sample where the largest liquidation ($3.84M) appears as fills of at most $899k. Over the full
+year the largest single episode is **$194M**, spread across 4,776 fills.
 
 The tail is genuinely heavy (exponential is rejected decisively) but **not a power law**:
 lognormal and Weibull both beat Pareto at every estimable threshold, across nearly three orders
@@ -129,7 +133,7 @@ R² = 0.14 here before being caught ([EXP-004](experiments/EXP-004-oracle-perp-l
 
 **Published datasets carry a derived account id, not the address** (`hlm/data/anon.py`).
 Addresses are public on-chain, so this is not confidentiality — it avoids publishing a
-*compiled* map of 350k accounts to their losses. Every number reproduces bit for bit on the
+*compiled* map of 151,730 accounts to their losses. Every number reproduces bit for bit on the
 derived ids. The hash is unsalted and deterministic, so a known address can still be tested for
 membership: **do not call these datasets anonymised.**
 

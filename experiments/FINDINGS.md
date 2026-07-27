@@ -51,16 +51,22 @@ range 38% wider at the top (max `range_bps` 135.9 → 187.8).
 
 All of the following are **counting facts**. No distributional assumption enters.
 
+Year-scale figures are from the 1,460-hour stratified sample (351,540 episodes, 2,010,042 fills,
+380 instruments, 151,730 accounts, $15.53bn notional). Figures needing per-fill notionals come
+from the 12-hour sample and are marked, because that column was not retained at year scale.
+
 | | |
 |---|---|
 | fills per liquidation | median 2, mean **5.72×** over an unbiased archive year |
-| robustness of that factor | 3.7–3.8× across six different definitions of "one liquidation" on the 12-hour sample; the choice of unit is not doing the work |
-| tranching vs size | median 2 fills below the median episode, **41** in the top 1% |
-| share of fills from the top 1% of episodes | **18%** |
-| concentration | top 1% of fills carry **30.7%** of liquidated notional; top 10% carry 76.6% |
+| robustness of that factor | 3.7–3.8× across six different definitions of "one liquidation" *(12 h)*; the choice of unit is not doing the work |
+| tranching vs size | median 2 fills below the median episode, **72** in the top 1% (mean 132, max 4,776) |
+| share of fills from the top 1% of episodes | **23.1%** |
+| concentration | top 1% of **episodes** carry **67.3%** of liquidated notional; top 5% carry 85.6%, top 10% carry 92.6% |
+| | *(12 h, by fill: top 1% of fills carry 30.7%, top 10% carry 76.6%)* |
+| corr(ln notional, ln fills) | **+0.545** |
 
 **Size distribution compression**, measured quantile by quantile against true episode sizes
-(not modelled):
+(not modelled). **12-hour sample** — per-fill notionals were not retained at year scale:
 
 | quantile | episode | fill | factor |
 |---|---|---|---|
@@ -69,7 +75,8 @@ All of the following are **counting facts**. No distributional assumption enters
 | p99 | $214,474 | $63,812 | **3.4×** |
 | p99.9 | $1,969,302 | $180,161 | **10.9×** |
 
-Largest real episode **$3.84M**; largest single fill **$899k**.
+Largest real episode in that 12-hour sample **$3.84M**; largest single fill **$899k**.
+Over the full year the largest episode is **$194,115,094**, spread across **4,776 fills**.
 
 **Majors and HIP-3 behave identically** on every measure tested (EXP-017) — this is a property
 of the liquidation mechanism, not of the market.
