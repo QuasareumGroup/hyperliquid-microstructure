@@ -51,9 +51,11 @@ range 38% wider at the top (max `range_bps` 135.9 → 187.8).
 
 All of the following are **counting facts**. No distributional assumption enters.
 
-Year-scale figures are from the 1,460-hour stratified sample (351,540 episodes, 2,010,042 fills,
-380 instruments, 151,730 accounts, $15.53bn notional). Figures needing per-fill notionals come
-from the 12-hour sample and are marked, because that column was not retained at year scale.
+Everything below is year-scale — the 1,460-hour stratified sample: 351,540 episodes,
+2,010,042 fills, 380 instruments, 151,730 accounts, $15.53bn notional. Per-fill notionals come
+from a second pass over the same hours (EXP-024), which reproduces every count statistic here to
+three decimal places. The two rows still marked *(12 h)* are checks that were only ever run on
+the smaller sample; neither is load-bearing.
 
 | | |
 |---|---|
