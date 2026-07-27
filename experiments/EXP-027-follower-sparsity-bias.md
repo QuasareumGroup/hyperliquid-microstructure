@@ -120,6 +120,45 @@ idiosyncratic component is an **independent random walk**. If Hyperliquid's own 
 autocorrelated or arrive in bursts, the synthetic follower understates their effect, and the
 measured bias is too small. Stated here so it is not discovered later.
 
-## 7. Results
+## 7. Addendum — registered after P2 was rejected, before the diagnostic was run
+
+**This section is post-hoc and labelled as such.** The main grid ran, P2 was rejected on all four
+assets, and that rejection points at an error in §2 rather than at a property of the data. The
+prediction below was written before the diagnostic was executed; it is not part of the original
+registration.
+
+### What §2 got wrong
+
+§2 argued: Test A (κ = 0) found no bias, Test B found +25 to +212 ms, therefore the difference is
+κ. **That is not the difference between them.** Test A thinned the *follower*; Test B thinned the
+*leader*. They differ in which series was degraded, not in the follower's noise.
+
+And there is a textbook reason κ cannot be the answer. The Hayashi-Yoshida estimator is a
+cross-covariance. If the follower is `x(t−L) + W` with `W` independent of `x`, then
+`E[Δx · ΔW] = 0` at every lag, so `W` contributes nothing to the cross-covariance curve at any
+τ. Independent noise moves the estimator's **variance**, never its **peak**. §2's mechanism was
+ruled out before the data was touched, by algebra that should have been done first.
+
+### Why this matters more than a rejected prediction
+
+**Result 1 does not thin the leader.** Binance enters at its full density. If Test B's inflation
+is caused by leader-thinning, then it is a property of an artificial manipulation and has no
+bearing on Result 1 — and the "upward bias of unmeasured size" written into EXP-026 §7 and
+carried into FINDINGS is an inference I made from an experiment that does not apply.
+
+### The diagnostic
+
+Take the synthetic follower at a known `L = 575 ms`, observed at HL's print times as above — then
+**additionally thin the leader** to those same print times, reproducing Test B's manipulation on
+a pair whose true lag is known.
+
+- **P5.** Thinning the leader inflates the recovered peak by an amount comparable to EXP-026 Test
+  B (+25 to +212 ms, larger on sparser assets), at both κ = 0 and κ = κ̂. That identifies Test B's
+  inflation as leader-thinning, absent from Result 1, and the EXP-026 caveat gets withdrawn.
+- **P5 false** — leader-thinning does not inflate the synthetic pair. Then Test B's inflation
+  comes from something about *real* Hyperliquid that the synthetic follower fails to reproduce,
+  the caveat stands, and it stays unmeasured. That outcome is worse for us and more interesting.
+
+## 8. Results
 
 *(empty until the experiment runs)*
