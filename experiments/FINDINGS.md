@@ -59,23 +59,24 @@ the smaller sample; neither is load-bearing.
 
 | | |
 |---|---|
-| fills per liquidation | median 2, mean **5.72×** over an unbiased archive year |
+| fills per liquidation | median 2, mean **5.72×** (day-resampled 95% CI [5.47, 5.99]) over a fixed-hour archive year |
 | robustness of that factor | 3.7–3.8× across six different definitions of "one liquidation" *(12 h)*; the choice of unit is not doing the work |
 | tranching vs size | median 2 fills below the median episode, **72** in the top 1% (mean 132, max 4,776) |
 | share of fills from the top 1% of episodes | **23.1%** |
 | concentration | top 1% of **episodes** carry **67.3%** of liquidated notional; top 5% carry 85.6%, top 10% carry 92.6% |
 | | *(12 h, by fill: top 1% of fills carry 30.7%, top 10% carry 76.6%)* |
-| corr(ln notional, ln fills) | **+0.545** |
+| corr(ln notional, ln fills) | **+0.545** (Pearson of logs; Spearman rank +0.468) |
 
 **The protocol's own chunking does not undo this.** Hyperliquid sends only 20% of a position
 above 100,000 USDC as the first market order, then waits **30 s** before sending more. One forced
 close can therefore span several transactions, which the `(account, transaction)` unit would
-split. Measured: of 98,983 consecutive same-account-same-instrument episode pairs, **0%** are
-under 5 s apart, 1.8% fall in 5–35 s, and **94.7% are more than 10 minutes apart** — unrelated
+split. Measured: of 98,983 consecutive same-account-same-instrument episode pairs, none are
+under 5 s apart (empty **by construction** of the 5-second episode unit), 1.8% fall in 5–35 s, and **94.7% are more than 10 minutes apart** — unrelated
 events, not chunks. Merging every chain within 90 s touches 1.4% of episodes and moves the factor
 from 5.72× to **5.76×**, so the reported figure is mildly conservative. The mechanism is visible
-where it should be: chains start at a median **$72,326** against **$1,902** for isolated
-episodes, against a threshold of $100k.
+where it should be: chains start at a median **$72,326** against **$1,083** for episodes outside any chain
+(factor 67), against a threshold of $100k. *(An earlier $1,902 figure used an undeclared
+subset — accounts with a second episode in the year; caught in review.)*
 
 **Size distribution compression**, measured quantile by quantile against true episode sizes
 (not modelled). **Year scale since EXP-024** — 2,010,314 fills, bootstrap 95% CI:
@@ -91,8 +92,9 @@ Compression is **stronger than the 12-hour sample showed** at p50, p90 and p99, 
 excluding the old value at each — the same direction the count inflation moved (3.8× → 5.72×)
 when the cascade-selected hours were removed. At p99.9 the two are indistinguishable.
 
-Largest episode **$194,115,094**, spread across **4,776 fills**; largest single fill
-**$10,990,000**.
+Largest episode by notional **$194,115,094** (BTC, **2,568 fills**); most-tranched episode
+**4,776 fills** ($32.4M, ZEC); largest single fill **$10,990,000**. *(An earlier version
+conflated the two maxima into one episode — caught in review.)*
 
 **Majors and HIP-3 behave identically on tail *index* (EXP-017) but not on compression
 (EXP-024).** Majors compress more in the body (ratio 1.30 at p90, CI [1.24, 1.36]), HIP-3 more in
@@ -112,8 +114,9 @@ threshold tried (p ≤ 0.01).
 **Threshold-independent (EXP-022).** EXP-020 established this at one hand-fixed cut-off and
 listed the arbitrariness as a limit. Selecting `xmin` by minimising KS gives $560,627 — within
 a factor 1.79 of the hand choice, which sits inside the bootstrap 95% CI [$194k, $987k] — and
-the ranking holds at **all 14 estimable thresholds**, `xmin` from $14.9k to $8.85M. Nearly three
-orders of magnitude, same answer.
+the ranking holds at **all 14 estimable thresholds**, `xmin` from $14.9k to $8.85M — nearly
+three orders of magnitude, individually significant at 13 of the 14 (p = 0.07 at the highest
+cut-off).
 
 **But the tail cannot be named**, and this is the closed form of what used to be open item 2.
 Lognormal and Weibull *do* separate — they simply separate in **opposite directions** depending
@@ -161,9 +164,11 @@ only headline that survived the day without correction.
 2. ~~What the liquidation tail actually is~~ — **closed by EXP-022, negatively.** `xmin` is now
    selected rather than assumed, and the answer is that no name is available: the winner between
    lognormal and Weibull reverses across the threshold range. What remains genuinely open is
-   narrower — over `xmin` ∈ [$49k, $163k] **no candidate fits**. Both alternatives degenerate
-   onto the power-law limit of their own family while KS rejects the power law itself. A fifth
-   family (generalised Pareto, log-gamma) might cover that band; none was tried.
+   narrower — over `xmin` ∈ [$49k, $163k] **no candidate fits**. The Weibull pins at a numerical
+   bound and the lognormal drifts to extreme parameters (both toward the power-law limit of
+   their own family), and a direct GoF test rejects every fitted candidate in the band
+   (parametric-bootstrap KS, p ≤ 0.01) while KS rejects the power law itself. A fifth family
+   (generalised Pareto, log-gamma) might cover that band; none was tried.
 3. **Venue decoupling during cascades** — coupling roughly halves (EXP-015), on 8 windows. Needs
    many more, and a bounded coupling statistic.
 4. **The premium-sign regime flip** — measured, then explained by the market cycle (r = 0.786).

@@ -23,7 +23,7 @@ experiment in `../experiments/`:
 | 5.72× count inflation, 351,540 episodes from 2,010,042 fills | `exp017_episodes.csv`, [EXP-017](../experiments/EXP-017-year-tail.md) |
 | robust across six unit definitions | [EXP-016](../experiments/EXP-016-liquidation-overcounting.md) |
 | tranching 2 → 72 fills with size; top 1% of episodes → 23.1% of fills | `exp017_episodes.csv` |
-| size compression 4.58× at p99, 10.0× at p99.9, majors vs HIP-3 | `exp024_fill_notionals.csv.gz`, [EXP-024](../experiments/EXP-024-year-fill-notionals.md) |
+| size compression 4.58× at p99, 10.0× at p99.9, majors vs HIP-3 | `exp024_fill_notionals.csv.gz` + `exp024_episodes.csv.gz` + `exp024_ci.py`, [EXP-024](../experiments/EXP-024-year-fill-notionals.md) |
 | tail heavy, not a power law, and not nameable | [EXP-020](../experiments/EXP-020-alternatives.md), [EXP-022](../experiments/EXP-022-xmin-selection.md) |
 | what CEX feeds publish | venue documentation, [EXP-016](../experiments/EXP-016-liquidation-overcounting.md) |
 
@@ -61,8 +61,10 @@ check is now Section 4.2, and it exists because the docs were read properly.
 - Two cited works were characterised from abstracts rather than full text — Lim (SSRN,
   registration wall) and Zhivkov et al. (publisher returned 403). Flagged in Limitations; nothing
   in the argument depends on their contents.
-- The full per-fill file is 119 MB and is not committed. What is committed reproduces every
-  quantile in the paper exactly — see the table above.
+- The full joinable per-fill file is 119 MB and is not committed (it regenerates with one
+  documented command). What is committed — `exp024_fill_notionals.csv.gz`,
+  `exp024_episodes.csv.gz` and `exp024_ci.py` — reproduces every quantile and interval in the
+  paper.
 
 ## Submission details
 
@@ -87,6 +89,16 @@ organisation is "acknowledged by name in multiple reputable research outlets by 
 people". Quasareum meets neither today. Revisit if several people publish under the affiliation.
 
 The author-side identifier is already covered by ORCID, which is the more important of the two.
+
+## Adversarial review
+
+Before submission the paper went through two independent adversarial reviews — Claude Fable 5
+(same model family as the authoring model) and Grok (different family), each in an isolated
+worktree, no contact between them. Their unedited reports are [`../review/FABLE.md`](../review/FABLE.md)
+and [`../review/GROK.md`](../review/GROK.md), Fable's verification code is `../review/r*.py`,
+and the point-by-point response — every finding, its arbitration, and the fix applied — is
+[`../review/RESPONSE.md`](../review/RESPONSE.md). Both reviews reproduced the headline figures;
+both found real errors; all confirmed findings are fixed in the current text.
 
 ## Intended venue
 

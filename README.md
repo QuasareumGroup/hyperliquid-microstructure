@@ -34,17 +34,20 @@ replaced it.
 
 ### Counting liquidation fills misrepresents liquidations
 
-Hyperliquid's node-fills archive is the only public record of liquidations that is complete
-*and* names the liquidated account, with its position size and realised loss. Counting **fills**
-rather than liquidation episodes inflates event counts **5.72×** over an unbiased archive year
+Hyperliquid's node-fills archive is a public record of liquidations that is complete *and*
+names the liquidated account, with its position size and realised loss — a combination no
+centralised venue publishes, and one whose order-book structure makes fill-tranching
+measurable at scale. Counting **fills**
+rather than liquidation episodes inflates event counts **5.72×** (95% CI [5.47, 5.99]) over a
+fixed-hour archive year
 — 351,540 episodes from 2,010,042 fills. The inflation grows with size: a typical liquidation is
 2 fills, those in the top percentile a median of **72**. The top 1% of episodes generate **23.1%
 of all fills** and carry **67.3%** of liquidated notional, so the bias is worst exactly where
 liquidation research concentrates.
 
 It also compresses the size distribution — **4.58× at p99, 10.0× at p99.9** over the full year,
-so the largest single episode ($194M, spread across 4,776 fills) appears in the fill record as
-pieces of at most $11.0M. The two instrument segments compress differently and cross over:
+so the largest single episode ($194M — 2,568 fills, BTC) appears in the fill record as pieces
+of at most $11.0M; the most-tranched liquidation is a distinct one, 4,776 fills ($32.4M, ZEC). The two instrument segments compress differently and cross over:
 majors more in the body, HIP-3 builder markets more in the tail.
 
 The tail is genuinely heavy (exponential is rejected decisively) but **not a power law**:
@@ -58,6 +61,10 @@ than the distribution. That is a result, not a gap waiting to be filled.
 
 ![Hill plot](reports/exp018_hill_plot.svg)
 
+*The Hill plot above illustrates a withdrawn claim — the plateau is a property of the
+estimator, not a tail index. It is kept as the record of why that claim was withdrawn
+(see [FINDINGS](experiments/FINDINGS.md)).*
+
 ---
 
 ## How the work is done
@@ -65,15 +72,20 @@ than the distribution. That is a result, not a gap waiting to be filled.
 This is the part worth copying, and it is why the results above are stated as narrowly as they
 are.
 
-- **Every experiment is pre-registered** — hypothesis and falsification criterion written into
-  `experiments/EXP-NNN-*.md` *before* it runs. Several were committed while the campaign was
-  still collecting, so the timestamps are checkable.
-- **Retractions stay in the open.** Thirteen claims have been withdrawn or requalified; each
+- **Pre-registered from EXP-017 onward** — hypothesis and falsification criterion committed
+  *before* the run, ordering checkable in the history. The four earliest experiment files
+  (EXP-016, 018–020) entered the history with results included; that is stated rather than
+  implied away.
+- **Retractions stay in the open.** More than a dozen claims have been withdrawn or requalified; each
   correction sits in the file that made the original claim, with the reason. Nothing is
   rewritten to have always been right.
 - **Estimators are validated against known answers before use.** This caught a sign inversion in
   the lead-lag estimator that would have read as "Hyperliquid leads" with perfect confidence,
   and a tail-index estimator that silently returned 0.00.
+- **Adversarially reviewed before submission.** Two independent model reviewers — one from the
+  same family as the authoring model, one from a different one — re-derived every headline
+  figure and attacked the statistics. Their unedited reports, verification code, and the
+  point-by-point response are in [`review/`](review/).
 - **Campaigns are reproducible**: every reduced dataset is versioned in `experiments/data/`, so a
   result can be checked without re-running the collection.
 

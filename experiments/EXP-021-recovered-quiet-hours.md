@@ -171,7 +171,10 @@ Usable hours: **191**, against EXP-011's 144.
 
 Not quieter. If anything marginally more volatile, and not significantly so:
 
-- Spearman(`range_bps`, flagged) = **+0.034**
+- Spearman(`range_bps`, flagged) = **+0.034** *(review note: computed over the 191 usable
+  hours, not the 193 classified; over 193 the values are +0.003 / −0.040, and scipy's
+  tie-corrected estimator gives −0.096 rather than −0.099 for the extended Spearman. Same
+  conclusions throughout.)*
 - Spearman(HL events, flagged) = **−0.015**
 - Mann-Whitney, recovered vs retained: z = +0.47, **p = 0.635**
 

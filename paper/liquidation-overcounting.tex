@@ -9,6 +9,7 @@
 \usepackage{caption}
 \usepackage[margin=1in]{geometry}
 \usepackage{microtype}
+\PassOptionsToPackage{hyphens}{url}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
 \usepackage{pgfplots}
@@ -36,10 +37,11 @@ evidence from a complete on-chain derivatives ledger}
 Forced liquidations in cryptocurrency derivatives are almost always counted from
 exchange-published event feeds, in which one economic liquidation appears as several records.
 We quantify the resulting distortion on Hyperliquid, an on-chain perpetual-futures venue whose
-node-fills archive is, to our knowledge, the only public liquidation record that is
-simultaneously complete and attributed to the liquidated account. On a uniformly stratified
-sample of 351{,}540 liquidation episodes reconstructed from 2{,}010{,}042 fills over one year,
-counting fills rather than episodes inflates the event count by a factor of \textbf{5.72}. The
+node-fills archive is complete and attributed to the liquidated account---a combination no
+centralised venue publishes. On a fixed-hour stratified sample of 351{,}540 liquidation
+episodes reconstructed from 2{,}010{,}042 fills over one year, counting fills rather than
+episodes inflates the event count by a factor of \textbf{5.72} (day-resampled 95\% CI
+[5.47, 5.99]). The
 inflation is not a constant: it is \emph{size-dependent}, rising from a median of 2 fills per
 episode below the median size to a median of 72 in the top percentile, so the bias is
 concentrated on precisely the events that liquidation studies are about. The top 1\% of episodes
@@ -83,7 +85,9 @@ knowledge no centralised venue publishes both.
 
 Hyperliquid does. It is an on-chain perpetual-futures exchange whose node data includes every
 fill, each carrying the liquidated account address, the mark price at liquidation, the starting
-position and the realised loss. This paper uses that archive to measure how far fill-counting
+position and the realised loss. Among on-chain venues it is not alone in publishing attributed
+liquidations (Section~\ref{sec:related}); it is the venue where the fill-level order-book
+structure, the scale and the year-deep archive make the distortion measurable. This paper uses that archive to measure how far fill-counting
 departs from episode-counting, and what the episode-size distribution actually looks like.
 
 \paragraph{Contributions.}
@@ -126,9 +130,10 @@ publishes only the largest liquidation order per 1000\,ms per symbol; OKX publis
 update per second per contract; Bybit's legacy stream did the same before
 \texttt{allLiquidation} replaced it in 2025 \cite{binance,okx,bybit}. K33 Research
 \cite{k33} characterised the consequence bluntly---their analyst described exchange liquidation
-data as ``a vast underrepresentation of actual liquidation volumes''---and industry commentary
-during the October 2025 cascade reported venue-internal figures several times the published
-ones.
+data as ``a vast underrepresentation of actual liquidation volumes.'' The magnitude has been put
+on record at least once: during the February 2025 sell-off, Bybit's chief executive reported
+roughly \$2.1B of internal liquidations against about \$0.33B in aggregated public feeds, and
+estimated the market-wide figure at \$8--10B against \$2.2B reported~\cite{bybitceo}.
 
 The direction matters. Rate-limited order feeds \textbf{undercount}. Fill-level records, which is
 what an on-chain venue publishes, \textbf{overcount}. Both defects are real, they apply to
@@ -169,9 +174,21 @@ by scanning for protocol-emitted events---Aave's \texttt{LiquidationCall}, Compo
 liquidation on the same event basis. In lending, \textbf{the protocol emits one event per
 liquidation call, so the unit is given by the data}.
 
-Perpetual venues emit no such event. A forced close is observable only through the fills it
-generates, so the unit must be \emph{reconstructed} rather than read. That is the gap this paper
-addresses: the reconstruction is a researcher degree of freedom that has not been priced.
+Perpetual venues with an order book emit no such event. A forced close is observable only
+through the fills it generates, so the unit must be \emph{reconstructed} rather than read. That
+is the gap this paper addresses: the reconstruction is a researcher degree of freedom that has
+not been priced.
+
+\paragraph{On-chain venues besides Hyperliquid.} The uniqueness is narrower than an earlier
+draft of this paper claimed, and the correction matters. Pool-based on-chain venues emit one
+protocol event per liquidation---GMX's \texttt{LiquidatePosition} on Arbitrum is public,
+complete and attributed~\cite{gmx}---so, as in lending, the unit comes with the data; with no
+order book there is also no tranching to measure. dYdX v4 publishes attributed liquidation
+fills through its indexer~\cite{dydx}, a second order-book venue on which this measurement
+could be replicated. Data vendors already aggregate Hyperliquid's fills into liquidation
+events---Pinax documents ``one row per liquidation event, aggregated across the multiple fills
+that walk the book''~\cite{pinax}---so the multi-fill structure is known to practitioners.
+What has been missing, to our knowledge, is the measured factor.
 
 \section{Setting and data}
 \label{sec:data}
@@ -223,11 +240,12 @@ across \textbf{380 instruments} and \textbf{151{,}730 distinct accounts}, totall
 \paragraph{Two passes.} The counting results below come from that collection, which reduced to
 episodes. Measuring compression needs the individual fill notionals, which it did not retain, so
 the same hours were collected a second time keeping them. The second pass returned 351{,}648
-episodes and 2{,}010{,}314 fills---\textbf{0.03\% more}, most likely late-arriving blocks written
-after the first pass read those hours---and reproduces every count statistic reported in
-Sections~\ref{sec:count} to three decimal places: the inflation factor, the median and mean fills
-per episode in the top percentile, the share of fills and of notional carried by that percentile,
-the rank correlation between size and fills, and the largest episode and its fill count. We
+episodes and 2{,}010{,}314 fills---\textbf{+0.031\% episodes, +0.014\% fills}, most likely
+late-arriving blocks written after the first pass read those hours---and reproduces every count
+statistic reported in Section~\ref{sec:count} at the precision quoted in this paper: the
+inflation factor, the median and mean fills per episode in the top percentile, the share of
+fills and of notional carried by that percentile, the correlation between size and fills, and
+the two maxima. We
 therefore quote the first collection for counts and the second for compression, and note the
 difference rather than reconciling it away.
 
@@ -268,7 +286,10 @@ episode, 60\,s gap & 6{,}533 & 3.8$\times$ \\
 Grouping by transaction, by a one-second gap, or by the whole hour lands within 2\% of the same
 answer (Table~\ref{tab:units}). Tranching happens \emph{inside} a transaction, not across
 transactions separated in time, so the choice of rule is not doing the work. We adopt
-(account, transaction) for the remainder.
+(account, transaction) on the twelve-hour sample, where transaction hashes are retained. The
+year-scale collection keys episodes by \textbf{(account, instrument, 5-second gap)}---hashes
+are not kept at that scale---which Table~\ref{tab:units} bounds within 2\% of the transaction
+unit, in the direction that makes the reported factor conservative.
 
 One caution earned in the course of this work: a transaction hash is not a liquidation. A single
 transaction can carry forced closes for several accounts, so grouping by hash alone
@@ -286,6 +307,14 @@ by a factor of
 
 The factor is comparable across segments: 5.78$\times$ for majors (289{,}283 episodes from
 1{,}672{,}034 fills) and 5.43$\times$ for HIP-3 (62{,}257 from 338{,}008).
+
+\paragraph{Uncertainty.} The ratio is computed over 351{,}540 episodes, but episodes cluster in
+days and cascades concentrate fills, so iid resampling understates its variance about
+threefold. Resampling \emph{days} gives a 95\% interval of \textbf{[5.47, 5.99]} (SD 0.14),
+and the factor varies systematically across the four sampled hour-strata, from 5.36 at 14:00
+UTC to 6.12 at 20:00 UTC (code: \texttt{experiments/exp024\_ci.py}). The third significant
+figure is therefore not meaningful, and a full-census factor could plausibly differ by a few
+tenths in either direction (Section~\ref{sec:limits}).
 
 \begin{figure}[htbp]
 \centering
@@ -346,7 +375,8 @@ p90--99 \ (\$39{,}307 -- \$549{,}060) & 31{,}638 & 8 & 19.11 \\
 \end{tabular}
 \end{table}
 
-The rank correlation between log notional and log fills per episode is $+0.545$. A typical
+The Pearson correlation between log notional and log fills per episode is $+0.545$
+(Spearman rank correlation $+0.468$). A typical
 liquidation is two fills; the largest are a median of 72 and a mean of 132, with a maximum of
 4{,}776.
 
@@ -358,8 +388,8 @@ scaling factor---it is a dataset in which the largest events have been replicate
 \label{sec:cooldown}
 
 The partial-liquidation rule means one position's forced close can span several market orders
-30 seconds apart, in different transactions. Our (account, transaction) unit would count those
-separately, so the reported inflation could be too \emph{low}.
+30 seconds apart. Separated by more than five seconds, they fall into different episodes under
+the year-scale unit, so the reported inflation could be too \emph{low}.
 
 We test this on the year sample by measuring the time between consecutive episodes of the same
 account and instrument (98{,}983 consecutive pairs):
@@ -367,13 +397,15 @@ account and instrument (98{,}983 consecutive pairs):
 \begin{table}[htbp]
 \centering
 \caption{Time between consecutive episodes of the same account and instrument. The cooldown
-signature is present and small; the mass is at separations far too long to be one forced close.}
+signature is present and small; the mass is at separations far too long to be one forced close.
+The $<$5\,s row is empty by construction of the 5-second episode unit and carries no
+information.}
 \label{tab:cooldown}
 \begin{tabular}{lrr}
 \toprule
 separation & pairs & share \\
 \midrule
-$<$ 5\,s & 0 & 0.0\% \\
+$<$ 5\,s (by construction) & 0 & --- \\
 5--35\,s & 1{,}757 & 1.8\% \\
 35--90\,s & 922 & 0.9\% \\
 90\,s -- 10\,min & 2{,}545 & 2.6\% \\
@@ -389,8 +421,8 @@ mildly conservative, and the choice of unit remains not load-bearing.
 
 The mechanism is nonetheless identifiable in the data, which is a useful check that we are seeing
 what the documentation describes: chains begin at a median episode size of \textbf{\$72{,}326}
-against \textbf{\$1{,}902} for isolated episodes, a factor of 38, consistent with a rule that
-engages above 100{,}000 USDC. Only 4.86\% of episodes exceed that threshold.
+against \textbf{\$1{,}083} for episodes outside any chain, a factor of 67, consistent with a
+rule that engages above 100{,}000 USDC. Only 4.86\% of episodes exceed that threshold.
 
 \subsection{Concentration}
 
@@ -423,9 +455,9 @@ maximum & \$194{,}115{,}094 & \$10{,}990{,}000 & 17.7$\times$ & --- \\
 \end{table}
 
 Compression grows monotonically through the distribution, reaching an order of magnitude at the
-99.9th percentile (Table~\ref{tab:compression}). The largest episode in the sample,
-\$194{,}115{,}094 across 4{,}776 fills, appears in the fill record as pieces of at most
-\$10.99M.
+99.9th percentile (Table~\ref{tab:compression}). The largest episode in the sample by
+notional, \$194{,}115{,}094 (BTC, 2{,}568 fills), appears in the fill record as pieces of at
+most \$10.99M; the most-tranched episode is a distinct one, 4{,}776 fills for \$32.4M (ZEC).
 
 \paragraph{The cascade-selected sample understated this.} An earlier version of this measurement
 used the twelve-hour sample described in Section~\ref{sec:unit}, two of whose hours had been
@@ -457,10 +489,12 @@ Pareto). But the Pareto fit is itself rejected: a Kolmogorov--Smirnov test with
 parametric-bootstrap $p$-values rejects it at every threshold tried, including at the threshold
 selected by the Clauset--Shalizi--Newman procedure~\cite{clauset2009} ($p = 0.010$).
 
-Both two-parameter alternatives beat it. Fitting conditional on $x \ge x_{\min}$ and comparing by
-Vuong's non-nested likelihood-ratio test, lognormal and Weibull each dominate Pareto at
-\textbf{all 14 estimable thresholds}, with $x_{\min}$ ranging from \$14{,}912 to \$8{,}845{,}704
----nearly three orders of magnitude. An exponential never wins at any threshold.
+Both two-parameter alternatives beat it. Fitting conditional on $x \ge x_{\min}$ and comparing
+by Vuong's non-nested likelihood-ratio test, lognormal and Weibull each achieve the higher
+likelihood against Pareto at \textbf{all 14 estimable thresholds}, with $x_{\min}$ ranging from
+\$14{,}912 to \$8{,}845{,}704---nearly three orders of magnitude---and the comparison is
+individually significant at 13 of the 14 (at $x_{\min} = \$6.9$M, $p = 0.07$). An exponential
+never wins at any threshold.
 
 \subsection{What does not: the tail cannot be named}
 
@@ -482,7 +516,7 @@ against Weibull; $R<0$ favours Weibull.}
 $x_{\min}$ range & Vuong $R$ & verdict \\
 \midrule
 \$199k -- \$1.33M & $-2.74$ to $-3.67$ \ ($p<0.01$) & Weibull \\
-\$1.85M -- \$8.85M & $-1.00$ to $-1.86$ \ ($p>0.05$) & indistinguishable \\
+\$1.85M -- \$8.85M & $-1.86$ to $+0.36$ \ ($p>0.05$) & indistinguishable \\
 \$14.9k -- \$28.3k & $+13.42$ to $+15.92$ \ ($p \ll 0.001$) & lognormal \\
 \bottomrule
 \end{tabular}
@@ -496,11 +530,12 @@ We take this to be the substantive finding of the section rather than a gap in i
 
 \subsection{A band where nothing fits}
 
-Over $x_{\min} \in [\$49\mathrm{k},\ \$163\mathrm{k}]$, both alternatives converge on a
-parameter bound---lognormal with $\mu \to -\infty$, Weibull with $\lambda \to 0$. Both limits are
-the power-law limit of their own family. In that band the extra parameter buys nothing and the
-models are unidentified, while the power law they are collapsing onto is itself rejected by the
-KS test.
+Over $x_{\min} \in [\$49\mathrm{k},\ \$163\mathrm{k}]$, the two-parameter alternatives stop
+being interpretable: the Weibull pins at the numerical bound on $\lambda$ and the lognormal
+wanders to extreme parameters ($\mu = -17$, $\sigma = 5.8$ at one threshold), each drifting
+toward the power-law limit of its own family, while the power law itself is rejected by KS.
+Widening the optimiser's bounds does not rescue them: a direct goodness-of-fit test rejects
+each fitted alternative in this band (parametric-bootstrap KS, $p \le 0.01$).
 
 So over that band \emph{no candidate here describes the data}. A model ranking cannot report
 this, because a ranking always returns a winner. We flag it because a reader who takes the
@@ -575,8 +610,8 @@ episodes, which requires an attributed record.
 event rates within a window. Both are inflated most during the large episodes that constitute
 cascades, so a fill-based cascade measure partly detects its own tranching.
 
-\paragraph{For risk models.} A size distribution fitted on fills is compressed by 3.4$\times$ at
-the 99th percentile and 10.9$\times$ at the 99.9th. A model calibrated on that distribution
+\paragraph{For risk models.} A size distribution fitted on fills is compressed by 4.58$\times$ at
+the 99th percentile and 10.0$\times$ at the 99.9th. A model calibrated on that distribution
 understates the size of the largest forced closes it is meant to survive.
 
 \paragraph{For the tail literature.} We would encourage reporting the model ranking across a
@@ -595,11 +630,20 @@ name would have been the threshold's.
       most likely late-arriving blocks written after the first pass. It changes no figure here,
       but work needing exact reproducibility should pin an archive snapshot.
 \item \textbf{The sample is stratified, not exhaustive}: four fixed hours per day. Uniform in
-      time, but a cascade falling entirely outside those hours is invisible.
+      time, but a cascade falling entirely outside those hours is invisible---and within the
+      sample the factor rises with activity and varies across the four hour-strata
+      (5.36--6.12), so the exposure is ordinary, not only extreme.
 \item \textbf{One venue, one year.} Whether the inflation factor is stable over time, or trends
       with venue growth, is untested.
-\item \textbf{The goodness-of-fit bootstrap fixes $x_{\min}$} inside each synthetic sample rather
-      than re-selecting it, which makes the reported $p$ conservative toward rejection.
+\item \textbf{The goodness-of-fit bootstrap fixes $x_{\min}$} inside each synthetic sample
+      rather than re-selecting it. The observed KS distance is minimised by the threshold
+      selection while the synthetic ones are not, which inflates the reported $p$---a bias
+      \emph{against} rejection---so the rejection at $p = 0.010$ holds a fortiori.
+\item \textbf{The compression intervals draw the episode and fill sides independently}, though
+      fills compose episodes. A cluster bootstrap on the twelve-hour sample, where membership
+      is versioned, widens the p50 and p90 intervals by 24--45\% and leaves the tail
+      approximately unchanged; no comparison in Table~\ref{tab:compression} is decided by
+      margins that small (code: \texttt{experiments/exp024\_ci.py}).
 \item \textbf{Four candidate families.} A fifth---generalised Pareto, log-gamma---might describe
       the band where none of ours does. None was tried.
 \item \textbf{Our novelty claim is bounded by a search, not by a proof.} We surveyed the
@@ -619,11 +663,14 @@ name would have been the threshold's.
 All code, reduced datasets and experimental records are public at
 \url{https://github.com/QuasareumGroup/hyperliquid-microstructure}.
 
-Each experiment is pre-registered: hypothesis, predictions and falsification criteria are
-committed \emph{before} the run, and the commit ordering is checkable in the repository history.
+From EXP-017 onward, experiments are pre-registered: hypothesis, predictions and falsification
+criteria are committed \emph{before} the run, and the ordering is checkable in the repository
+history---five of the nine experiments this paper draws on. The four earlier ones (EXP-016,
+EXP-018--020) entered the history with their results in the same commit, so no before/after
+ordering can be verified for them; the discipline hardened as the work progressed.
 Corrections and withdrawals remain in the file that made the original claim rather than being
 edited away; \texttt{experiments/FINDINGS.md} carries the current state of every claim and the
-reason for each of the fourteen that have been withdrawn or requalified.
+reason for each claim that has been withdrawn or requalified.
 
 Published datasets carry a derived account identifier---a truncated SHA-256 of the address---in
 place of the address itself. Addresses are public on-chain, so this is not confidentiality; it
@@ -638,9 +685,7 @@ analytics product for Hyperliquid, and trades on the venue. This is a material i
 paper that argues Hyperliquid's liquidation record is uniquely suited to a measurement no other
 venue supports, and it is declared here rather than left to be discovered. No data from that
 product is used in this paper: every figure derives from Hyperliquid's public requester-pays
-node-fills archive, reachable by anyone with an AWS account. The finding itself is unflattering
-to the venue's ecosystem---it says a widely quoted class of statistic about Hyperliquid is
-inflated fivefold---which is the opposite of what a commercial interest would motivate.
+node-fills archive, reachable by anyone with an AWS account.
 
 \paragraph{Funding.} None. The archive access cost is within AWS's free monthly egress
 allowance.
@@ -649,7 +694,8 @@ allowance.
 \url{https://github.com/QuasareumGroup/hyperliquid-microstructure} under
 \texttt{experiments/data/}, licensed CC BY 4.0. The per-fill notionals underlying
 Section~\ref{sec:compression} are published as \texttt{exp024\_fill\_notionals.csv.gz}
-(2{,}010{,}314 records). The full joinable per-fill file is 119\,MB and is not committed; it
+(2{,}010{,}314 records), the matching episode file as \texttt{exp024\_episodes.csv.gz}
+(351{,}648 records), and the interval code as \texttt{exp024\_ci.py}. The full joinable per-fill file is 119\,MB and is not committed; it
 regenerates from the source archive with a single documented command. The source archive is
 published by Hyperliquid and is not ours to redistribute.
 
@@ -744,6 +790,26 @@ OKX.
 Bybit.
 \newblock V5 WebSocket public: \texttt{allLiquidation} stream.
 \newblock \url{https://bybit-exchange.github.io/docs/v5/websocket/public/all-liquidation}.
+
+\bibitem{gmx}
+GMX.
+\newblock Contracts documentation: the \texttt{LiquidatePosition} event.
+\newblock \url{https://docs.gmx.io/}.
+
+\bibitem{dydx}
+dYdX.
+\newblock v4 indexer documentation: fills and liquidations.
+\newblock \url{https://docs.dydx.exchange/}.
+
+\bibitem{pinax}
+Pinax.
+\newblock Hyperliquid markets liquidations API.
+\newblock \url{https://app.pinax.network/docs/perp-exchanges/getV1HyperliquidMarketsLiquidations/}.
+
+\bibitem{bybitceo}
+CoinDesk.
+\newblock Bybit makes liquidation data more transparent, February 2025.
+\newblock \url{https://www.coindesk.com/markets/2025/02/21/bybit-makes-liquidation-data-more-transparent-aiming-to-lure-institutional-investors}.
 
 \bibitem{coinglass}
 CoinGlass.

@@ -6,9 +6,12 @@ The compression table is now year-scale, which closes the last blocker on the pr
 **Registered:** 2026-07-27 · **Run:** 2026-07-27
 **Author:** Thomas Erhel / Quasareum
 **Scripts:** `experiments/exp017_year_tail.py --fills-out ...`, `experiments/exp024_analyse.py`
-**Data:** `experiments/data/exp024_fill_notionals.csv.gz` — 2,010,314 fills as
-`(hip3, notional)`, 5.6 MB, reproduces every quantile below exactly. The full joinable file is
-119 MB and is not committed; see §7.
+**Data:** `experiments/data/exp024_fill_notionals.csv.gz` (2,010,314 fills) and — since the
+adversarial review — `experiments/data/exp024_episodes.csv.gz` (351,648 episodes, the second
+pass) plus the interval code `experiments/exp024_ci.py`. Together they reproduce every quantile
+and interval below. *(Until the review, the episode side required an uncommitted file and the
+CI code was never versioned — findings B2/B4, `review/FABLE.md`.)* The full joinable per-fill
+file is 119 MB and is not committed; see §7.
 
 > **Current position: [FINDINGS.md](FINDINGS.md).** This file keeps its original
 > pre-registration wording plus results; the state of claims lives there.
@@ -81,6 +84,12 @@ the last submission blocker closes. If P3 fails, the table still becomes year-sc
 correction is to the number, not to the claim.
 
 ## 6. Results
+
+### Review note (2026-07-27)
+
+The two-pass agreement below was described as holding "to three decimal places"; it holds at
+the precision quoted in the paper (the inflation factor is 5.7178 vs 5.7168 — two decimals, not
+three). The "0.03% more" figure conflated episodes (+0.031%) and fills (+0.014%).
 
 ### P1 — confirmed, with a small non-zero difference worth naming
 

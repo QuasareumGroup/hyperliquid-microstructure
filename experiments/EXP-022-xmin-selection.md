@@ -230,6 +230,27 @@ degenerate onto the power-law limit of their own family while the power law is i
 rejected by KS. So no candidate here describes that band — a gap that a bare model
 ranking hides completely, since a ranking always returns a winner.
 
+## 8bis. Corrections from adversarial review (2026-07-27)
+
+Three statements above are corrected by the review (`review/FABLE.md`, findings B7, B8, B10;
+each verified independently before being applied):
+
+- **§3 says a 20-point grid; the run used 18** (`exp022_grid.csv`), and the script's default is
+  14. The registered number was not the executed one.
+- **§7's band diagnosis ("lognormal at μ = −30") is half wrong.** At two of the four excluded
+  thresholds the lognormal converged *interior* (μ = 1.96 and −17.11); only the Weibull pinned
+  at the script's numerical λ bound. What actually holds — and is the stronger argument — is
+  that a **direct GoF test rejects every fitted candidate in the band** (parametric-bootstrap
+  KS, p ≤ 0.01, re-verified with widened bounds). The "unidentified band" conclusion stands on
+  that footing, not on the boundary diagnosis.
+- **The GoF simplification's direction was misstated** ("conservative toward rejection"). The
+  observed KS is minimised by threshold selection while the synthetics' are not, which inflates
+  p — a bias *against* rejection. The rejection at p = 0.010 therefore holds a fortiori.
+
+Also noted in review: excluding the four degenerate thresholds *cost* P2 two thresholds where
+lognormal beat Pareto cleanly (R = −7.53, −2.68) — the exclusion rule works against the claim it
+protects, not for it.
+
 ## 9. Limits
 
 - The GoF bootstrap fixes `xmin` inside each synthetic rather than re-selecting it, as
