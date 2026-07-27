@@ -1,6 +1,8 @@
 # EXP-026 — Is the 575 ms an information lag or a sampling artefact?
 
-**Status:** pre-registered, not yet run
+**Status:** run. **P1 confirmed decisively, P2 and P3 confirmed, P4 rejected on 3 of 4 assets.**
+The 575 ms is **not** manufactured by sparsity — but sparsity **inflates** it, so the measured
+value carries an upward bias of unknown size. Result 1 survives its most adversarial test.
 **Registered:** 2026-07-27
 **Author:** Thomas Erhel / Quasareum
 **Data:** perplog tape, BTC/ETH/SOL/HYPE, 2026-07-18 → 07-26, venues `hl / binance / okx`
@@ -108,4 +110,78 @@ and whether the second paper can be written.
 
 ## 7. Results
 
-*(empty until the experiment runs)*
+84 hours across four assets, sampled evenly through the window. Test C was not launched — see §8.
+
+### P1 — confirmed, and it is the result that matters
+
+Binance shifted by a known lag, then thinned to Hyperliquid's actual print times for the same
+hour. Median recovered peak:
+
+| imposed | BTC | ETH | SOL | HYPE |
+|---|---|---|---|---|
+| **0 ms** | **0** | **0** | **25** | **0** |
+| 100 ms | 100 | 100 | 125 | 100 |
+| 300 ms | 300 | 300 | 312 | 300 |
+| 575 ms | 575 | 575 | 575 | 575 |
+| 1000 ms | 1000 | 1000 | 1025 | 1000 |
+
+On BTC, ETH and HYPE the recovery is **exact in every hour** — interquartile range zero. On SOL,
+the sparsest instrument at 2,051 prints per hour, errors reach 25 ms, still half the registered
+tolerance.
+
+**The line that decides it is `L = 0`.** Impose no lag, thin the follower to HL's print
+cadence, and the estimator returns **zero**. It does not drift toward 575 ms, or toward anything.
+Whatever produces Result 1, it is not the estimator inventing a lag from unequal observation
+rates.
+
+### P2 and P3 — confirmed. Sparsity inflates the estimate.
+
+Real HL measured against a Binance thinned to HL's own cadence:
+
+| | HL prints/h | unthinned | thinned | change |
+|---|---|---|---|---|
+| BTC | 12,500 | 562 ms | 600 ms | **+38** |
+| HYPE | 6,700 | 525 ms | 550 ms | **+25** |
+| ETH | 4,672 | 562 ms | 750 ms | **+188** |
+| SOL | 2,051 | 625 ms | 838 ms | **+212** |
+
+The peak never collapses, so P2 holds at every asset. And it moves **up** in all four, as P3
+registered with its reason: coarser observation biases a lag estimate away from zero. The
+sparsest instruments shift most.
+
+**This is the finding worth carrying forward, and it cuts against us.** Sparsity does not create
+the lag, but it does exaggerate it. Hyperliquid's own prints are sparse, so the 575 ms measured
+against a dense Binance plausibly carries an upward bias of its own. How large is **not
+measured** — Test B makes the *leader* sparse, which is not the same experiment as making the
+*follower* dense, and nothing here quantifies the latter.
+
+### P4 — rejected on 3 of 4
+
+Rank correlation between thinned and unthinned peaks across hours: BTC +0.328 (p = 0.117),
+ETH +0.353 (p = 0.127), HYPE +0.272 (p = 0.247), SOL +0.605 (p = 0.005). Thinning does not merely
+shift the peak, it adds hour-to-hour noise. The registered claim that it "does it consistently"
+is wrong for the three denser assets.
+
+### One limitation of Test A, stated because it bounds the conclusion
+
+The synthetic follower is a deterministic shift of the leader — same price path, sampled
+sparsely. It therefore tests whether sparsity alone creates lag between series that are otherwise
+identical. It does **not** test the case where the follower has its own price innovations, which
+is what Hyperliquid actually is. A stronger version would add independent noise to the follower
+before thinning. Not run.
+
+## 8. What this settles, and what it does not
+
+**Settles:** Result 1 is not a sparsity artefact. The estimator recovers zero when zero is
+imposed, at HL's real observation density, on every asset. The most damaging explanation
+available for the 575 ms is eliminated.
+
+**Does not settle:** whether the lag is mechanical or informational — the original question. It
+narrows it: observation density is out, so what remains is block cadence, network latency, and
+genuine price discovery. And it adds a new caveat, that the *magnitude* is inflated by an
+unmeasured amount.
+
+**Test C was not launched.** A BBO recorder needs days of calendar time to accumulate anything
+useful, and starting a permanent capture on the author's machine is a decision about that
+machine, not an analysis step. It remains the only route to the stale-book question, and
+recording BBO is a gap in `perplog-recorder` regardless of this experiment.

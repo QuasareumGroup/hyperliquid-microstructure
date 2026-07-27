@@ -32,7 +32,16 @@ constant, **ρ(range, peak) = −0.100, p = 0.006** — higher volatility, margi
 effect explaining 1% of variance does not move a 575 ms median, so the result stands; the word
 "invariant" does not.
 
-Estimator: Hayashi-Yoshida, grid-free, validated to zero error against known lags (EXP-010).
+Estimator: Hayashi-Yoshida, grid-free, validated to zero error against known lags (EXP-010)
+**and re-validated at Hyperliquid's own observation density (EXP-026)**: impose a lag of zero,
+thin the follower to HL's real print times, and the estimator returns zero — exactly, in every
+hour, on BTC, ETH and HYPE, and within 25 ms on the sparsest instrument. The lag is not
+manufactured by unequal observation rates.
+
+**But sparsity inflates it.** Thinning Binance to HL's cadence moves the measured peak *up* in
+all four assets, by +25 ms on the densest and +212 ms on the sparsest. HL's own prints are
+sparse, so the 575 ms plausibly carries an upward bias of **unmeasured size**. The result holds;
+its magnitude should be read as an upper estimate.
 **Open:** how much is mechanical (block cadence, network) versus price discovery. Observability
 is ruled out as the explanation for the *level* (EXP-014); nothing has replaced it.
 
