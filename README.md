@@ -42,9 +42,10 @@ rather than liquidation episodes inflates event counts **5.72×** over an unbias
 of all fills** and carry **67.3%** of liquidated notional, so the bias is worst exactly where
 liquidation research concentrates.
 
-It also compresses the size distribution — 3.4× at p99, 10.9× at p99.9, measured on a 12-hour
-sample where the largest liquidation ($3.84M) appears as fills of at most $899k. Over the full
-year the largest single episode is **$194M**, spread across 4,776 fills.
+It also compresses the size distribution — **4.58× at p99, 10.0× at p99.9** over the full year,
+so the largest single episode ($194M, spread across 4,776 fills) appears in the fill record as
+pieces of at most $11.0M. The two instrument segments compress differently and cross over:
+majors more in the body, HIP-3 builder markets more in the tail.
 
 The tail is genuinely heavy (exponential is rejected decisively) but **not a power law**:
 lognormal and Weibull both beat Pareto at every estimable threshold, across nearly three orders
