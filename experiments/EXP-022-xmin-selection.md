@@ -5,7 +5,7 @@ every estimable `xmin`. P1, P3 and P4 rejected.** Lognormal and Weibull *do* sep
 but in opposite directions depending on where the tail is cut, so **the tail cannot be
 named** from this data. That is the answer to FINDINGS open item 2, not a deferral of it.
 **Registered:** 2026-07-27 · **Run:** 2026-07-27
-**Author:** monproweb / Quasareum
+**Author:** Thomas Erhel / Quasareum
 **Scripts:** `experiments/exp022_xmin.py`
 **Output:** `experiments/data/exp022_grid.csv` (18 thresholds)
 

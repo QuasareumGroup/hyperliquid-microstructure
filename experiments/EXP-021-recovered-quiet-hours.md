@@ -5,7 +5,7 @@ The flag was not biased toward quiet hours; it was uncorrelated with market acti
 altogether. The premise in §1 is retracted, the sample grows 144 → 191, and the
 headline is unchanged at 575 ms.
 **Registered:** 2026-07-26 · **Run:** 2026-07-27
-**Author:** monproweb / Quasareum
+**Author:** Thomas Erhel / Quasareum
 **Scripts:** `experiments/exp021_recovered_hours.py`, `experiments/exp021_analyse.py`
 **Data:** `experiments/data/exp021_hours.csv` (193 hours, every hour in the window)
 

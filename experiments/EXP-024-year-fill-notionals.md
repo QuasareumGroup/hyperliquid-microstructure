@@ -4,7 +4,7 @@
 where it cannot. P4 rejected** — majors and HIP-3 compress differently, and they cross over.
 The compression table is now year-scale, which closes the last blocker on the preprint.
 **Registered:** 2026-07-27 · **Run:** 2026-07-27
-**Author:** monproweb / Quasareum
+**Author:** Thomas Erhel / Quasareum
 **Scripts:** `experiments/exp017_year_tail.py --fills-out ...`, `experiments/exp024_analyse.py`
 **Data:** `experiments/data/exp024_fill_notionals.csv.gz` — 2,010,314 fills as
 `(hip3, notional)`, 5.6 MB, reproduces every quantile below exactly. The full joinable file is

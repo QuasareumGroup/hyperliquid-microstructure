@@ -6,7 +6,7 @@ weaker within an instrument (ρ ≈ −0.09) than between instruments (−0.656)
 not deliver the decomposition EXP-012 hoped for. A second finding arrived unasked:
 **volatility invariance is not literal.**
 **Registered:** 2026-07-27 · **Run:** 2026-07-27
-**Author:** monproweb / Quasareum
+**Author:** Thomas Erhel / Quasareum
 **Scripts:** `experiments/exp021_recovered_hours.py --coin {ETH,SOL,HYPE}`,
 `experiments/exp023_analyse.py`
 **Data:** perplog tape, 2026-07-18 → 07-26, venues `hl / binance / okx`.

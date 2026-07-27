@@ -3,7 +3,7 @@
 **Status:** pre-registered, not yet run
 **Track:** O1
 **Registered:** 2026-07-26
-**Author:** monproweb / Quasareum
+**Author:** Thomas Erhel / Quasareum
 
 > Written *before* running anything. Predictions below are commitments, not
 > descriptions. If the results contradict them, the results are what gets
