@@ -70,6 +70,7 @@ check is now Section 4.2, and it exists because the docs were read properly.
 |---|---|
 | author | Thomas Erhel — Quasareum — contact@quasareum.com |
 | ORCID | [0009-0007-1772-9892](https://orcid.org/0009-0007-1772-9892) |
+| copyright | **Quasareum** — conditional on a written assignment of rights from the author to the company, which French law does not grant automatically to a non-salaried founder. Not a blocker for arXiv; worth executing once. |
 | licence | **CC BY 4.0** — stated on the title page, `paper/LICENSE`, and to be selected at arXiv submission |
 
 ## Intended venue
