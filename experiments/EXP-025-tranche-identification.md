@@ -1,9 +1,10 @@
 # EXP-025 — Can liquidation tranches be identified at all, and do they move the price?
 
-**Status:** run. **P1 confirmed — tranches are identifiable, and the instrument works.
-P2 rejected: the documented 30-second cooldown leaves no trace in the timing even once
-tranches are located correctly. P3 and P4 are statistically overwhelming and
-NOT INTERPRETABLE**, for the reason §1(a) predicted before the run.
+**Status:** run, including the §8 addendum. **P1 confirmed, P2 rejected, P5 rejected.**
+Tranches are identifiable from position accounting; the documented 30-second cooldown is not
+observable; and the 42 bps of adverse movement during a cooldown gap is **exogenous, not
+anticipation** — it does not revert. The selection reading of §1(a) is correct and there is
+nothing to claim on the price side.
 **Registered:** 2026-07-27
 **Author:** Thomas Erhel / Quasareum
 **Script:** `experiments/exp017_year_tail.py --with-prices` (per-fill price, size and position)
@@ -255,3 +256,70 @@ Closes are split on their **largest inter-tranche gap**: continuous (< 2 s) agai
 Whatever P5 returns, **P1 and P2 stand on their own**: tranches are identifiable from position
 accounting, and the documented 30-second cooldown is not observable in the venue's complete fill
 record. Those do not depend on this addendum.
+
+
+## 9. Results of the addendum — P5 rejected, and the reading is settled
+
+Ambient series: **46,184,928 last-trade prices**, one per second per instrument, over 974
+archive hours and 191 instruments (1.12 GB raw; the 7,963 per-close measurements are published
+as `experiments/data/exp025_reversion.csv.gz`, 0.15 MB).
+
+### The adverse move is confirmed on ambient prices
+
+| | n | mean A | median A |
+|---|---|---|---|
+| continuous (< 2 s) | 3,616 | +24.7 bps | **+0.0** |
+| gapped (≥ 25 s) | 1,537 | **+79.9 bps** | **+47.4** |
+
+Measured on market prices rather than on the liquidation's own executions, the gap effect is if
+anything larger than §6 showed. The median continuous close moves the price **not at all**.
+
+### P5 — rejected. The extra move does not revert.
+
+Share of the adverse move that was temporary, `R(300)/A`:
+
+| | n | mean | median |
+|---|---|---|---|
+| continuous | 1,397 | **+0.757** | +0.608 |
+| gapped | 1,513 | **+0.606** | +0.490 |
+
+Gapped closes revert **less**, not more. Mann-Whitney against the registered direction:
+**p = 0.971**; Welch t = −0.45, p = 0.652.
+
+**That settles it.** Anticipation predicts temporary pressure that unwinds once the forced flow
+stops. What the data shows is movement as permanent as any other — the signature of information,
+not of liquidity provision under pressure. The 42 bps happened *and then the second tranche
+happened because of it*, which is what §1(a) said before any of this was measured.
+
+### P6 — the numbers exist and are not claimable
+
+Both groups revert substantially, which would read as "forced closes have 60–76% temporary
+impact". Two reasons not to publish that:
+
+- The ratio is computed on closes with |A| > 1 bp, and conditioning on a large realised move
+  induces regression to the mean regardless of any impact.
+- The levels do not cohere: continuous closes revert **+34.1 bps** against a mean move of
+  **+24.7 bps**, a ratio of **1.38**. Price cannot come back more than it went, so the baseline
+  is contaminated — most likely the ambient price at `t₀` is already moved by the close
+  beginning, and the +300 s window catches unrelated drift.
+
+Both defects apply **equally to the two groups**, which is why the P5 comparison survives them
+and the P6 level does not. Reported, not claimed.
+
+## 10. What EXP-025 leaves behind
+
+**Two results that stand.** Tranche boundaries are recoverable from `startPosition` and `sz`
+where elapsed time shows nothing (P1: 70.8% of pauses at multiples of 0.2 against a 16.3% null).
+And the venue's documented 30-second cooldown is **not observable in its own complete fill
+record** — median 0.0 s between tranche boundaries, 75% under two seconds (P2).
+
+**One result deliberately not claimed.** A +48.6 bps difference at p ≈ 0 that would have made a
+very shareable finding, and that the pre-registered reversion test identifies as selection.
+
+**One methodological defect recorded.** §4 asserted that within-close comparison handled the
+selection "by design". It does for continuous transitions and fails for gapped ones — the
+distinction was not drawn when it should have been.
+
+**And one bug found by accident**, worth more than everything above: the collector that fed
+this experiment discarded the price column, and going back for it exposed the double-counting
+that had halved nothing and doubled everything in the paper's headline.

@@ -181,6 +181,26 @@ only headline that survived the day without correction.
 
 ---
 
+### The liquidation tranching mechanism (EXP-025)
+
+Hyperliquid documents closing positions above $100k in 20% chunks with a 30-second cooldown.
+**The chunking is real and recoverable; the cooldown is not observable.**
+
+Tranche boundaries are an arithmetic fact of position accounting, not of elapsed time: 70.8% of
+pauses inside a forced close fall within ±0.02 of a multiple of 0.2, against 16.3% under a
+uniform null. But among 7,963 multi-tranche closes above $100k, the median gap between tranche
+boundaries is **0.0 s** and 75% are under two seconds — boundaries are crossed inside a
+continuous sweep, not after a wait.
+
+**Not claimed:** closes with a real gap (≥ 25 s) show +79.9 bps of adverse movement against
++24.7 for continuous ones. That difference is **selection, not anticipation** — a second tranche
+is sent only if the account is still under margin, so the gap exists precisely when price moved
+against it. The pre-registered discriminator settles it: gapped closes revert *less* than
+continuous ones (0.61 vs 0.76 of their move, Mann-Whitney p = 0.971), so the extra movement is
+permanent, hence information rather than temporary pressure.
+
+→ EXP-025
+
 ## Method rules earned here
 
 Each cost a real error, and each is recorded where it was paid.
