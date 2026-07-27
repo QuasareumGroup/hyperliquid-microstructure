@@ -225,12 +225,19 @@ Each cost a real error, and each is recorded where it was paid.
 9. **A mechanism read off the code is a hypothesis, not a measured effect.** Knowing *why* a
    filter should bias a sample is not evidence that it did. (EXP-021: the bias was argued from
    `missed_ms = now − last_event`, sounded compelling, and measured to zero.)
-10. **A ranking always returns a winner — check the winner actually fits.**
+10. **A ranking always returns a winner — check the winner actually fits.** Model comparison is
+    relative and cannot say "none of these". (EXP-022: over a band of thresholds both
+    alternatives sat on a parameter bound, degenerate, while the reference they were being
+    compared against was itself rejected.)
 11. **Reviews audit the analysis; nobody audits the collection.** Everything downstream
     inherits a collector's assumptions silently, so a bug there is invisible to any check
     made on derived data. Two adversarial reviews recomputed eight headline figures from
     the CSVs, flawlessly, with no chance of finding the error that was upstream of them.
-    What caught it was needing a new column and having to go back to the source. Model comparison is
-    relative and cannot say "none of these". (EXP-022: over a band of thresholds both
-    alternatives sat on a parameter bound, degenerate, while the reference they were being
-    compared against was itself rejected.)
+    What caught it was needing a new column and having to go back to the source.
+12. **"That data does not exist" is a claim about code — go read the code.** Said from memory
+    twice. Once it was wrong outright (EXP-025: the liquidation collector was said to have kept
+    prices; it discarded them). Once the verdict held but the reason was wrong (EXP-026: BBO was
+    said to be unrecorded because "the recorder subscribes to `trades` only" — it also records
+    books; the real obstacles are a 2 s write-side thinning and, decisively, Binance's fixed
+    500 ms depth grid). A wrong reason is not a harmless slip: it points the next experiment at
+    the wrong fix. Here it hid that the answer is two `bbo` subscriptions, not a new recorder.

@@ -29,8 +29,19 @@ questions and we have only trades.
 | source | cadence | usable for a 575 ms question |
 |---|---|---|
 | perplog tape (`.pfr`) | trades, median gap **266 ms** on HL/BTC | yes, and it is what Result 1 uses |
-| perplog book (`.pbs`) | REST keyframes, **~2 s** | **no** — cannot resolve below ~4 s |
-| BBO | **not recorded** — the recorder subscribes to `trades` only | — |
+| perplog book (`.pbs`), HL | WS `l2Book` depth-20, **thinned to 2 s on write** | **no** — 2 s cannot resolve 575 ms |
+| perplog book (`.pbs`), Binance | WS `depth20@500ms` — a **venue-imposed grid** | **no**, and no setting fixes it |
+| HL `bbo`, Binance `bookTicker` | native, push-on-change, **no grid either side** | **yes — and neither is subscribed** |
+
+> **Correction, 2026-07-27.** This table first read "BBO not recorded — the recorder subscribes to
+> `trades` only". That is **wrong**: `perplog-recorder` also runs a book path (`book_venues.rs`)
+> subscribing to HL `l2Book` and Binance partial depth. The conclusion survives, the reason does
+> not, and the real reason is sharper. Two distinct obstacles, only one of which is ours:
+> perplog thins books to `RECORDER_BOOK_INTERVAL_MS` (default 2 000, clamp floor 250) — that one
+> is a config change; but Binance publishes partial depth **on a fixed 500 ms grid**, which no
+> configuration touches. Measuring a 575 ms lead-lag on two series where one is gridded at 500 ms
+> is not a resolution one can buy back. The BBO channels avoid both: HL's `bbo` and Binance's
+> `bookTicker` are documented push-on-change with no interval. See method rule 12.
 
 So this experiment attacks the same question with the data that exists, and separately starts the
 capture that would answer it properly.
@@ -181,7 +192,15 @@ narrows it: observation density is out, so what remains is block cadence, networ
 genuine price discovery. And it adds a new caveat, that the *magnitude* is inflated by an
 unmeasured amount.
 
-**Test C was not launched.** A BBO recorder needs days of calendar time to accumulate anything
-useful, and starting a permanent capture on the author's machine is a decision about that
-machine, not an analysis step. It remains the only route to the stale-book question, and
-recording BBO is a gap in `perplog-recorder` regardless of this experiment.
+**Test C was not launched**, and it is smaller than §3 implied. It does not need a new recorder:
+`perplog-recorder` already has the venue-shard machinery, and what is missing is two
+subscriptions — HL `bbo` and Binance `bookTicker`, both push-on-change. It is still calendar-
+bound, which is the whole argument for starting it before anything else here: an hour not
+recorded is an hour that cannot be recovered later at any price.
+
+It also remains the only route to the question that decides whether Result 1 is worth a second
+paper. If HL's *quotes* trail Binance's by ~575 ms, resting orders sit at stale prices and there
+is something there. If the quotes track and only the *prints* trail, then the lag is about when
+trades happen rather than what prices are available — no stale book, nothing to take, and a more
+interesting result than the first reading. Both outcomes are publishable; neither is reachable
+from trades.
