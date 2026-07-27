@@ -1,6 +1,10 @@
 # EXP-027 — How much of the 575 ms is follower sparsity?
 
-**Status:** pre-registered, not yet run
+**Status:** run. **P1, P3, P4 confirmed; P2 and P5 rejected.** Follower sparsity does not bias
+the estimator — the density curve is flat from 0.5× HL to full Binance, at every κ up to 20.
+**But the synthetic follower fails a validation it should pass** (P5), so that result is
+established for a model the real pair demonstrably is not. The EXP-026 caveat is **narrowed, not
+removed**.
 **Registered:** 2026-07-27
 **Author:** Thomas Erhel / Quasareum
 **Data:** perplog tape, BTC/ETH/SOL/HYPE, 2026-07-18 → 07-26 — already on disk, no new download.
@@ -161,4 +165,86 @@ a pair whose true lag is known.
 
 ## 8. Results
 
-*(empty until the experiment runs)*
+92 asset-hours: BTC 24, ETH 24, HYPE 24, SOL 20 (four hours dropped by the ρ > 0.10 identification
+guard).
+
+| | HL prints/h | Binance/h | ρ | κ̂ | real peak |
+|---|---|---|---|---|---|
+| BTC | 12,500 | 36,517 | 0.534 | 2.52 | 562 ms |
+| ETH | 5,548 | 28,387 | 0.407 | 5.07 | 575 ms |
+| HYPE | 5,540 | 13,162 | 0.455 | 3.83 | 550 ms |
+| SOL | 2,576 | 7,560 | 0.218 | 20.14 | 612 ms |
+
+### P1 confirmed — the code agrees with EXP-026
+
+At κ = 0 the recovered lag equals the imposed lag exactly on BTC, ETH and HYPE at all four `L`,
+and within 25 ms on SOL. Two independent implementations agree on the case they share, so what
+follows is interpretable.
+
+### P2 rejected — and it could not have been otherwise
+
+Bias at `L = 575` across κ ∈ {0, 0.25κ̂, κ̂, 4κ̂}:
+
+| BTC | ETH | HYPE | SOL |
+|---|---|---|---|
+| +0, +0, +0, +0 | +0, +0, +0, +0 | +0, +0, +0, +0 | +0, +50, +0, −12 |
+
+Flat, at noise ratios up to 4 × 20.14 = **80× the leader's own variance** on SOL. §7 gives the
+reason: an independent additive component contributes zero to the cross-covariance at every lag,
+so it cannot move the peak. SOL's ±50 ms wobble is one to two steps of a 25 ms grid on the
+sparsest, least correlated instrument — variance, which is precisely what independent noise is
+supposed to add.
+
+### P3 and P4 confirmed — follower density does not bias the estimate
+
+Bias at `L = 575`, κ = κ̂, as the follower's observation count varies:
+
+| | 0.5× HL | 1× HL | 2× | 4× | 8× | full Binance |
+|---|---|---|---|---|---|---|
+| BTC / ETH / HYPE | +0 | +0 | +0 | +0 | +0 | +0 |
+| SOL | +62 | +25 | +50 | +50 | +50 | +50 |
+
+Flat — including on SOL, whose offset is the same at HL's density as at Binance's and therefore
+is not a density effect. Inverting `measured = a + b·L` at HL's real density gives
+**L\* = 575 ms** on BTC, ETH and HYPE and **561 ms** on SOL. The correction this experiment was
+built to produce is, on this model, **zero**.
+
+### P5 rejected — the model fails its validation
+
+Same synthetic follower, true lag 575 ms, measured against a full-density leader and against one
+thinned to HL's print times — the manipulation EXP-026 Test B performed on the real pair:
+
+| | κ = 0 | κ = κ̂ | Test B found, on the real pair |
+|---|---|---|---|
+| BTC | +25 | +12 | **+38** |
+| ETH | +0 | +0 | **+188** |
+| HYPE | −12 | +12 | **+25** |
+| SOL | +0 | −38 | **+212** |
+
+Everything in the first two columns is within one or two grid steps of zero. **The synthetic pair
+does not reproduce Test B.** By the falsification registered in §7, this is the outcome that goes
+against us: Test B's inflation comes from something in *real* Hyperliquid that the model lacks.
+
+## 9. What this settles, and the caveat it leaves standing
+
+**Excluded, with a reason each.** Two candidate mechanisms for a bias on Result 1 are now ruled
+out rather than merely unmeasured: independent follower innovations (P2, and the algebra that
+makes it structural rather than empirical), and leader-thinning of a co-moving pair (P5). The
+density curve is flat across a 16-fold range including HL's real cadence and burstiness.
+
+**Not established: that Result 1 is unbiased.** P5's rejection is a failed validation of the
+instrument, not a detail. A model that cannot reproduce a measured behaviour of the real pair is
+not evidence about the real pair, and every "+0" above is a statement about that model. The
+honest position is that the EXP-026 caveat is **narrower and better characterised**, not lifted.
+
+**The leading candidate for what is missing — endogenous observation times.** In the synthetic,
+the follower's price path comes from Binance while its observation times come from Hyperliquid,
+so times and innovations are *independent by construction*. In reality they are the same event:
+Hyperliquid prints **because** a trade occurred, so its print times are correlated with its own
+price moves. Nothing in this design reproduces that coupling, and it is the most plausible source
+of a behaviour the model misses. Testing it needs a follower whose sampling times are drawn
+conditional on its own path — a different experiment, not run.
+
+**For the paper.** 575 ms stands as the measured value, with follower sparsity excluded as an
+explanation on the strongest model available and the model's own inadequacy stated. That is a
+weaker claim than "575 ms, corrected and confirmed", and it is the one the evidence supports.

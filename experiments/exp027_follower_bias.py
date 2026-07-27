@@ -144,6 +144,19 @@ def one_hour(coin: str, date: str, hour: int) -> dict | None:
         o_ts, o_px = thin_to(f_ts, f_px, tgt)
         key = "d_full" if dm is None else f"d_{dm:g}"
         row[key] = peak(o_ts, o_px, bn_ts, bn_px) if o_ts.size >= 100 else float("nan")
+
+    # --- P5: reproduce Test B's manipulation on a pair whose true lag is KNOWN.
+    # Paired — the same synthetic follower is measured against a full-density
+    # leader and against one thinned to HL's print times, so the only difference
+    # between the two columns is the leader.
+    rng2 = np.random.default_rng(seed_for(coin, date, hour) ^ 0x5F5)
+    tb_ts, tb_px = thin_to(bn_ts, bn_px, hl_ts)
+    for km in (0.0, 1.0):
+        f_ts, f_px = follower(bn_ts, bn_px, L_REPORTED, kh * km, rng2)
+        o_ts, o_px = thin_to(f_ts, f_px, hl_ts)
+        good = o_ts.size >= 100 and tb_ts.size >= 100
+        row[f"ld_full_k{km:g}"] = peak(o_ts, o_px, bn_ts, bn_px) if good else float("nan")
+        row[f"ld_thin_k{km:g}"] = peak(o_ts, o_px, tb_ts, tb_px) if good else float("nan")
     return row
 
 
@@ -233,6 +246,22 @@ def main() -> None:
     bf = med(rows, "d_full") - L_REPORTED
     print(f"  P3 {'CONFIRMED' if abs(bf) <= 50 else 'REJECTED'} — bias vanishes at full "
           f"density ({bf:+.0f} ms)")
+
+    print("\nP5 DIAGNOSTIC — same synthetic follower (true L=575), leader full vs thinned")
+    p5 = []
+    for km in (0.0, 1.0):
+        lf, lt = med(rows, f"ld_full_k{km:g}"), med(rows, f"ld_thin_k{km:g}")
+        p5.append(lt - lf)
+        print(f"  kappa={km:g}kh   leader full {lf:>6.0f} ms   leader thinned {lt:>6.0f} ms"
+              f"   inflation {lt-lf:+.0f}")
+    fin5 = [d for d in p5 if np.isfinite(d)]
+    ok5 = bool(fin5) and all(d >= 25 for d in fin5)
+    print(f"  P5 {'CONFIRMED' if ok5 else 'REJECTED'} — thinning the LEADER inflates a "
+          f"known-lag pair")
+    print("  -> Test B's inflation is leader-thinning. Result 1 does not thin the leader."
+          if ok5 else
+          "  -> Test B's inflation is NOT reproduced. Its source is unidentified; the "
+          "EXP-026 caveat stands.")
 
     a, b, ls = invert(rows)
     real_bias = med(rows, f"m_k1_L{L_REPORTED:.0f}") - L_REPORTED

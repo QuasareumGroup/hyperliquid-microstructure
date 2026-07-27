@@ -38,10 +38,20 @@ thin the follower to HL's real print times, and the estimator returns zero — e
 hour, on BTC, ETH and HYPE, and within 25 ms on the sparsest instrument. The lag is not
 manufactured by unequal observation rates.
 
-**But sparsity inflates it.** Thinning Binance to HL's cadence moves the measured peak *up* in
-all four assets, by +25 ms on the densest and +212 ms on the sparsest. HL's own prints are
-sparse, so the 575 ms plausibly carries an upward bias of **unmeasured size**. The result holds;
-its magnitude should be read as an upper estimate.
+**A caveat on the magnitude, narrowed by EXP-027 but not lifted.** Thinning Binance to HL's
+cadence moves the measured peak *up* in all four assets (+25 ms on the densest, +212 on the
+sparsest), which raised the worry that HL's own sparsity inflates the 575 ms. EXP-027 attacked
+that on 92 asset-hours and **excluded two mechanisms with a reason each**: independent follower
+innovations cannot move the peak at all (a cross-covariance is blind to them — structural, not
+empirical), and follower density does not either, the bias curve being flat from half HL's
+cadence to Binance's full density at noise ratios up to 80× the leader's variance.
+
+**But the synthetic pair failed its validation**: it does not reproduce the leader-thinning
+inflation that the real pair shows. So those exclusions describe a model the real pair
+demonstrably is not, and the caveat stands — better characterised, not removed. The leading
+suspect is **endogenous sampling**: Hyperliquid prints *because* a trade happened, so its
+observation times correlate with its own price innovations, a coupling no synthetic follower here
+reproduces. 575 ms is the measured value; whether it is the true one is open.
 **Open:** how much is mechanical (block cadence, network) versus price discovery. Observability
 is ruled out as the explanation for the *level* (EXP-014); nothing has replaced it.
 
