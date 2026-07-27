@@ -1,8 +1,8 @@
 # Preprint — counting fills misrepresents liquidations
 
-**Status: draft. Not submitted, and not ready to be.** Two things must be done first, both
-listed below. Everything else in it is measured, cross-checked against the versioned data, and
-reproducible from this repository.
+**Status: draft, one blocker left.** The literature review is done (16 references, Section 2).
+What remains is one data item, listed below. Everything else is measured, cross-checked against
+the versioned data, and reproducible from this repository.
 
 ## Build
 
@@ -27,22 +27,47 @@ experiment in `../experiments/`:
 | tail heavy, not a power law, and not nameable | [EXP-020](../experiments/EXP-020-alternatives.md), [EXP-022](../experiments/EXP-022-xmin-selection.md) |
 | what CEX feeds publish | venue documentation, [EXP-016](../experiments/EXP-016-liquidation-overcounting.md) |
 
+## What the literature review established
+
+The framing changed as a result, so it is worth recording separately from the paper.
+
+**The documented bias runs the other way.** Since 2021 the major centralised venues rate-limit
+their liquidation feeds — Binance publishes only the largest order per 1000 ms per symbol, OKX
+one update per second per contract. K33 Research called the result "a vast underrepresentation
+of actual liquidation volumes." So the known problem is **under**counting on order feeds, and
+what we measure is **over**counting on fill records. Pooling the two combines a downward-biased
+count with an upward-biased one.
+
+**The lending literature does not have this problem, and that is instructive.** Qin et al.
+(ACM IMC 2021) count DeFi liquidations by scanning protocol-emitted events — Aave's
+`LiquidationCall`, Compound's `LiquidateBorrow`. One call, one event: the unit comes with the
+data. Perpetual venues emit no such event, so the unit has to be reconstructed, and that
+reconstruction is what nobody had priced.
+
+**Existing Hyperliquid work measures dollars, not counts** — Chitra et al. on autodeleveraging
+profit overshoot, Sepper on slippage risk — so the counting question had not come up on this
+venue.
+
+**It also caught something the paper needed.** Hyperliquid sends only 20% of a position above
+100k USDC as the first market order, then waits 30 s. One forced close can span several
+transactions, which our unit would split. Tested on the year sample: 1.4% of episodes are
+affected and the factor moves 5.72× → 5.76×, so the reported number is mildly conservative. That
+check is now Section 4.2, and it exists because the docs were read properly.
+
 ## Before submission
 
-1. **A systematic literature review.** The paper currently positions itself against venue
-   documentation and against the statistical methodology it uses. It does not survey the
-   empirical crypto-liquidation literature. Section 9 says so explicitly, and that admission is
-   not a substitute for doing the work — a measurement paper whose contribution is "this has
-   been measured wrong" has to establish how it has been measured before.
-
-2. **Per-fill notionals at year scale.** The compression table (Section 5) rests on the
-   twelve-hour sample because per-fill notionals were not retained during the year-scale
-   collection. The count and tranching results are year-scale. Re-collecting is a rerun of
-   `../experiments/exp017_year_tail.py` with the per-fill column kept — roughly 50 GB of
-   requester-pays egress, inside the free monthly allowance.
+**Per-fill notionals at year scale.** The compression table (Section 5) rests on the twelve-hour
+sample because per-fill notionals were not retained during the year-scale collection. The count
+and tranching results are year-scale. Re-collecting is a rerun of
+`../experiments/exp017_year_tail.py` with the per-fill column kept — roughly 50 GB of
+requester-pays egress, inside the free monthly allowance.
 
 Optional, and worth considering: a fifth candidate family (generalised Pareto, log-gamma) for
 the threshold band where none of the four fits, per EXP-022.
+
+Two cited works were characterised from abstracts rather than full text — Lim (SSRN, registration
+wall) and Zhivkov et al. (publisher returned 403). Both are flagged in the paper's Limitations.
+Nothing in the argument depends on their contents.
 
 ## Intended venue
 

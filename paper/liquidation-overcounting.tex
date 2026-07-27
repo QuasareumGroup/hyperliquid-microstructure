@@ -21,6 +21,7 @@ evidence from a complete on-chain derivatives ledger}
 
 \begin{document}
 \maketitle
+\sloppy
 
 \begin{abstract}
 \noindent
@@ -40,11 +41,12 @@ is unambiguously heavy---an exponential is rejected decisively---and it is not a
 it \emph{cannot be named} beyond that. Lognormal and Weibull specifications both dominate a
 Pareto fit at every estimable threshold across nearly three orders of magnitude of cut-off, yet
 which of the two wins reverses with the threshold, so any named family would report the
-analyst's cut-off rather than the distribution. Finally, we document that the fill-counting bias
-does \emph{not} transfer to centralised-exchange feeds, which publish orders rather than fills,
-but that two of the three major feeds carry a different and, for counting purposes, worse
-defect: they publish per-second maxima rather than samples. All data, code and pre-registrations
-are public.
+analyst's cut-off rather than the distribution. Finally, we place this beside the liquidation-data
+bias that is already documented and observe that it runs the \emph{other way}: rate-limited
+centralised-exchange feeds undercount, publishing per-second maxima rather than samples, while
+fill-level on-chain records overcount. Pooling the two sources combines a downward-biased count
+with an upward-biased one, and they do not cancel. All data, code and pre-registrations are
+public.
 \end{abstract}
 
 \section{Introduction}
@@ -88,6 +90,9 @@ departs from episode-counting, and what the episode-size distribution actually l
       across the threshold range (Section~\ref{sec:tail}).
 \item We document what centralised-exchange feeds actually publish, and show the failure mode
       there is different and worse for counting purposes (Section~\ref{sec:cex}).
+\item We position this against the liquidation-data bias already documented in the literature,
+      which runs in the \emph{opposite} direction, and note the consequence for work that pools
+      centralised and on-chain liquidation records (Section~\ref{sec:related}).
 \end{enumerate}
 
 \paragraph{On the negative result.} Section~\ref{sec:tail} sets out to name the tail and fails.
@@ -96,16 +101,89 @@ threshold one happened to choose---is how a threshold choice becomes a stylised 
 tail-index estimates were produced during this work and all three were withdrawn; the record of
 those withdrawals is public and is described in Section~\ref{sec:repro}.
 
+\section{Related work}
+\label{sec:related}
+
+\subsection{The known bias runs the other way}
+
+That published liquidation counts are unreliable is not a new observation. What has been
+documented is the opposite of what we measure.
+
+Since 2021 the major centralised venues have rate-limited their public liquidation feeds. Binance
+publishes only the largest liquidation order per 1000\,ms per symbol; OKX publishes at most one
+update per second per contract; Bybit's legacy stream did the same before
+\texttt{allLiquidation} replaced it in 2025 \cite{binance,okx,bybit}. K33 Research
+\cite{k33} characterised the consequence bluntly---their analyst described exchange liquidation
+data as ``a vast underrepresentation of actual liquidation volumes''---and industry commentary
+during the October 2025 cascade reported venue-internal figures several times the published
+ones.
+
+The direction matters. Rate-limited order feeds \textbf{undercount}. Fill-level records, which is
+what an on-chain venue publishes, \textbf{overcount}. Both defects are real, they apply to
+different data sources, and they pull in opposite directions. A study that pools centralised-feed
+liquidations with on-chain liquidations is combining a downward-biased count with an
+upward-biased one, and the two do not cancel.
+
+A third source in common use, aggregator heatmaps, is neither: those are \emph{modelled} estimates
+derived from open-interest snapshots and assumed leverage distributions, not records of
+liquidations that occurred \cite{coinglass}.
+
+\subsection{What the empirical literature counts}
+
+\paragraph{Perpetual futures.} Cheng et al.~\cite{cheng2021} give the reference empirical
+treatment of forced liquidation in crypto perpetuals, applying generalised extreme value theory
+to BitMEX data from 2017--2021 and reporting daily forced liquidations of 3.51\% and 1.89\% of
+outstanding long and short positions, at an average leverage of 60$\times$ among liquidated
+accounts. Their statistics are \emph{volumes} rather than event counts, which insulates them from
+the unit question we raise---aggregate liquidated notional is invariant to how the record is
+partitioned---though a size distribution drawn from the same feed would not be.
+
+Recent work on the October 2025 cascade is event-study shaped and likewise measures in dollars:
+Lim~\cite{lim2026} works minute-level on Binance and Bybit, and Chitra et al.~\cite{chitra2026}
+analyse Hyperliquid's autodeleveraging during the same episode, quantifying profit overshoot
+(up to \$51.7M) rather than counting discrete events. Sepper~\cite{sepper2026} builds a
+liquidity-risk framework on Hyperliquid order-book and liquidation records. Zhivkov et
+al.~\cite{zhivkov2026} compare microstructure across 26 centralised and decentralised venues.
+
+To our knowledge, none of this work counts liquidation \emph{events} from a fill-level record, and
+none states the unit at which liquidations are counted. We therefore do not claim that any
+published result is wrong. We claim that the correction has not been measured, and we measure it.
+
+\paragraph{Lending protocols.} The DeFi lending literature is the closest methodological
+neighbour and instructive precisely because it does not have this problem. Qin et
+al.~\cite{qin2021} study roughly 50{,}000 liquidations across Aave, Compound, MakerDAO and dYdX
+by scanning for protocol-emitted events---Aave's \texttt{LiquidationCall}, Compound's
+\texttt{LiquidateBorrow}---and Moallemi and Patange~\cite{moallemi2024} analyse fixed-spread
+liquidation on the same event basis. In lending, \textbf{the protocol emits one event per
+liquidation call, so the unit is given by the data}.
+
+Perpetual venues emit no such event. A forced close is observable only through the fills it
+generates, so the unit must be \emph{reconstructed} rather than read. That is the gap this paper
+addresses: the reconstruction is a researcher degree of freedom that has not been priced.
+
 \section{Setting and data}
 \label{sec:data}
 
 \subsection{Hyperliquid liquidations}
 
 Hyperliquid is a perpetual-futures venue with an on-chain order book. Positions are margined
-against a mark price, and a position whose margin ratio falls below maintenance is force-closed
-by the protocol. The resulting trades are recorded in the node's fill stream with a
-\texttt{liquidation} field carrying the liquidated user, the mark price and the liquidation
-method, alongside the fill's own price, size, starting position and realised profit and loss.
+against a mark price, and a position whose margin ratio falls below maintenance---half the
+initial margin at maximum leverage, between 1.25\% and 16.7\% depending on the
+instrument---is force-closed by the protocol. The resulting trades are recorded in the node's
+fill stream with a \texttt{liquidation} field carrying the liquidated user, the mark price and
+the liquidation method, alongside the fill's own price, size, starting position and realised
+profit and loss.
+
+Two mechanism details bear directly on the measurement. First, \textbf{large positions are closed
+in parts}: above 100{,}000 USDC of position value the protocol sends only 20\% of the position as
+a market order, then waits \textbf{30 seconds} before sending more for that account
+\cite{hyperliquid}. Second, if the position is still not closed and equity falls below two-thirds
+of maintenance margin, a \emph{backstop} transfers the position to the liquidator vault.
+
+The first of these is a documented mechanism for the size dependence we report in
+Section~\ref{sec:count}: tranching is not only order-book slicing but partly protocol design. It
+also raises a measurement question---whether chunks separated by the cooldown should be one
+liquidation or several---which we test directly in Section~\ref{sec:cooldown}.
 
 Two properties make the archive suitable for this measurement. It is \textbf{complete}: every
 fill is present, with no publication rate limit, because the data is the chain's own record
@@ -214,6 +292,44 @@ The consequence is stated most sharply as a share: \textbf{the top 1\% of episod
 23.1\% of all fills}. A dataset of fills is therefore not a dataset of liquidations with a
 scaling factor---it is a dataset in which the largest events have been replicated most.
 
+\subsection{Does the 30-second cooldown split episodes?}
+\label{sec:cooldown}
+
+The partial-liquidation rule means one position's forced close can span several market orders
+30 seconds apart, in different transactions. Our (account, transaction) unit would count those
+separately, so the reported inflation could be too \emph{low}.
+
+We test this on the year sample by measuring the time between consecutive episodes of the same
+account and instrument (98{,}983 consecutive pairs):
+
+\begin{table}[htbp]
+\centering
+\caption{Time between consecutive episodes of the same account and instrument. The cooldown
+signature is present and small; the mass is at separations far too long to be one forced close.}
+\label{tab:cooldown}
+\begin{tabular}{lrr}
+\toprule
+separation & pairs & share \\
+\midrule
+$<$ 5\,s & 0 & 0.0\% \\
+5--35\,s & 1{,}757 & 1.8\% \\
+35--90\,s & 922 & 0.9\% \\
+90\,s -- 10\,min & 2{,}545 & 2.6\% \\
+$>$ 10\,min & 93{,}759 & \textbf{94.7\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Chains of two or more episodes within 90 seconds account for 2{,}200 chains covering 4{,}879
+episodes---\textbf{1.4\% of the sample}. Merging every such chain into a single episode moves the
+inflation factor from 5.72$\times$ to \textbf{5.76$\times$}. The reported figure is therefore
+mildly conservative, and the choice of unit remains not load-bearing.
+
+The mechanism is nonetheless identifiable in the data, which is a useful check that we are seeing
+what the documentation describes: chains begin at a median episode size of \textbf{\$72{,}326}
+against \textbf{\$1{,}902} for isolated episodes, a factor of 38, consistent with a rule that
+engages above 100{,}000 USDC. Only 4.86\% of episodes exceed that threshold.
+
 \subsection{Concentration}
 
 Liquidated notional is concentrated to a degree that compounds the above: the top 1\% of
@@ -259,10 +375,10 @@ straightforward to remove.
 \subsection{What holds}
 
 The tail is unambiguously heavy. Against a Pareto reference fitted on the same exceedances, an
-exponential specification is rejected decisively (Vuong $R = +11.96$, $p < 10^{-4}$, in favour of
+exponential specification is rejected decisively (Vuong's test~\cite{vuong1989}, $R = +11.96$, $p < 10^{-4}$, in favour of
 Pareto). But the Pareto fit is itself rejected: a Kolmogorov--Smirnov test with
 parametric-bootstrap $p$-values rejects it at every threshold tried, including at the threshold
-selected by the Clauset--Shalizi--Newman procedure ($p = 0.010$).
+selected by the Clauset--Shalizi--Newman procedure~\cite{clauset2009} ($p = 0.010$).
 
 Both two-parameter alternatives beat it. Fitting conditional on $x \ge x_{\min}$ and comparing by
 Vuong's non-nested likelihood-ratio test, lognormal and Weibull each dominate Pareto at
@@ -317,7 +433,7 @@ winning family from a comparison table has no way to see it.
 
 Three tail-index estimates were produced in the course of this work---$\alpha \approx 1.15$,
 then $\alpha \in [0.9, 1.2]$, then a Hill-plot plateau at $\alpha \approx 0.93$---and all three
-are withdrawn. The Hill estimator estimates a Pareto exponent, and the tail is not Pareto; drift
+are withdrawn. The Hill estimator~\cite{hill1975} estimates a Pareto exponent, and the tail is not Pareto; drift
 of the Hill index with tail depth, initially read as a measurement defect, is the known
 signature of a lognormal-like tail. Consequences drawn from those numbers, including ``infinite
 variance'' and ``the sample mean is not a stable statistic,'' are withdrawn with them: both are
@@ -338,6 +454,7 @@ defect.
 \centering
 \caption{What the major centralised feeds publish, per venue documentation.}
 \label{tab:cex}
+\small
 \begin{tabular}{llll}
 \toprule
 venue & stream & unit & limitation \\
@@ -405,10 +522,15 @@ name would have been the threshold's.
       than re-selecting it, which makes the reported $p$ conservative toward rejection.
 \item \textbf{Four candidate families.} A fifth---generalised Pareto, log-gamma---might describe
       the band where none of ours does. None was tried.
-\item \textbf{The literature review is incomplete.} We position this work against venue
-      documentation and against the statistical methodology it uses, but have not surveyed the
-      empirical crypto-liquidation literature systematically. Claims of novelty should be read
-      as claims about what we measured, not about what has been measured before.
+\item \textbf{Our novelty claim is bounded by a search, not by a proof.} We surveyed the
+      empirical crypto-liquidation literature and found no study that counts liquidation events
+      from a fill-level record, and none that states its counting unit. Absence of a result in a
+      search is weaker than absence of the result. The claim to read is the measurement, not
+      the priority.
+\item \textbf{Two cited works were not read in full.} Lim~\cite{lim2026} is behind a
+      registration wall and Zhivkov et al.~\cite{zhivkov2026} returned an access error; both are
+      characterised from their abstracts and metadata. Nothing in our argument depends on their
+      contents beyond the fact that they measure in dollars and across venues respectively.
 \end{itemize}
 
 \section{Reproducibility}
@@ -446,15 +568,76 @@ B.~M. Hill.
 \newblock A simple general approach to inference about the tail of a distribution.
 \newblock \emph{Annals of Statistics}, 3(5):1163--1174, 1975.
 
+\bibitem{cheng2021}
+Z.~Cheng, J.~Deng, T.~Wang, and M.~Yu.
+\newblock Liquidation, leverage and optimal margin in bitcoin futures markets.
+\newblock \emph{Applied Economics}, 53(47), 2021. arXiv:2102.04591.
+
+\bibitem{qin2021}
+K.~Qin, L.~Zhou, P.~Gamito, P.~Jovanovic, and A.~Gervais.
+\newblock An empirical study of DeFi liquidations: incentives, risks, and instabilities.
+\newblock In \emph{Proc.\ 21st ACM Internet Measurement Conference (IMC)}, 2021.
+arXiv:2106.06389.
+
+\bibitem{moallemi2024}
+C.~C. Moallemi and U.~Patange.
+\newblock An analysis of fixed-spread liquidation lending in DeFi.
+\newblock SSRN 4803547, 2024.
+
+\bibitem{chitra2026}
+T.~Chitra, N.~Thogiti, M.~J.~P. Trujillo Ramirez, and V.~Xu.
+\newblock Autodeleveraging as online learning.
+\newblock arXiv:2602.15182, February 2026.
+
+\bibitem{sepper2026}
+O.~Sepper.
+\newblock Slippage-at-Risk (SaR): a forward-looking liquidity risk framework for perpetual
+futures exchanges.
+\newblock arXiv:2603.09164, March 2026.
+
+\bibitem{lim2026}
+B.~C. Lim.
+\newblock Anatomy of a crypto cascade: minute-level evidence from the October 2025 crash.
+\newblock SSRN 6579278.
+
+\bibitem{zhivkov2026}
+K.~Zhivkov, T.~Todorov, and G.~Georgiev.
+\newblock Temporal dynamics of market microstructure in cryptocurrency perpetual futures:
+econometric evidence from centralized and decentralized exchanges.
+\newblock \emph{Journal of Risk and Financial Management}, 14(5):103, 2026.
+
+\bibitem{k33}
+K33 Research.
+\newblock Cited in: Crypto liquidations may be way worse than data has let on.
+\newblock \emph{Cointelegraph}, August 2024.
+\newblock \url{https://cointelegraph.com/news/
+liquidation-data-wildy-underreported-last-3-years-k33-research}.
+
 \bibitem{hyperliquid}
 Hyperliquid.
-\newblock Documentation: node data, liquidations, and the funding mechanism.
-\newblock \url{https://hyperliquid.gitbook.io/hyperliquid-docs}.
+\newblock Documentation: liquidations, node data, and the funding mechanism.
+\newblock \url{https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations}.
 
 \bibitem{binance}
 Binance.
 \newblock USD-M futures WebSocket streams: liquidation order streams.
-\newblock \url{https://developers.binance.com/docs/derivatives}.
+\newblock \url{https://developers.binance.com/docs/derivatives/
+usds-margined-futures/websocket-market-streams/Liquidation-Order-Streams}.
+
+\bibitem{okx}
+OKX.
+\newblock WebSocket API: liquidation orders channel.
+\newblock \url{https://www.okx.com/docs-v5/en/}.
+
+\bibitem{bybit}
+Bybit.
+\newblock V5 WebSocket public: \texttt{allLiquidation} stream.
+\newblock \url{https://bybit-exchange.github.io/docs/v5/websocket/public/all-liquidation}.
+
+\bibitem{coinglass}
+CoinGlass.
+\newblock Liquidation heatmap methodology.
+\newblock \url{https://docs.coinglass.com/reference/liquidation-aggregate-heatmap}.
 
 \end{thebibliography}
 

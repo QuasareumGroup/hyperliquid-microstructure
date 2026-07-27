@@ -65,6 +65,16 @@ from the 12-hour sample and are marked, because that column was not retained at 
 | | *(12 h, by fill: top 1% of fills carry 30.7%, top 10% carry 76.6%)* |
 | corr(ln notional, ln fills) | **+0.545** |
 
+**The protocol's own chunking does not undo this.** Hyperliquid sends only 20% of a position
+above 100,000 USDC as the first market order, then waits **30 s** before sending more. One forced
+close can therefore span several transactions, which the `(account, transaction)` unit would
+split. Measured: of 98,983 consecutive same-account-same-instrument episode pairs, **0%** are
+under 5 s apart, 1.8% fall in 5–35 s, and **94.7% are more than 10 minutes apart** — unrelated
+events, not chunks. Merging every chain within 90 s touches 1.4% of episodes and moves the factor
+from 5.72× to **5.76×**, so the reported figure is mildly conservative. The mechanism is visible
+where it should be: chains start at a median **$72,326** against **$1,902** for isolated
+episodes, against a threshold of $100k.
+
 **Size distribution compression**, measured quantile by quantile against true episode sizes
 (not modelled). **12-hour sample** — per-fill notionals were not retained at year scale:
 
