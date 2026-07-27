@@ -190,3 +190,68 @@ cooldown gap, and we cannot yet say whether that is the market or the margin eng
   it named and costed.
 - And, incidentally, the bug that halved the paper's headline — found because this experiment
   needed a column the collector had thrown away.
+
+
+---
+
+## 8. Addendum — pre-registered 2026-07-27, before the ambient pass runs
+
+> Written after §6 and **before any ambient price data exists**. The collection is launched
+> after this file is committed.
+
+### Why a simple ambient comparison would settle nothing
+
+The obvious control — compare the price move during a cooldown gap to the move over a matched
+window with no liquidation — **cannot discriminate**. The gapped transitions are selected on
+adverse movement (§1a), so they will exceed any unselected control by construction, under either
+hypothesis. Running that comparison would produce a large, significant, meaningless number.
+
+### The test that does discriminate: reversion after the close
+
+Selection acts on *why tranche k+1 exists*. It says nothing about what the price does **after the
+forced close has finished**. That window is uncontaminated, and the two hypotheses part company
+there:
+
+- **Anticipation** — the market pushed price ahead of flow it knew was coming. That is
+  liquidity provision under pressure, and it is **temporary**: once the flow stops, price
+  reverts.
+- **Selection** — price moved for exogenous reasons, which is why the account stayed underwater.
+  Exogenous moves are information and **do not revert**.
+
+### Measurement
+
+For each multi-tranche close above \$100k (n = 7,963; 1,536 with a gap ≥ 25 s), from the ambient
+trade series of the same instrument:
+
+- `A` = adverse move during the close, `t₀ → t₁`, signed so positive is against the account.
+- `R(k)` = reversion at `t₁ + k` seconds, `k ∈ {30, 60, 300}`, signed so **positive means price
+  came back** toward its pre-close level.
+- Reported as the ratio `R(300) / A` — the share of the move that was temporary.
+
+Closes are split on their **largest inter-tranche gap**: continuous (< 2 s) against gapped
+(≥ 25 s). Ambient prices come from *all* fills of that instrument, not liquidation fills.
+
+### Predictions
+
+- **P5 (discriminating).** Gapped closes revert **more** than continuous ones, as a share of
+  their own adverse move: `R(300)/A` is higher for the gapped group, difference significant at
+  5%. *That is anticipation: the extra 42 bps is temporary pressure, not news.*
+- **P6.** Both groups show some reversion (`R(300)/A > 0`), since any marketable sweep has
+  temporary impact.
+
+### Falsification
+
+- **P5 false, equal reversion** — the extra move in gapped closes is as permanent as the rest.
+  Then the 42 bps is **exogenous price movement that caused the second tranche**, the selection
+  reading is correct, and there is no anticipation to report. This is the outcome §1(a) implies
+  and it must not be softened.
+- **P5 false, reversed** — gapped closes revert *less*. Stronger still for selection: the gap
+  coincided with genuine news.
+- **P6 false** — no reversion anywhere. Then the ambient series is too coarse to measure
+  reversion at all, and the experiment reports a measurement failure rather than a finding.
+
+### What is claimable either way
+
+Whatever P5 returns, **P1 and P2 stand on their own**: tranches are identifiable from position
+accounting, and the documented 30-second cooldown is not observable in the venue's complete fill
+record. Those do not depend on this addendum.

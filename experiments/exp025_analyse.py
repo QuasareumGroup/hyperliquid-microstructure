@@ -38,7 +38,7 @@ def load_runs(path: Path) -> list[list[dict]]:
             by[(r["user"], r["coin"])].append({
                 "ts": int(r["ts"]), "sz": float(r["sz"]),
                 "sp": abs(float(r["start_position"])), "px": float(r["px"]),
-                "dir": r["dir"],
+                "dir": r["dir"], "coin": r["coin"], "user": r["user"],
             })
     runs = []
     for v in by.values():
