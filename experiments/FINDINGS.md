@@ -73,9 +73,12 @@ close can therefore span several transactions, which the `(account, transaction)
 split. Measured: of 98,983 consecutive same-account-same-instrument episode pairs, none are
 under 5 s apart (empty **by construction** of the 5-second episode unit), 1.8% fall in 5–35 s, and **94.7% are more than 10 minutes apart** — unrelated
 events, not chunks. Merging every chain within 90 s touches 1.4% of episodes and moves the factor
-from 5.72× to **5.76×**, so the reported figure is mildly conservative. The mechanism is visible
-where it should be: chains start at a median **$72,326** against **$1,083** for episodes outside any chain
-(factor 67), against a threshold of $100k. *(An earlier $1,902 figure used an undeclared
+from 5.72× to **5.76×**, so the reported figure is mildly conservative. Chains are strongly size-selected —
+median **$72,326** against **$1,083** for episodes outside any chain (factor 67), against a
+$100k threshold — but that **does not identify the cooldown**: their gap distribution decays
+monotonically from the 5 s floor (median 17.9 s, only 6% in [25, 40] s), with no 30 s mode even
+on chains above $1M. Size selection is consistent with the rule; the timing is not evidence for
+it. Identifying tranches needs position accounting, not elapsed time — see EXP-025. *(An earlier $1,902 figure used an undeclared
 subset — accounts with a second episode in the year; caught in review.)*
 
 **Size distribution compression**, measured quantile by quantile against true episode sizes

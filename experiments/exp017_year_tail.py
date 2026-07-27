@@ -51,6 +51,9 @@ HOURS = (2, 8, 14, 20)
 #: EXP-016 showed the factor is insensitive between 1s and one hour.
 EPISODE_GAP_MS = 5_000
 
+#: Set by --with-prices; widens the per-fill output with px, sz and startPosition.
+_WITH_PRICES = False
+
 
 def fetch(date8: str, hour: int, dest: Path) -> bool:
     r = subprocess.run(
@@ -82,6 +85,14 @@ def liquidation_fills(path: Path) -> list[dict]:
                         "coin": fill["coin"],
                         "user": liq["liquidatedUser"],
                         "ntl": float(fill["px"]) * float(fill["sz"]),
+                        # Retained for EXP-025: tranche boundaries are an arithmetic
+                        # fact of position accounting, not of elapsed time. The first
+                        # year-scale pass multiplied px by sz and discarded both,
+                        # which made the question unaskable without re-collecting.
+                        "px": float(fill["px"]),
+                        "sz": float(fill["sz"]),
+                        "start_position": float(fill["startPosition"]),
+                        "dir": fill.get("dir", ""),
                     })
                 except (KeyError, ValueError, TypeError):
                     continue
@@ -109,11 +120,15 @@ def to_episodes(fills: list[dict], keep_fills: bool = False) -> tuple[list[dict]
             ep_ts = run[0]["ts"]
             uid = account_id(user)
             for f in run:
-                frows.append({
+                row = {
                     "ts": f["ts"], "ep_ts": ep_ts, "coin": coin,
                     "hip3": int(":" in coin), "user": uid,
                     "notional": round(f["ntl"], 4),
-                })
+                }
+                if _WITH_PRICES:
+                    row |= {"px": f["px"], "sz": f["sz"],
+                            "start_position": f["start_position"], "dir": f["dir"]}
+                frows.append(row)
 
     for (user, coin), group in by_key.items():
         group.sort(key=lambda f: f["ts"])
@@ -155,10 +170,15 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=6)
     default_out = REPO / "experiments" / "data" / "exp017_episodes.csv"
     ap.add_argument("--out", type=Path, default=default_out)
+    ap.add_argument("--with-prices", action="store_true",
+                    help="widen --fills-out with px, sz, startPosition, dir (EXP-025)")
     ap.add_argument("--fills-out", type=Path, default=None,
                     help="also write one row per liquidation fill, joinable to --out "
                          "on (coin, user, ts=ep_ts). Large: ~2M rows over the year.")
     args = ap.parse_args()
+
+    global _WITH_PRICES
+    _WITH_PRICES = args.with_prices
 
     days = []
     d = FIRST_DAY
@@ -176,7 +196,10 @@ def main() -> None:
         if keep:
             args.fills_out.parent.mkdir(parents=True, exist_ok=True)
             fh2 = args.fills_out.open("w", newline="")
-            w2 = csv.DictWriter(fh2, fieldnames=["ts", "ep_ts", "coin", "hip3", "user", "notional"])
+            cols = ["ts", "ep_ts", "coin", "hip3", "user", "notional"]
+            if _WITH_PRICES:
+                cols += ["px", "sz", "start_position", "dir"]
+            w2 = csv.DictWriter(fh2, fieldnames=cols)
             w2.writeheader()
         with args.out.open("w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=["ts", "coin", "hip3", "user", "fills", "notional"])

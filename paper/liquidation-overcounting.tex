@@ -419,10 +419,24 @@ episodes---\textbf{1.4\% of the sample}. Merging every such chain into a single 
 inflation factor from 5.72$\times$ to \textbf{5.76$\times$}. The reported figure is therefore
 mildly conservative, and the choice of unit remains not load-bearing.
 
-The mechanism is nonetheless identifiable in the data, which is a useful check that we are seeing
-what the documentation describes: chains begin at a median episode size of \textbf{\$72{,}326}
-against \textbf{\$1{,}083} for episodes outside any chain, a factor of 67, consistent with a
-rule that engages above 100{,}000 USDC. Only 4.86\% of episodes exceed that threshold.
+Chains are strongly size-selected, as the rule would predict: they begin at a median episode
+size of \textbf{\$72{,}326} against \textbf{\$1{,}083} for episodes outside any chain, a
+factor of 67, against a rule that engages above 100{,}000 USDC. Only 4.86\% of episodes exceed
+that threshold.
+
+We stop short of attributing the chains to the cooldown, because their \emph{timing} does not
+carry its signature. A 30-second wait should leave a deficit of short gaps and a mode near 30\,s;
+instead the gap distribution decays monotonically from the 5-second floor imposed by the episode
+unit, with a median of 17.9\,s and only 6\% of gaps in [25, 40]\,s. Restricting to chains whose
+first tranche exceeds \$1M---where the rule should bind hardest---does not change the shape
+(7\% in that window). The size selection is therefore consistent with the cooldown but does not
+identify it: bigger forced closes take longer for several reasons, and a 5-second grouping rule
+will split any of them. Separating the two would need tranche boundaries reconstructed from
+position accounting rather than from elapsed time, which the archive supports
+(\texttt{startPosition} and \texttt{sz} per fill) and we leave to future work.
+
+None of this touches the robustness result above: merging chains moves the factor by 0.04
+whatever produces them.
 
 \subsection{Concentration}
 
