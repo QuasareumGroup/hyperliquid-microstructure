@@ -30,3 +30,9 @@ venv/
 
 # OS
 .DS_Store
+
+# LaTeX intermediates (the PDF itself is tracked)
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.png

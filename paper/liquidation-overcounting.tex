@@ -1,0 +1,461 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+\title{\bfseries Counting fills misrepresents liquidations:\\
+evidence from a complete on-chain derivatives ledger}
+
+\author{monproweb\\ \small Quasareum\\ \small \texttt{contact@quasareum.com}}
+
+\date{27 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Forced liquidations in cryptocurrency derivatives are almost always counted from
+exchange-published event feeds, in which one economic liquidation appears as several records.
+We quantify the resulting distortion on Hyperliquid, an on-chain perpetual-futures venue whose
+node-fills archive is, to our knowledge, the only public liquidation record that is
+simultaneously complete and attributed to the liquidated account. On a uniformly stratified
+sample of 351{,}540 liquidation episodes reconstructed from 2{,}010{,}042 fills over one year,
+counting fills rather than episodes inflates the event count by a factor of \textbf{5.72}. The
+inflation is not a constant: it is \emph{size-dependent}, rising from a median of 2 fills per
+episode below the median size to a median of 72 in the top percentile, so the bias is
+concentrated on precisely the events that liquidation studies are about. The top 1\% of episodes
+generate 23.1\% of all fills. We further characterise the episode-size distribution as far as
+the data permits, and report a negative result that we believe is the more useful one: the tail
+is unambiguously heavy---an exponential is rejected decisively---and it is not a power law, but
+it \emph{cannot be named} beyond that. Lognormal and Weibull specifications both dominate a
+Pareto fit at every estimable threshold across nearly three orders of magnitude of cut-off, yet
+which of the two wins reverses with the threshold, so any named family would report the
+analyst's cut-off rather than the distribution. Finally, we document that the fill-counting bias
+does \emph{not} transfer to centralised-exchange feeds, which publish orders rather than fills,
+but that two of the three major feeds carry a different and, for counting purposes, worse
+defect: they publish per-second maxima rather than samples. All data, code and pre-registrations
+are public.
+\end{abstract}
+
+\section{Introduction}
+
+Empirical work on cryptocurrency derivatives routinely counts liquidation events: how many
+occurred, how large they were, how they cluster in cascades, how they propagate across venues.
+The counting is nearly always done from an exchange-published liquidation feed, and the unit of
+that feed is not the unit of the question.
+
+A trader whose position is force-closed experiences one liquidation. The exchange executes it as
+a sequence of fills against the order book. If the published record is per fill, then a single
+economic event enters the dataset several times, at several sizes, none of them the size of the
+position that was closed. Any statistic computed over those records---a count, a size
+distribution, a tail index, an inter-arrival time---measures the exchange's execution mechanics
+as much as the market.
+
+This is a well-understood problem in principle. What has been missing is a public dataset in
+which the correct unit can be reconstructed, so that the distortion can be measured rather than
+assumed. That requires a liquidation record that is (i) complete, with no sampling or rate limit,
+and (ii) attributed, so that fills belonging to one account's forced close can be grouped. To our
+knowledge no centralised venue publishes both.
+
+Hyperliquid does. It is an on-chain perpetual-futures exchange whose node data includes every
+fill, each carrying the liquidated account address, the mark price at liquidation, the starting
+position and the realised loss. This paper uses that archive to measure how far fill-counting
+departs from episode-counting, and what the episode-size distribution actually looks like.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item We measure a \textbf{5.72$\times$} count inflation from fill-counting on a uniformly
+      stratified one-year sample, and show the factor is robust to how ``one liquidation'' is
+      defined (Section~\ref{sec:unit}).
+\item We show the inflation is \textbf{size-dependent}, growing from 2 to 72 fills per episode
+      between the lower half and the top percentile of the size distribution, so it is worst
+      exactly where liquidation research concentrates (Section~\ref{sec:count}).
+\item We show fill-counting \textbf{compresses the size distribution}, by factors of
+      3.4$\times$ at the 99th percentile and 10.9$\times$ at the 99.9th
+      (Section~\ref{sec:compression}).
+\item We characterise the episode-size tail and report that it \textbf{cannot be named}:
+      heavy, not a power law, but with the ranking between lognormal and Weibull reversing
+      across the threshold range (Section~\ref{sec:tail}).
+\item We document what centralised-exchange feeds actually publish, and show the failure mode
+      there is different and worse for counting purposes (Section~\ref{sec:cex}).
+\end{enumerate}
+
+\paragraph{On the negative result.} Section~\ref{sec:tail} sets out to name the tail and fails.
+We report the failure in full because the alternative---quoting whichever family wins at the
+threshold one happened to choose---is how a threshold choice becomes a stylised fact. Three
+tail-index estimates were produced during this work and all three were withdrawn; the record of
+those withdrawals is public and is described in Section~\ref{sec:repro}.
+
+\section{Setting and data}
+\label{sec:data}
+
+\subsection{Hyperliquid liquidations}
+
+Hyperliquid is a perpetual-futures venue with an on-chain order book. Positions are margined
+against a mark price, and a position whose margin ratio falls below maintenance is force-closed
+by the protocol. The resulting trades are recorded in the node's fill stream with a
+\texttt{liquidation} field carrying the liquidated user, the mark price and the liquidation
+method, alongside the fill's own price, size, starting position and realised profit and loss.
+
+Two properties make the archive suitable for this measurement. It is \textbf{complete}: every
+fill is present, with no publication rate limit, because the data is the chain's own record
+rather than a broadcast feed. And it is \textbf{attributed}: each fill names the liquidated
+account, so fills belonging to one forced close can be grouped without inference.
+
+The archive is hosted as requester-pays object storage, partitioned by hour.
+
+\subsection{Sampling design}
+
+A full census of the archive year is approximately 8{,}760 hours and on the order of 300\,GB of
+egress. We instead sample \textbf{four fixed hours per day---02, 08, 14 and 20 UTC---across all
+365 archive days}, which is uniform in time and inside the free egress allowance.
+
+The hours are \emph{fixed rather than chosen}. This matters more than the sample size. An earlier
+version of this measurement used twelve hours, two of which had been selected because they
+contained known liquidation cascades, and therefore over-represented large episodes in a study
+whose subject is the size dependence of a bias. Fixing the hours removes that selection directly
+rather than correcting for it afterwards.
+
+The sample comprises \textbf{351{,}540 episodes} reconstructed from \textbf{2{,}010{,}042 fills},
+across \textbf{380 instruments} and \textbf{151{,}730 distinct accounts}, totalling
+\textbf{\$15.53 billion} of liquidated notional.
+
+\subsection{Instrument segments}
+
+Hyperliquid hosts both venue-listed perpetuals (``majors'') and builder-deployed markets under
+its HIP-3 mechanism, identified by a \texttt{dex:} prefix in the instrument name. HIP-3 markets
+are thinner and separately parameterised, so we report them separately throughout: they carry
+17.7\% of episodes but 9.3\% of notional---more liquidations, smaller.
+
+\section{What counts as one liquidation}
+\label{sec:unit}
+
+The natural unit is the \emph{episode}: one account's forced close of one position. The archive
+does not label episodes, so they must be reconstructed, and the reconstruction rule is a
+researcher degree of freedom. We therefore do not defend a single rule. We count under six, and
+report the spread.
+
+\begin{table}[htbp]
+\centering
+\caption{Count inflation is insensitive to the reconstruction rule. Twelve-hour sample,
+24{,}566 fills.}
+\label{tab:units}
+\begin{tabular}{lrr}
+\toprule
+unit & count & inflation \\
+\midrule
+fills & 24{,}566 & 1.0$\times$ \\
+(account, transaction) & 6{,}412 & 3.8$\times$ \\
+episode, 1\,s gap & 6{,}582 & 3.7$\times$ \\
+episode, 5\,s gap & 6{,}546 & 3.8$\times$ \\
+episode, 60\,s gap & 6{,}533 & 3.8$\times$ \\
+(account, instrument, hour) & 6{,}465 & 3.8$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Grouping by transaction, by a one-second gap, or by the whole hour lands within 2\% of the same
+answer (Table~\ref{tab:units}). Tranching happens \emph{inside} a transaction, not across
+transactions separated in time, so the choice of rule is not doing the work. We adopt
+(account, transaction) for the remainder.
+
+One caution earned in the course of this work: a transaction hash is not a liquidation. A single
+transaction can carry forced closes for several accounts, so grouping by hash alone
+under-counts. The grouping key must include the account.
+
+\section{Count inflation}
+\label{sec:count}
+
+On the one-year stratified sample, counting fills instead of episodes inflates the event count
+by a factor of
+
+\[
+\frac{2{,}010{,}042}{351{,}540} = \mathbf{5.72}.
+\]
+
+The factor is comparable across segments: 5.78$\times$ for majors (289{,}283 episodes from
+1{,}672{,}034 fills) and 5.43$\times$ for HIP-3 (62{,}257 from 338{,}008).
+
+\subsection{The inflation is size-dependent}
+
+A constant multiplier would be a nuisance parameter. This one is not constant.
+
+\begin{table}[htbp]
+\centering
+\caption{Tranching grows with episode size. One-year sample, 351{,}540 episodes.}
+\label{tab:size}
+\begin{tabular}{lrrr}
+\toprule
+size bucket & episodes & median fills & mean fills \\
+\midrule
+p0--50 \ (\$0 -- \$1{,}117) & 175{,}770 & 2 & 2.19 \\
+p50--90 \ (\$1{,}117 -- \$39{,}307) & 140{,}616 & 2 & 3.94 \\
+p90--99 \ (\$39{,}307 -- \$549{,}060) & 31{,}638 & 8 & 19.11 \\
+\textbf{p99--100} \ (\$549{,}060 -- \$194{,}115{,}094) & \textbf{3{,}516} & \textbf{72} & \textbf{132.27} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The rank correlation between log notional and log fills per episode is $+0.545$. A typical
+liquidation is two fills; the largest are a median of 72 and a mean of 132, with a maximum of
+4{,}776.
+
+The consequence is stated most sharply as a share: \textbf{the top 1\% of episodes generate
+23.1\% of all fills}. A dataset of fills is therefore not a dataset of liquidations with a
+scaling factor---it is a dataset in which the largest events have been replicated most.
+
+\subsection{Concentration}
+
+Liquidated notional is concentrated to a degree that compounds the above: the top 1\% of
+episodes carry \textbf{67.3\%} of notional, the top 5\% carry 85.6\%, and the top 10\% carry
+92.6\%. The events that dominate the economics are the events the fill-count distorts most.
+
+\section{Size compression}
+\label{sec:compression}
+
+Fill-counting also changes the measured size distribution, because an episode of a given size
+appears as several smaller records.
+
+\begin{table}[htbp]
+\centering
+\caption{Fill-counting compresses the size distribution. Measured with per-fill notionals on the
+twelve-hour sample; see Section~\ref{sec:limits}.}
+\label{tab:compression}
+\begin{tabular}{lrrr}
+\toprule
+quantile & true episode & observed fill & factor \\
+\midrule
+p50 & \$661 & \$424 & 1.6$\times$ \\
+p90 & \$18{,}259 & \$8{,}842 & 2.1$\times$ \\
+p99 & \$214{,}474 & \$63{,}812 & \textbf{3.4$\times$} \\
+p99.9 & \$1{,}969{,}302 & \$180{,}161 & \textbf{10.9$\times$} \\
+maximum & \$3{,}838{,}207 & \$899{,}224 & 4.3$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The compression grows through the distribution, reaching an order of magnitude at the 99.9th
+percentile (Table~\ref{tab:compression}). In this sample the largest single liquidation of
+\$3.84M appears in the fill record as pieces of at most \$899k.
+
+At one-year scale the largest episode is \textbf{\$194{,}115{,}094}, decomposed into 4{,}776
+fills. Per-fill notionals were not retained at year scale, so Table~\ref{tab:compression} is
+reported from the twelve-hour sample; this is the principal data limitation of the paper and is
+straightforward to remove.
+
+\section{The episode-size distribution}
+\label{sec:tail}
+
+\subsection{What holds}
+
+The tail is unambiguously heavy. Against a Pareto reference fitted on the same exceedances, an
+exponential specification is rejected decisively (Vuong $R = +11.96$, $p < 10^{-4}$, in favour of
+Pareto). But the Pareto fit is itself rejected: a Kolmogorov--Smirnov test with
+parametric-bootstrap $p$-values rejects it at every threshold tried, including at the threshold
+selected by the Clauset--Shalizi--Newman procedure ($p = 0.010$).
+
+Both two-parameter alternatives beat it. Fitting conditional on $x \ge x_{\min}$ and comparing by
+Vuong's non-nested likelihood-ratio test, lognormal and Weibull each dominate Pareto at
+\textbf{all 14 estimable thresholds}, with $x_{\min}$ ranging from \$14{,}912 to \$8{,}845{,}704
+---nearly three orders of magnitude. An exponential never wins at any threshold.
+
+\subsection{What does not: the tail cannot be named}
+
+Selecting $x_{\min}$ by minimising the KS distance of the power-law fit gives \$560{,}627
+($k = 3{,}104$, $\hat\alpha = 0.960$). A nonparametric bootstrap over 500 resamples puts a 95\%
+interval on that selection of $[\$193{,}877,\ \$986{,}963]$---\textbf{a factor of five}. The
+threshold is barely identified by the data, which is why we report the ranking across a grid of
+thresholds rather than at a single selected one.
+
+Across that grid the ranking between the two survivors \emph{reverses}:
+
+\begin{table}[htbp]
+\centering
+\caption{Which alternative wins depends on where the tail is cut. Vuong $R$ for lognormal
+against Weibull; $R<0$ favours Weibull.}
+\label{tab:reverse}
+\begin{tabular}{lrl}
+\toprule
+$x_{\min}$ range & Vuong $R$ & verdict \\
+\midrule
+\$199k -- \$1.33M & $-2.74$ to $-3.67$ \ ($p<0.01$) & Weibull \\
+\$1.85M -- \$8.85M & $-1.00$ to $-1.86$ \ ($p>0.05$) & indistinguishable \\
+\$14.9k -- \$28.3k & $+13.42$ to $+15.92$ \ ($p \ll 0.001$) & lognormal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Weibull wins in the far tail, lognormal wins decisively deeper in the body, and the crossover
+falls inside a band where neither is identified. \textbf{Any name given to this tail would
+report the analyst's threshold rather than the distribution.}
+
+We take this to be the substantive finding of the section rather than a gap in it.
+
+\subsection{A band where nothing fits}
+
+Over $x_{\min} \in [\$49\mathrm{k},\ \$163\mathrm{k}]$, both alternatives converge on a
+parameter bound---lognormal with $\mu \to -\infty$, Weibull with $\lambda \to 0$. Both limits are
+the power-law limit of their own family. In that band the extra parameter buys nothing and the
+models are unidentified, while the power law they are collapsing onto is itself rejected by the
+KS test.
+
+So over that band \emph{no candidate here describes the data}. A model ranking cannot report
+this, because a ranking always returns a winner. We flag it because a reader who takes the
+winning family from a comparison table has no way to see it.
+
+\subsection{Withdrawn estimates}
+
+Three tail-index estimates were produced in the course of this work---$\alpha \approx 1.15$,
+then $\alpha \in [0.9, 1.2]$, then a Hill-plot plateau at $\alpha \approx 0.93$---and all three
+are withdrawn. The Hill estimator estimates a Pareto exponent, and the tail is not Pareto; drift
+of the Hill index with tail depth, initially read as a measurement defect, is the known
+signature of a lognormal-like tail. Consequences drawn from those numbers, including ``infinite
+variance'' and ``the sample mean is not a stable statistic,'' are withdrawn with them: both are
+properties of a fitted Pareto with $\alpha < 2$, and that fit is rejected.
+
+The count and compression results in Sections~\ref{sec:count}--\ref{sec:compression} are
+unaffected. They compare two curves computed identically on the same data and assume no
+parametric form.
+
+\section{Why this does not transfer to centralised-exchange feeds}
+\label{sec:cex}
+
+The bias measured here is specific to a \emph{fill}-level record. Centralised venues publish
+liquidation \emph{orders}, so there is no tranching to inflate. Their feeds carry a different
+defect.
+
+\begin{table}[htbp]
+\centering
+\caption{What the major centralised feeds publish, per venue documentation.}
+\label{tab:cex}
+\begin{tabular}{llll}
+\toprule
+venue & stream & unit & limitation \\
+\midrule
+Binance & \texttt{forceOrder} & order & only the \emph{largest} order per 1000\,ms per symbol \\
+OKX & \texttt{liquidation-orders} & order & at most one update per second per contract \\
+Bybit (legacy) & \texttt{liquidation} & order & at most 1/s per symbol; deprecated \\
+Bybit (current) & \texttt{allLiquidation} & order & complete, pushed every 500\,ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Binance does not publish a sample of liquidations. It publishes a sequence of \emph{per-second
+maxima}, which is a different statistical object with three consequences:
+
+\begin{itemize}
+\item \textbf{event counts are unrecoverable}---nothing in the feed states how many liquidations
+      a given snapshot suppressed;
+\item \textbf{the body of the distribution is destroyed}---small liquidations never appear at
+      all;
+\item \textbf{the tail index may survive}---block maxima are a valid extreme-value approach, and
+      a block maximum inherits the tail index of its parent distribution.
+\end{itemize}
+
+That last point matters for interpreting existing results: a study of Binance liquidation data
+can produce a defensible tail estimate and a worthless event count from the same feed. The
+distinction is between statistics that depend on counting or on the body, which are compromised,
+and tail-shape statistics, which may not be.
+
+We note this from venue documentation, not from a re-analysis of published work, and make no
+claim about any specific paper.
+
+\section{Implications}
+
+\paragraph{For measurement.} Any statistic over crypto liquidation data should state its unit.
+On a fill-level record the correction is a factor of 5.72 on counts, but because the factor is
+size-dependent it cannot be applied as a scalar: the correct procedure is to reconstruct
+episodes, which requires an attributed record.
+
+\paragraph{For cascade studies.} Cascade detection typically thresholds on event counts or
+event rates within a window. Both are inflated most during the large episodes that constitute
+cascades, so a fill-based cascade measure partly detects its own tranching.
+
+\paragraph{For risk models.} A size distribution fitted on fills is compressed by 3.4$\times$ at
+the 99th percentile and 10.9$\times$ at the 99.9th. A model calibrated on that distribution
+understates the size of the largest forced closes it is meant to survive.
+
+\paragraph{For the tail literature.} We would encourage reporting the model ranking across a
+range of thresholds rather than at a selected one, and reporting where no candidate fits. In this
+dataset a single-threshold analysis would have supported naming the tail; the grid shows the
+name would have been the threshold's.
+
+\section{Limitations}
+\label{sec:limits}
+
+\begin{itemize}
+\item \textbf{Compression is measured on twelve hours}, not on the year, because per-fill
+      notionals were not retained at year scale. The count and tranching results are year-scale.
+      Re-collection is straightforward.
+\item \textbf{The sample is stratified, not exhaustive}: four fixed hours per day. Uniform in
+      time, but a cascade falling entirely outside those hours is invisible.
+\item \textbf{One venue, one year.} Whether the inflation factor is stable over time, or trends
+      with venue growth, is untested.
+\item \textbf{The goodness-of-fit bootstrap fixes $x_{\min}$} inside each synthetic sample rather
+      than re-selecting it, which makes the reported $p$ conservative toward rejection.
+\item \textbf{Four candidate families.} A fifth---generalised Pareto, log-gamma---might describe
+      the band where none of ours does. None was tried.
+\item \textbf{The literature review is incomplete.} We position this work against venue
+      documentation and against the statistical methodology it uses, but have not surveyed the
+      empirical crypto-liquidation literature systematically. Claims of novelty should be read
+      as claims about what we measured, not about what has been measured before.
+\end{itemize}
+
+\section{Reproducibility}
+\label{sec:repro}
+
+All code, reduced datasets and experimental records are public at
+\url{https://github.com/QuasareumGroup/hyperliquid-microstructure}.
+
+Each experiment is pre-registered: hypothesis, predictions and falsification criteria are
+committed \emph{before} the run, and the commit ordering is checkable in the repository history.
+Corrections and withdrawals remain in the file that made the original claim rather than being
+edited away; \texttt{experiments/FINDINGS.md} carries the current state of every claim and the
+reason for each of the fourteen that have been withdrawn or requalified.
+
+Published datasets carry a derived account identifier---a truncated SHA-256 of the address---in
+place of the address itself. Addresses are public on-chain, so this is not confidentiality; it
+avoids publishing a compiled map of 151{,}730 accounts to their losses. Every result reproduces
+bit for bit on the derived identifiers. The hash is unsalted and deterministic, so a known
+address can still be tested for membership: these datasets are pseudonymous, not anonymised.
+
+\begin{thebibliography}{9}
+
+\bibitem{clauset2009}
+A.~Clauset, C.~R. Shalizi, and M.~E.~J. Newman.
+\newblock Power-law distributions in empirical data.
+\newblock \emph{SIAM Review}, 51(4):661--703, 2009.
+
+\bibitem{vuong1989}
+Q.~H. Vuong.
+\newblock Likelihood ratio tests for model selection and non-nested hypotheses.
+\newblock \emph{Econometrica}, 57(2):307--333, 1989.
+
+\bibitem{hill1975}
+B.~M. Hill.
+\newblock A simple general approach to inference about the tail of a distribution.
+\newblock \emph{Annals of Statistics}, 3(5):1163--1174, 1975.
+
+\bibitem{hyperliquid}
+Hyperliquid.
+\newblock Documentation: node data, liquidations, and the funding mechanism.
+\newblock \url{https://hyperliquid.gitbook.io/hyperliquid-docs}.
+
+\bibitem{binance}
+Binance.
+\newblock USD-M futures WebSocket streams: liquidation order streams.
+\newblock \url{https://developers.binance.com/docs/derivatives}.
+
+\end{thebibliography}
+
+\end{document}

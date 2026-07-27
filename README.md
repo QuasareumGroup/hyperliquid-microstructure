@@ -100,6 +100,13 @@ are.
 `hlm/{problems,solvers,montecarlo,bench,strategy}/` are **empty placeholders** for the direction
 below. They contain nothing yet, and the README says so rather than implying otherwise.
 
+## Preprint
+
+[`paper/`](paper/) — *Counting fills misrepresents liquidations: evidence from a complete
+on-chain derivatives ledger*. Draft, not submitted; [`paper/README.md`](paper/README.md) states
+what remains before it could be. Every figure traces to a versioned dataset and a pre-registered
+experiment in this repository.
+
 ## Setup
 
 ```bash
