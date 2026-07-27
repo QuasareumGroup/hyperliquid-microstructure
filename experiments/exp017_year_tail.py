@@ -88,23 +88,44 @@ def liquidation_fills(path: Path) -> list[dict]:
     return out
 
 
-def to_episodes(fills: list[dict]) -> list[dict]:
-    """Collapse fills into (user, coin) episodes separated by EPISODE_GAP_MS."""
+def to_episodes(fills: list[dict], keep_fills: bool = False) -> tuple[list[dict], list[dict]]:
+    """Collapse fills into (user, coin) episodes separated by EPISODE_GAP_MS.
+
+    Returns `(episodes, fill_rows)`. `fill_rows` is empty unless `keep_fills`, and
+    carries `ep_ts` — the episode's first-fill timestamp — so it joins to the
+    episode file on `(coin, user, ts)`. Measuring how fill-counting compresses the
+    size distribution needs the individual notionals, and the first year-scale run
+    discarded them; the twelve-hour sample was the only per-fill evidence.
+    """
     by_key: dict[tuple[str, str], list[dict]] = collections.defaultdict(list)
     for f in fills:
         by_key[(f["user"], f["coin"])].append(f)
-    rows = []
+    rows: list[dict] = []
+    frows: list[dict] = []
+
+    def close(user: str, coin: str, run: list[dict]) -> None:
+        rows.append(_row(user, coin, run))
+        if keep_fills:
+            ep_ts = run[0]["ts"]
+            uid = account_id(user)
+            for f in run:
+                frows.append({
+                    "ts": f["ts"], "ep_ts": ep_ts, "coin": coin,
+                    "hip3": int(":" in coin), "user": uid,
+                    "notional": round(f["ntl"], 4),
+                })
+
     for (user, coin), group in by_key.items():
         group.sort(key=lambda f: f["ts"])
         run = [group[0]]
         for f in group[1:]:
             if f["ts"] - run[-1]["ts"] > EPISODE_GAP_MS:
-                rows.append(_row(user, coin, run))
+                close(user, coin, run)
                 run = [f]
             else:
                 run.append(f)
-        rows.append(_row(user, coin, run))
-    return rows
+        close(user, coin, run)
+    return rows, frows
 
 
 def _row(user: str, coin: str, run: list[dict]) -> dict:
@@ -121,12 +142,12 @@ def _row(user: str, coin: str, run: list[dict]) -> dict:
     }
 
 
-def process_hour(date8: str, hour: int) -> list[dict]:
+def process_hour(date8: str, hour: int, keep_fills: bool = False) -> tuple[list[dict], list[dict]]:
     with tempfile.TemporaryDirectory() as tmp:
         p = Path(tmp) / "h.lz4"
         if not fetch(date8, hour, p):
-            return []
-        return to_episodes(liquidation_fills(p))
+            return [], []
+        return to_episodes(liquidation_fills(p), keep_fills)
 
 
 def main() -> None:
@@ -134,6 +155,9 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=6)
     default_out = REPO / "experiments" / "data" / "exp017_episodes.csv"
     ap.add_argument("--out", type=Path, default=default_out)
+    ap.add_argument("--fills-out", type=Path, default=None,
+                    help="also write one row per liquidation fill, joinable to --out "
+                         "on (coin, user, ts=ep_ts). Large: ~2M rows over the year.")
     args = ap.parse_args()
 
     days = []
@@ -145,24 +169,43 @@ def main() -> None:
     print(f"{len(days)} days x {len(HOURS)} hours = {len(tasks):,} hours to reduce")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    written = 0
-    with args.out.open("w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=["ts", "coin", "hip3", "user", "fills", "notional"])
-        w.writeheader()
-        with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            futs = {pool.submit(process_hour, d8, h): (d8, h) for d8, h in tasks}
-            for i, f in enumerate(as_completed(futs), 1):
-                try:
-                    rows = f.result()
-                except Exception:
-                    rows = []
-                if rows:
-                    w.writerows(rows)
-                    written += len(rows)
-                if i % 100 == 0:
-                    fh.flush()
-                    print(f"  {i}/{len(tasks)} hours, {written:,} episodes")
+    keep = args.fills_out is not None
+    written = nfills = 0
+    fh2 = w2 = None
+    try:
+        if keep:
+            args.fills_out.parent.mkdir(parents=True, exist_ok=True)
+            fh2 = args.fills_out.open("w", newline="")
+            w2 = csv.DictWriter(fh2, fieldnames=["ts", "ep_ts", "coin", "hip3", "user", "notional"])
+            w2.writeheader()
+        with args.out.open("w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=["ts", "coin", "hip3", "user", "fills", "notional"])
+            w.writeheader()
+            with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                futs = {pool.submit(process_hour, d8, h, keep): (d8, h) for d8, h in tasks}
+                for i, f in enumerate(as_completed(futs), 1):
+                    try:
+                        rows, frows = f.result()
+                    except Exception:
+                        rows, frows = [], []
+                    if rows:
+                        w.writerows(rows)
+                        written += len(rows)
+                    if frows and w2 is not None:
+                        w2.writerows(frows)
+                        nfills += len(frows)
+                    if i % 100 == 0:
+                        fh.flush()
+                        if fh2 is not None:
+                            fh2.flush()
+                        print(f"  {i}/{len(tasks)} hours, {written:,} episodes"
+                              + (f", {nfills:,} fills" if keep else ""))
+    finally:
+        if fh2 is not None:
+            fh2.close()
     print(f"wrote {written:,} episodes -> {args.out}")
+    if keep:
+        print(f"wrote {nfills:,} fills -> {args.fills_out}")
 
 
 if __name__ == "__main__":
