@@ -40,8 +40,13 @@ It also compresses the size distribution — 3.4× at p99, 10.9× at p99.9 — s
 liquidation ($3.84M) appears as fills of at most $899k.
 
 The tail is genuinely heavy (exponential is rejected decisively) but **not a power law**:
-lognormal and Weibull both beat Pareto and tie with each other. Earlier versions of this work
-quoted a tail index; that claim is withdrawn, and FINDINGS.md explains why.
+lognormal and Weibull both beat Pareto at every estimable threshold, across nearly three orders
+of magnitude of cut-off. Earlier versions of this work quoted a tail index; that claim is
+withdrawn, and FINDINGS.md explains why.
+
+**The tail cannot be named beyond that.** Lognormal and Weibull separate — but in opposite
+directions depending on where the tail is cut, so whichever wins reports the threshold rather
+than the distribution. That is a result, not a gap waiting to be filled.
 
 ![Hill plot](reports/exp018_hill_plot.svg)
 
