@@ -76,22 +76,30 @@ where it should be: chains start at a median **$72,326** against **$1,902** for 
 episodes, against a threshold of $100k.
 
 **Size distribution compression**, measured quantile by quantile against true episode sizes
-(not modelled). **12-hour sample** — per-fill notionals were not retained at year scale:
+(not modelled). **Year scale since EXP-024** — 2,010,314 fills, bootstrap 95% CI:
 
-| quantile | episode | fill | factor |
-|---|---|---|---|
-| p50 | $661 | $424 | 1.6× |
-| p90 | $18,259 | $8,842 | 2.1× |
-| p99 | $214,474 | $63,812 | **3.4×** |
-| p99.9 | $1,969,302 | $180,161 | **10.9×** |
+| quantile | episode | fill | factor | 95% CI | *(12 h)* |
+|---|---|---|---|---|---|
+| p50 | $1,117 | $558 | **2.00** | [1.97, 2.03] | *1.6* |
+| p90 | $39,288 | $12,046 | **3.26** | [3.21, 3.31] | *2.1* |
+| p99 | $548,922 | $119,919 | **4.58** | [4.41, 4.76] | *3.4* |
+| p99.9 | $5,834,505 | $582,486 | **10.02** | [9.24, 11.21] | *10.9* |
 
-Largest real episode in that 12-hour sample **$3.84M**; largest single fill **$899k**.
-Over the full year the largest episode is **$194,115,094**, spread across **4,776 fills**.
+Compression is **stronger than the 12-hour sample showed** at p50, p90 and p99, with intervals
+excluding the old value at each — the same direction the count inflation moved (3.8× → 5.72×)
+when the cascade-selected hours were removed. At p99.9 the two are indistinguishable.
 
-**Majors and HIP-3 behave identically** on every measure tested (EXP-017) — this is a property
-of the liquidation mechanism, not of the market.
+Largest episode **$194,115,094**, spread across **4,776 fills**; largest single fill
+**$10,990,000**.
 
-→ EXP-016, EXP-017
+**Majors and HIP-3 behave identically on tail *index* (EXP-017) but not on compression
+(EXP-024).** Majors compress more in the body (ratio 1.30 at p90, CI [1.24, 1.36]), HIP-3 more in
+the tail (0.82 at p99, CI [0.74, 0.90]), crossing over between them. No contradiction: the tail
+index is a property of the liquidation mechanism, while compression is produced by slicing a
+position against a book, and HIP-3 books are thinner. The mechanism claim stands; "identical on
+every measure" does not.
+
+→ EXP-016, EXP-017, EXP-024
 
 ### 3. The liquidation size tail is heavy, and it is not a power law
 
@@ -130,6 +138,7 @@ thresholds and loses decisively at the two lowest. A local result, recorded as s
 | "Hyperliquid's lag widens under stress" (EXP-008) | Artefact of the sampling grid; the partial correlation controlling for grid step is −0.001 (EXP-009). |
 | "the deadband is a novel finding" (FINDING-001) | Published algebra; the control-system framing was also already in the literature. |
 | "the gap filter biased the sample toward active hours" (EXP-021 §1) | A mechanism argued from how `missed_ms` is computed, never measured. The flag is uncorrelated with activity on both volatility and event count (EXP-021). It was noise, not bias. |
+| "majors and HIP-3 behave identically on every measure tested" (EXP-017) | True of the tail index, false of size compression: the segments differ at p50, p90 and p99 and cross over between p90 and p99 (EXP-024). The mechanism reading survives; the universal quantifier does not. |
 
 **The episode-versus-fill comparison is unaffected by any of this.** It contrasts two curves
 computed identically on the same data and assumes no parametric form — which is why it is the

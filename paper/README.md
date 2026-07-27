@@ -1,8 +1,8 @@
 # Preprint — counting fills misrepresents liquidations
 
-**Status: draft, one blocker left.** The literature review is done (16 references, Section 2).
-What remains is one data item, listed below. Everything else is measured, cross-checked against
-the versioned data, and reproducible from this repository.
+**Status: draft, no known blockers.** The literature review is done (16 references, Section 2)
+and the compression table is now year-scale like the rest of the paper (EXP-024). Every figure is
+measured, cross-checked against the versioned data, and reproducible from this repository.
 
 ## Build
 
@@ -23,7 +23,7 @@ experiment in `../experiments/`:
 | 5.72× count inflation, 351,540 episodes from 2,010,042 fills | `exp017_episodes.csv`, [EXP-017](../experiments/EXP-017-year-tail.md) |
 | robust across six unit definitions | [EXP-016](../experiments/EXP-016-liquidation-overcounting.md) |
 | tranching 2 → 72 fills with size; top 1% of episodes → 23.1% of fills | `exp017_episodes.csv` |
-| size compression 3.4× at p99, 10.9× at p99.9 | `exp016_fills.csv`, [EXP-016](../experiments/EXP-016-liquidation-overcounting.md) |
+| size compression 4.58× at p99, 10.0× at p99.9, majors vs HIP-3 | `exp024_fill_notionals.csv.gz`, [EXP-024](../experiments/EXP-024-year-fill-notionals.md) |
 | tail heavy, not a power law, and not nameable | [EXP-020](../experiments/EXP-020-alternatives.md), [EXP-022](../experiments/EXP-022-xmin-selection.md) |
 | what CEX feeds publish | venue documentation, [EXP-016](../experiments/EXP-016-liquidation-overcounting.md) |
 
@@ -54,20 +54,15 @@ transactions, which our unit would split. Tested on the year sample: 1.4% of epi
 affected and the factor moves 5.72× → 5.76×, so the reported number is mildly conservative. That
 check is now Section 4.2, and it exists because the docs were read properly.
 
-## Before submission
+## Remaining, none blocking
 
-**Per-fill notionals at year scale.** The compression table (Section 5) rests on the twelve-hour
-sample because per-fill notionals were not retained during the year-scale collection. The count
-and tranching results are year-scale. Re-collecting is a rerun of
-`../experiments/exp017_year_tail.py` with the per-fill column kept — roughly 50 GB of
-requester-pays egress, inside the free monthly allowance.
-
-Optional, and worth considering: a fifth candidate family (generalised Pareto, log-gamma) for
-the threshold band where none of the four fits, per EXP-022.
-
-Two cited works were characterised from abstracts rather than full text — Lim (SSRN, registration
-wall) and Zhivkov et al. (publisher returned 403). Both are flagged in the paper's Limitations.
-Nothing in the argument depends on their contents.
+- A fifth candidate family (generalised Pareto, log-gamma) for the threshold band where none of
+  the four fits, per EXP-022. Would strengthen Section 6; its absence is stated as a limitation.
+- Two cited works were characterised from abstracts rather than full text — Lim (SSRN,
+  registration wall) and Zhivkov et al. (publisher returned 403). Flagged in Limitations; nothing
+  in the argument depends on their contents.
+- The full per-fill file is 119 MB and is not committed. What is committed reproduces every
+  quantile in the paper exactly — see the table above.
 
 ## Intended venue
 

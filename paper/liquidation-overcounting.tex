@@ -83,8 +83,8 @@ departs from episode-counting, and what the episode-size distribution actually l
       between the lower half and the top percentile of the size distribution, so it is worst
       exactly where liquidation research concentrates (Section~\ref{sec:count}).
 \item We show fill-counting \textbf{compresses the size distribution}, by factors of
-      3.4$\times$ at the 99th percentile and 10.9$\times$ at the 99.9th
-      (Section~\ref{sec:compression}).
+      4.58$\times$ at the 99th percentile and 10.0$\times$ at the 99.9th, and that the two
+      instrument segments compress differently (Section~\ref{sec:compression}).
 \item We characterise the episode-size tail and report that it \textbf{cannot be named}:
       heavy, not a power law, but with the ranking between lognormal and Weibull reversing
       across the threshold range (Section~\ref{sec:tail}).
@@ -207,6 +207,17 @@ rather than correcting for it afterwards.
 The sample comprises \textbf{351{,}540 episodes} reconstructed from \textbf{2{,}010{,}042 fills},
 across \textbf{380 instruments} and \textbf{151{,}730 distinct accounts}, totalling
 \textbf{\$15.53 billion} of liquidated notional.
+
+\paragraph{Two passes.} The counting results below come from that collection, which reduced to
+episodes. Measuring compression needs the individual fill notionals, which it did not retain, so
+the same hours were collected a second time keeping them. The second pass returned 351{,}648
+episodes and 2{,}010{,}314 fills---\textbf{0.03\% more}, most likely late-arriving blocks written
+after the first pass read those hours---and reproduces every count statistic reported in
+Sections~\ref{sec:count} to three decimal places: the inflation factor, the median and mean fills
+per episode in the top percentile, the share of fills and of notional carried by that percentile,
+the rank correlation between size and fills, and the largest episode and its fill count. We
+therefore quote the first collection for counts and the second for compression, and note the
+difference rather than reconciling it away.
 
 \subsection{Instrument segments}
 
@@ -344,30 +355,45 @@ appears as several smaller records.
 
 \begin{table}[htbp]
 \centering
-\caption{Fill-counting compresses the size distribution. Measured with per-fill notionals on the
-twelve-hour sample; see Section~\ref{sec:limits}.}
+\caption{Fill-counting compresses the size distribution. All 2{,}010{,}314 fills of the one-year
+sample; 95\% intervals from 20{,}000 bootstrap draws.}
 \label{tab:compression}
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrr}
 \toprule
-quantile & true episode & observed fill & factor \\
+quantile & true episode & observed fill & factor & 95\% CI \\
 \midrule
-p50 & \$661 & \$424 & 1.6$\times$ \\
-p90 & \$18{,}259 & \$8{,}842 & 2.1$\times$ \\
-p99 & \$214{,}474 & \$63{,}812 & \textbf{3.4$\times$} \\
-p99.9 & \$1{,}969{,}302 & \$180{,}161 & \textbf{10.9$\times$} \\
-maximum & \$3{,}838{,}207 & \$899{,}224 & 4.3$\times$ \\
+p50 & \$1{,}117 & \$558 & 2.00$\times$ & [1.97, 2.03] \\
+p90 & \$39{,}288 & \$12{,}046 & 3.26$\times$ & [3.21, 3.31] \\
+p99 & \$548{,}922 & \$119{,}919 & \textbf{4.58$\times$} & [4.41, 4.76] \\
+p99.9 & \$5{,}834{,}505 & \$582{,}486 & \textbf{10.02$\times$} & [9.24, 11.21] \\
+maximum & \$194{,}115{,}094 & \$10{,}990{,}000 & 17.7$\times$ & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The compression grows through the distribution, reaching an order of magnitude at the 99.9th
-percentile (Table~\ref{tab:compression}). In this sample the largest single liquidation of
-\$3.84M appears in the fill record as pieces of at most \$899k.
+Compression grows monotonically through the distribution, reaching an order of magnitude at the
+99.9th percentile (Table~\ref{tab:compression}). The largest episode in the sample,
+\$194{,}115{,}094 across 4{,}776 fills, appears in the fill record as pieces of at most
+\$10.99M.
 
-At one-year scale the largest episode is \textbf{\$194{,}115{,}094}, decomposed into 4{,}776
-fills. Per-fill notionals were not retained at year scale, so Table~\ref{tab:compression} is
-reported from the twelve-hour sample; this is the principal data limitation of the paper and is
-straightforward to remove.
+\paragraph{The cascade-selected sample understated this.} An earlier version of this measurement
+used the twelve-hour sample described in Section~\ref{sec:unit}, two of whose hours had been
+chosen for containing cascades. It reported 1.6$\times$, 2.1$\times$, 3.4$\times$ and
+10.9$\times$ at the same four quantiles. The year-scale figures are larger at p50, p90 and p99,
+with the bootstrap interval excluding the old value at each; at p99.9 the two are
+indistinguishable. This is the same direction the count inflation moved---3.8$\times$ on the
+selected hours against 5.72$\times$ on the year---and for the same reason: compression is
+produced by tranching.
+
+\paragraph{The segments differ, and they cross over.} Majors and HIP-3 do not compress alike.
+Taking the ratio of their factors, majors compress more in the body---1.30 at p90, 95\% CI
+[1.24, 1.36]---and HIP-3 more in the tail---0.82 at p99, CI [0.74, 0.90]---with the crossover
+between the two. Three of four intervals exclude equality.
+
+This is consistent with, rather than contrary to, the finding that the two segments share a tail
+\emph{index}. An index is a property of the liquidation mechanism; compression is produced by
+slicing a position against an order book, and HIP-3 books are thinner. A thin book tranches a
+large position into more and smaller pieces, which is the direction observed.
 
 \section{The episode-size distribution}
 \label{sec:tail}
@@ -511,9 +537,12 @@ name would have been the threshold's.
 \label{sec:limits}
 
 \begin{itemize}
-\item \textbf{Compression is measured on twelve hours}, not on the year, because per-fill
-      notionals were not retained at year scale. The count and tranching results are year-scale.
-      Re-collection is straightforward.
+\item \textbf{The p99.9 and maximum rows are thin.} One in a thousand of 351{,}648 episodes
+      is 352 observations, and the maximum is a single episode against a single fill, quoted
+      without an uncertainty statement.
+\item \textbf{Two collections of the same hours differed by 0.03\%} (108 episodes, 272 fills),
+      most likely late-arriving blocks written after the first pass. It changes no figure here,
+      but work needing exact reproducibility should pin an archive snapshot.
 \item \textbf{The sample is stratified, not exhaustive}: four fixed hours per day. Uniform in
       time, but a cascade falling entirely outside those hours is invisible.
 \item \textbf{One venue, one year.} Whether the inflation factor is stable over time, or trends
