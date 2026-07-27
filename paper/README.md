@@ -64,6 +64,14 @@ check is now Section 4.2, and it exists because the docs were read properly.
 - The full per-fill file is 119 MB and is not committed. What is committed reproduces every
   quantile in the paper exactly — see the table above.
 
+## Submission details
+
+| | |
+|---|---|
+| author | Thomas Erhel — Quasareum — contact@quasareum.com |
+| ORCID | [0009-0007-1772-9892](https://orcid.org/0009-0007-1772-9892) |
+| licence | not yet chosen — arXiv asks at submission (CC BY 4.0 is the usual choice for a preprint meant to be cited) |
+
 ## Intended venue
 
 arXiv `q-fin.ST` (statistical finance), cross-list `q-fin.TR`. The contribution is a
