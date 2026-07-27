@@ -9,10 +9,11 @@ named** from this data. That is the answer to FINDINGS open item 2, not a deferr
 **Scripts:** `experiments/exp022_xmin.py`
 **Output:** `experiments/data/exp022_grid.csv` (18 thresholds)
 
-> **Current position: [FINDINGS.md](FINDINGS.md).** This file keeps its original
-> pre-registration wording plus results; the state of claims lives there.
 **Data:** `experiments/data/exp017_episodes.csv`, majors (n = 289,283) — already in the
 repo, no collection needed.
+
+> **Current position: [FINDINGS.md](FINDINGS.md).** This file keeps its original
+> pre-registration wording plus results; the state of claims lives there.
 
 > Written *before* running anything. Predictions below are commitments, not
 > descriptions. If the results contradict them, the results are what gets
