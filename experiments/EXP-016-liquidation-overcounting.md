@@ -1,5 +1,22 @@
 # EXP-016 — What is "one liquidation"? Fill-counting inflates the count and compresses sizes
 
+> ## ⚠ Correction — 2026-07-27 : le double comptage des fills
+>
+> **Every figure below that counts fills was overstated by exactly 2.00.** The
+> `node_fills` archive records a liquidation trade **twice** — once for the liquidated
+> account, once for the counterparty — and *both* records carry
+> `liquidation.liquidatedUser`. The account whose fill it is sits in `event[0]`, which
+> neither collector read. Verified on 38 hours spread across the year: ratio 2.0000
+> everywhere, minimum and maximum.
+>
+> Corrected: fills and notionals halve, **episode counts do not change** (both sides share
+> the same key), so the inflation factor halves. Ratios of fills to fills, and every
+> scale-invariant quantity, are unaffected.
+>
+> The numbers in the body of this file are the original, wrong ones and are kept as the
+> record. **[FINDINGS.md](FINDINGS.md) carries the corrected state.**
+
+
 **Status:** run, then rerun with per-fill notionals. The inflation factor is **robust to how a
 liquidation is defined**, is
 **strongly size-dependent** (2× typical, 67× for the top 1%), and fill-counting **compresses the

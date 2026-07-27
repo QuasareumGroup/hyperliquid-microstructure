@@ -51,60 +51,61 @@ range 38% wider at the top (max `range_bps` 135.9 → 187.8).
 
 All of the following are **counting facts**. No distributional assumption enters.
 
-Everything below is year-scale — the 1,460-hour stratified sample: 351,540 episodes,
-2,010,042 fills, 380 instruments, 151,730 accounts, $15.53bn notional. Per-fill notionals come
-from a second pass over the same hours (EXP-024), which reproduces every count statistic here to
-three decimal places. The two rows still marked *(12 h)* are checks that were only ever run on
-the smaller sample; neither is load-bearing.
+Everything below is year-scale — the 1,460-hour stratified sample: **351,648 episodes,
+1,005,157 fills**, 380 instruments, 151,775 accounts, **$7.77bn** notional. Collected with the
+`event[0] == liquidatedUser` filter; see the correction notice in EXP-016/017/024 for why the
+earlier figures were exactly twice these.
 
 | | |
 |---|---|
-| fills per liquidation | median 2, mean **5.72×** (day-resampled 95% CI [5.47, 5.99]) over a fixed-hour archive year |
-| robustness of that factor | 3.7–3.8× across six different definitions of "one liquidation" *(12 h)*; the choice of unit is not doing the work |
-| tranching vs size | median 2 fills below the median episode, **72** in the top 1% (mean 132, max 4,776) |
+| fills per liquidation | **median 1**, mean **2.86×** (day-resampled 95% CI [2.72, 3.00]) |
+| robustness of that factor | 1.9× across six different definitions of "one liquidation" *(12 h)*; every definition returns the same episode counts, so the unit is not doing the work |
+| tranching vs size | **median 1 fill below the 90th percentile**, 4 in p90–99, **36** in the top 1% (mean 66, max 2,388) |
 | share of fills from the top 1% of episodes | **23.1%** |
 | concentration | top 1% of **episodes** carry **67.3%** of liquidated notional; top 5% carry 85.6%, top 10% carry 92.6% |
-| | *(12 h, by fill: top 1% of fills carry 30.7%, top 10% carry 76.6%)* |
 | corr(ln notional, ln fills) | **+0.545** (Pearson of logs; Spearman rank +0.468) |
 
-**The protocol's own chunking does not undo this.** Hyperliquid sends only 20% of a position
-above 100,000 USDC as the first market order, then waits **30 s** before sending more. One forced
-close can therefore span several transactions, which the `(account, transaction)` unit would
-split. Measured: of 98,983 consecutive same-account-same-instrument episode pairs, none are
-under 5 s apart (empty **by construction** of the 5-second episode unit), 1.8% fall in 5–35 s, and **94.7% are more than 10 minutes apart** — unrelated
-events, not chunks. Merging every chain within 90 s touches 1.4% of episodes and moves the factor
-from 5.72× to **5.76×**, so the reported figure is mildly conservative. Chains are strongly size-selected —
-median **$72,326** against **$1,083** for episodes outside any chain (factor 67), against a
-$100k threshold — but that **does not identify the cooldown**: their gap distribution decays
-monotonically from the 5 s floor (median 17.9 s, only 6% in [25, 40] s), with no 30 s mode even
-on chains above $1M. Size selection is consistent with the rule; the timing is not evidence for
-it. Identifying tranches needs position accounting, not elapsed time — see EXP-025. *(An earlier $1,902 figure used an undeclared
-subset — accounts with a second episode in the year; caught in review.)*
+**The bias is the size, not a multiplier on top of it.** A liquidation below the 90th percentile
+is a *single fill* and is counted exactly right. All of the inflation comes from the largest
+decile:
 
-**Size distribution compression**, measured quantile by quantile against true episode sizes
-(not modelled). **Year scale since EXP-024** — 2,010,314 fills, bootstrap 95% CI:
+| size bucket | episodes | median fills | mean fills |
+|---|---|---|---|
+| p0–50 ($0 – $558) | 175,824 | **1** | 1.10 |
+| p50–90 ($558 – $19,644) | 140,659 | **1** | 1.97 |
+| p90–99 ($19,644 – $274,461) | 31,648 | 4 | 9.55 |
+| **p99–100** ($274,461 – $97,057,547) | 3,517 | **36** | 66.13 |
 
-| quantile | episode | fill | factor | 95% CI | *(12 h)* |
-|---|---|---|---|---|---|
-| p50 | $1,117 | $558 | **2.00** | [1.97, 2.03] | *1.6* |
-| p90 | $39,288 | $12,046 | **3.26** | [3.21, 3.31] | *2.1* |
-| p99 | $548,922 | $119,919 | **4.58** | [4.41, 4.76] | *3.4* |
-| p99.9 | $5,834,505 | $582,486 | **10.02** | [9.24, 11.21] | *10.9* |
+**Size distribution compression**, quantile by quantile against true episode sizes (not
+modelled), bootstrap 95% CI:
 
-Compression is **stronger than the 12-hour sample showed** at p50, p90 and p99, with intervals
-excluding the old value at each — the same direction the count inflation moved (3.8× → 5.72×)
-when the cascade-selected hours were removed. At p99.9 the two are indistinguishable.
+| quantile | episode | fill | factor | 95% CI |
+|---|---|---|---|---|
+| p50 | $558 | $558 | **1.00** | [0.99, 1.01] |
+| p90 | $19,644 | $12,046 | **1.63** | [1.60, 1.66] |
+| p99 | $274,461 | $119,919 | **2.29** | [2.21, 2.39] |
+| p99.9 | $2,917,253 | $582,474 | **5.01** | [4.62, 5.62] |
 
-Largest episode by notional **$194,115,094** (BTC, **2,568 fills**); most-tranched episode
-**4,776 fills** ($32.4M, ZEC); largest single fill **$10,990,000**. *(An earlier version
-conflated the two maxima into one episode — caught in review.)*
+The p50 factor is **1.00 with a CI of [0.99, 1.01]** — at the median the fill record is not
+distorted at all, measured rather than assumed.
 
-**Majors and HIP-3 behave identically on tail *index* (EXP-017) but not on compression
-(EXP-024).** Majors compress more in the body (ratio 1.30 at p90, CI [1.24, 1.36]), HIP-3 more in
-the tail (0.82 at p99, CI [0.74, 0.90]), crossing over between them. No contradiction: the tail
-index is a property of the liquidation mechanism, while compression is produced by slicing a
-position against a book, and HIP-3 books are thinner. The mechanism claim stands; "identical on
-every measure" does not.
+Largest episode by notional **$97,057,547** (BTC, 1,284 fills); most-tranched episode **2,388
+fills** ($16.2M, ZEC); largest single fill **$10,990,000**.
+
+**Majors and HIP-3 share a tail *index* (EXP-017) but not compression (EXP-024).** Majors
+compress more in the body (ratio 1.30 at p90), HIP-3 more in the tail (0.82 at p99), crossing
+over between them. Compression is produced by slicing a position against a book, and HIP-3 books
+are thinner; a tail index is a property of the liquidation mechanism. Majors run 2.89× against
+HIP-3's 2.72×, carrying 90.7% of notional against 9.3%.
+
+**The protocol's own chunking does not explain any of this.** Hyperliquid sends 20% of a
+position above $100k as the first market order, then waits 30 s. Of 98,983 consecutive
+same-account-same-instrument episode pairs, 94.7% are more than ten minutes apart — unrelated
+events. Merging every chain within 90 s touches 1.4% of episodes and moves the factor by less
+than 0.05. Chains are strongly size-selected, but their gap distribution decays monotonically
+from the 5 s floor with **no 30 s mode**, so the size selection is consistent with the cooldown
+without identifying it. Tranche identification needs position accounting, not elapsed time —
+EXP-025.
 
 → EXP-016, EXP-017, EXP-024
 
@@ -115,16 +116,15 @@ both beat Pareto**, and a KS test with parametric-bootstrap p-values rejects Par
 threshold tried (p ≤ 0.01).
 
 **Threshold-independent (EXP-022).** EXP-020 established this at one hand-fixed cut-off and
-listed the arbitrariness as a limit. Selecting `xmin` by minimising KS gives $560,627 — within
-a factor 1.79 of the hand choice, which sits inside the bootstrap 95% CI [$194k, $987k] — and
-the ranking holds at **all 14 estimable thresholds**, `xmin` from $14.9k to $8.85M — nearly
+listed the arbitrariness as a limit. Selecting `xmin` by minimising KS gives **$280,314** — the bootstrap 95% CI is [$97k, $496k] — and
+the ranking holds at **all 14 estimable thresholds**, `xmin` from $7.5k to $4.42M — nearly
 three orders of magnitude, individually significant at 13 of the 14 (p = 0.07 at the highest
 cut-off).
 
 **But the tail cannot be named**, and this is the closed form of what used to be open item 2.
 Lognormal and Weibull *do* separate — they simply separate in **opposite directions** depending
-on where the tail is cut: Weibull for `xmin` ∈ [$199k, $1.33M] (p < 0.01), lognormal decisively
-for `xmin` ≤ $28k (R > +13). Any name given to this tail would report the threshold, not the
+on where the tail is cut: Weibull for `xmin` ∈ [$100k, $663k] (p < 0.01), lognormal decisively
+for `xmin` ≤ $14k (R > +13). Any name given to this tail would report the threshold, not the
 distribution.
 
 **Pareto-with-cutoff wins at the selected `xmin` and only there** — best likelihood of the five,
@@ -167,7 +167,7 @@ only headline that survived the day without correction.
 2. ~~What the liquidation tail actually is~~ — **closed by EXP-022, negatively.** `xmin` is now
    selected rather than assumed, and the answer is that no name is available: the winner between
    lognormal and Weibull reverses across the threshold range. What remains genuinely open is
-   narrower — over `xmin` ∈ [$49k, $163k] **no candidate fits**. The Weibull pins at a numerical
+   narrower — over `xmin` ∈ [$25k, $81k] **no candidate fits**. The Weibull pins at a numerical
    bound and the lognormal drifts to extreme parameters (both toward the power-law limit of
    their own family), and a direct GoF test rejects every fitted candidate in the band
    (parametric-bootstrap KS, p ≤ 0.01) while KS rejects the power law itself. A fifth family
@@ -196,7 +196,12 @@ Each cost a real error, and each is recorded where it was paid.
 9. **A mechanism read off the code is a hypothesis, not a measured effect.** Knowing *why* a
    filter should bias a sample is not evidence that it did. (EXP-021: the bias was argued from
    `missed_ms = now − last_event`, sounded compelling, and measured to zero.)
-10. **A ranking always returns a winner — check the winner actually fits.** Model comparison is
+10. **A ranking always returns a winner — check the winner actually fits.**
+11. **Reviews audit the analysis; nobody audits the collection.** Everything downstream
+    inherits a collector's assumptions silently, so a bug there is invisible to any check
+    made on derived data. Two adversarial reviews recomputed eight headline figures from
+    the CSVs, flawlessly, with no chance of finding the error that was upstream of them.
+    What caught it was needing a new column and having to go back to the source. Model comparison is
     relative and cannot say "none of these". (EXP-022: over a band of thresholds both
     alternatives sat on a parameter bound, degenerate, while the reference they were being
     compared against was itself rejected.)

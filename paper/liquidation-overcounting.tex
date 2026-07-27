@@ -38,14 +38,13 @@ Forced liquidations in cryptocurrency derivatives are almost always counted from
 exchange-published event feeds, in which one economic liquidation appears as several records.
 We quantify the resulting distortion on Hyperliquid, an on-chain perpetual-futures venue whose
 node-fills archive is complete and attributed to the liquidated account---a combination no
-centralised venue publishes. On a fixed-hour stratified sample of 351{,}540 liquidation
-episodes reconstructed from 2{,}010{,}042 fills over one year, counting fills rather than
-episodes inflates the event count by a factor of \textbf{5.72} (day-resampled 95\% CI
-[5.47, 5.99]). The
-inflation is not a constant: it is \emph{size-dependent}, rising from a median of 2 fills per
-episode below the median size to a median of 72 in the top percentile, so the bias is
-concentrated on precisely the events that liquidation studies are about. The top 1\% of episodes
-generate 23.1\% of all fills. We also characterise the episode-size distribution and report a negative
+centralised venue publishes. On a fixed-hour stratified sample of 351{,}648 liquidation
+episodes reconstructed from 1{,}005{,}157 fills over one year, counting fills rather than
+episodes inflates the event count by a factor of \textbf{2.86} (day-resampled 95\% CI
+[2.72, 3.00]). The inflation is not a constant, and it is not a multiplier: below the 90th
+percentile a liquidation is a \emph{single fill} and is counted exactly right, while in the top
+percentile the median is \textbf{36 fills}. The bias is therefore not spread across the
+distribution---it \emph{is} the top decile, which generates 23.1\% of all fills. We also characterise the episode-size distribution and report a negative
 result: the tail is unambiguously heavy---an exponential is rejected decisively---and it is not a power law, but
 it \emph{cannot be named} beyond that. Lognormal and Weibull specifications both dominate a
 Pareto fit at every estimable threshold across nearly three orders of magnitude of cut-off, yet
@@ -92,15 +91,16 @@ departs from episode-counting, and what the episode-size distribution actually l
 
 \paragraph{Contributions.}
 \begin{enumerate}
-\item We measure a \textbf{5.72$\times$} count inflation from fill-counting on a uniformly
+\item We measure a \textbf{2.86$\times$} count inflation from fill-counting on a uniformly
       stratified one-year sample, and show the factor is robust to how ``one liquidation'' is
       defined (Section~\ref{sec:unit}).
-\item We show the inflation is \textbf{size-dependent}, growing from 2 to 72 fills per episode
-      between the lower half and the top percentile of the size distribution, so it is worst
-      exactly where liquidation research concentrates (Section~\ref{sec:count}).
+\item We show the inflation is \textbf{entirely a property of the largest episodes}: the median
+      liquidation is one fill, counted correctly, while the top percentile runs 36
+      (Section~\ref{sec:count}).
 \item We show fill-counting \textbf{compresses the size distribution}, by factors of
-      4.58$\times$ at the 99th percentile and 10.0$\times$ at the 99.9th, and that the two
-      instrument segments compress differently (Section~\ref{sec:compression}).
+      2.29$\times$ at the 99th percentile and 5.01$\times$ at the 99.9th while leaving the
+      median untouched, and that the two instrument segments compress differently
+      (Section~\ref{sec:compression}).
 \item We characterise the episode-size tail and report that it \textbf{cannot be named}:
       heavy, not a power law, but with the ranking between lognormal and Weibull reversing
       across the threshold range (Section~\ref{sec:tail}).
@@ -233,9 +233,18 @@ contained known liquidation cascades, and therefore over-represented large episo
 whose subject is the size dependence of a bias. Fixing the hours removes that selection directly
 rather than correcting for it afterwards.
 
-The sample comprises \textbf{351{,}540 episodes} reconstructed from \textbf{2{,}010{,}042 fills},
-across \textbf{380 instruments} and \textbf{151{,}730 distinct accounts}, totalling
-\textbf{\$15.53 billion} of liquidated notional.
+The sample comprises \textbf{351{,}648 episodes} reconstructed from \textbf{1{,}005{,}157 fills},
+across \textbf{380 instruments} and \textbf{151{,}775 distinct accounts}, totalling
+\textbf{\$7.77 billion} of liquidated notional.
+
+\paragraph{One record, two sides.} A liquidation trade appears \emph{twice} in the archive,
+once for the liquidated account and once for its counterparty, and both records carry
+\texttt{liquidation.liquidatedUser}. Only \texttt{event[0]}---the account whose fill it
+is---distinguishes them. Keeping both doubles every fill count and every notional exactly,
+while leaving episode counts unchanged, since the two sides share a grouping key. An earlier
+version of this paper made that error; the figures here retain only the liquidated account's
+side. We name it because it is invisible in any derived dataset: every check downstream of the
+collection reproduces it faithfully.
 
 \paragraph{Two passes.} The counting results below come from that collection, which reduced to
 episodes. Measuring compression needs the individual fill notionals, which it did not retain, so
@@ -302,17 +311,17 @@ On the one-year stratified sample, counting fills instead of episodes inflates t
 by a factor of
 
 \[
-\frac{2{,}010{,}042}{351{,}540} = \mathbf{5.72}.
+\frac{1{,}005{,}157}{351{,}648} = \mathbf{2.86}.
 \]
 
-The factor is comparable across segments: 5.78$\times$ for majors (289{,}283 episodes from
-1{,}672{,}034 fills) and 5.43$\times$ for HIP-3 (62{,}257 from 338{,}008).
+The factor is comparable across segments: 2.89$\times$ for majors (289{,}389 episodes from
+836{,}151 fills) and 2.72$\times$ for HIP-3 (62{,}259 from 169{,}006).
 
-\paragraph{Uncertainty.} The ratio is computed over 351{,}540 episodes, but episodes cluster in
+\paragraph{Uncertainty.} The ratio is computed over 351{,}648 episodes, but episodes cluster in
 days and cascades concentrate fills, so iid resampling understates its variance about
-threefold. Resampling \emph{days} gives a 95\% interval of \textbf{[5.47, 5.99]} (SD 0.14),
-and the factor varies systematically across the four sampled hour-strata, from 5.36 at 14:00
-UTC to 6.12 at 20:00 UTC (code: \texttt{experiments/exp024\_ci.py}). The third significant
+threefold. Resampling \emph{days} gives a 95\% interval of \textbf{[2.72, 3.00]} (SD 0.07),
+and the factor varies systematically across the four sampled hour-strata, from 2.68 at 14:00
+UTC to 3.06 at 20:00 UTC (code: \texttt{experiments/exp024\_ci.py}). The third significant
 figure is therefore not meaningful, and a full-census factor could plausibly differ by a few
 tenths in either direction (Section~\ref{sec:limits}).
 
@@ -361,24 +370,25 @@ A constant multiplier would be a nuisance parameter. This one is not constant.
 
 \begin{table}[htbp]
 \centering
-\caption{Tranching grows with episode size. One-year sample, 351{,}540 episodes.}
+\caption{The inflation is the top decile. One-year sample, 351{,}648 episodes.}
 \label{tab:size}
 \begin{tabular}{lrrr}
 \toprule
 size bucket & episodes & median fills & mean fills \\
 \midrule
-p0--50 \ (\$0 -- \$1{,}117) & 175{,}770 & 2 & 2.19 \\
-p50--90 \ (\$1{,}117 -- \$39{,}307) & 140{,}616 & 2 & 3.94 \\
+p0--50 \ (\$0 -- \$558) & 175{,}824 & \textbf{1} & 1.10 \\
+p50--90 \ (\$558 -- \$19{,}644) & 140{,}659 & \textbf{1} & 1.97 \\
 p90--99 \ (\$39{,}307 -- \$549{,}060) & 31{,}638 & 8 & 19.11 \\
-\textbf{p99--100} \ (\$549{,}060 -- \$194{,}115{,}094) & \textbf{3{,}516} & \textbf{72} & \textbf{132.27} \\
+\textbf{p99--100} \ (\$274{,}461 -- \$97{,}057{,}547) & \textbf{3{,}517} & \textbf{36} & \textbf{66.13} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 The Pearson correlation between log notional and log fills per episode is $+0.545$
 (Spearman rank correlation $+0.468$). A typical
-liquidation is two fills; the largest are a median of 72 and a mean of 132, with a maximum of
-4{,}776.
+liquidation below the 90th percentile is a \emph{single} fill and is counted exactly right;
+the largest are a median of 36 and a mean of 66, with a maximum of 2{,}388. The bias is not a
+multiplier applied unevenly---outside the top decile there is no bias at all.
 
 The consequence is stated most sharply as a share: \textbf{the top 1\% of episodes generate
 23.1\% of all fills}. A dataset of fills is therefore not a dataset of liquidations with a
@@ -416,7 +426,7 @@ $>$ 10\,min & 93{,}759 & \textbf{94.7\%} \\
 
 Chains of two or more episodes within 90 seconds account for 2{,}200 chains covering 4{,}879
 episodes---\textbf{1.4\% of the sample}. Merging every such chain into a single episode moves the
-inflation factor from 5.72$\times$ to \textbf{5.76$\times$}. The reported figure is therefore
+inflation factor from 2.86$\times$ to \textbf{2.88$\times$}. The reported figure is therefore
 mildly conservative, and the choice of unit remains not load-bearing.
 
 Chains are strongly size-selected, as the rule would predict: they begin at a median episode
@@ -459,19 +469,22 @@ sample; 95\% intervals from 20{,}000 bootstrap draws.}
 \toprule
 quantile & true episode & observed fill & factor & 95\% CI \\
 \midrule
-p50 & \$1{,}117 & \$558 & 2.00$\times$ & [1.97, 2.03] \\
-p90 & \$39{,}288 & \$12{,}046 & 3.26$\times$ & [3.21, 3.31] \\
-p99 & \$548{,}922 & \$119{,}919 & \textbf{4.58$\times$} & [4.41, 4.76] \\
-p99.9 & \$5{,}834{,}505 & \$582{,}486 & \textbf{10.02$\times$} & [9.24, 11.21] \\
-maximum & \$194{,}115{,}094 & \$10{,}990{,}000 & 17.7$\times$ & --- \\
+p50 & \$558 & \$558 & \textbf{1.00$\times$} & [0.99, 1.01] \\
+p90 & \$19{,}644 & \$12{,}046 & 1.63$\times$ & [1.60, 1.66] \\
+p99 & \$274{,}461 & \$119{,}919 & \textbf{2.29$\times$} & [2.21, 2.39] \\
+p99.9 & \$2{,}917{,}253 & \$582{,}474 & \textbf{5.01$\times$} & [4.62, 5.62] \\
+maximum & \$97{,}057{,}547 & \$10{,}990{,}000 & 8.8$\times$ & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Compression grows monotonically through the distribution, reaching an order of magnitude at the
 99.9th percentile (Table~\ref{tab:compression}). The largest episode in the sample by
-notional, \$194{,}115{,}094 (BTC, 2{,}568 fills), appears in the fill record as pieces of at
-most \$10.99M; the most-tranched episode is a distinct one, 4{,}776 fills for \$32.4M (ZEC).
+notional, \$97{,}057{,}547 (BTC, 1{,}284 fills), appears in the fill record as pieces of at
+most \$10.99M; the most-tranched episode is a distinct one, 2{,}388 fills for \$16.2M (ZEC).
+At the median the two distributions coincide: a factor of \textbf{1.00}, interval
+[0.99, 1.01]---the fill record is undistorted for the typical liquidation, measured rather than
+assumed.
 
 \paragraph{The cascade-selected sample understated this.} An earlier version of this measurement
 used the twelve-hour sample described in Section~\ref{sec:unit}, two of whose hours had been
@@ -479,7 +492,7 @@ chosen for containing cascades. It reported 1.6$\times$, 2.1$\times$, 3.4$\times
 10.9$\times$ at the same four quantiles. The year-scale figures are larger at p50, p90 and p99,
 with the bootstrap interval excluding the old value at each; at p99.9 the two are
 indistinguishable. This is the same direction the count inflation moved---3.8$\times$ on the
-selected hours against 5.72$\times$ on the year---and for the same reason: compression is
+selected hours against 2.86$\times$ on the year---and for the same reason: compression is
 produced by tranching.
 
 \paragraph{The segments differ, and they cross over.} Majors and HIP-3 do not compress alike.
@@ -506,15 +519,15 @@ selected by the Clauset--Shalizi--Newman procedure~\cite{clauset2009} ($p = 0.01
 Both two-parameter alternatives beat it. Fitting conditional on $x \ge x_{\min}$ and comparing
 by Vuong's non-nested likelihood-ratio test, lognormal and Weibull each achieve the higher
 likelihood against Pareto at \textbf{all 14 estimable thresholds}, with $x_{\min}$ ranging from
-\$14{,}912 to \$8{,}845{,}704---nearly three orders of magnitude---and the comparison is
-individually significant at 13 of the 14 (at $x_{\min} = \$6.9$M, $p = 0.07$). An exponential
+\$7{,}457 to \$4{,}422{,}852---nearly three orders of magnitude---and the comparison is
+individually significant at 13 of the 14 (at $x_{\min} = \$3.45$M, $p = 0.07$). An exponential
 never wins at any threshold.
 
 \subsection{What does not: the tail cannot be named}
 
-Selecting $x_{\min}$ by minimising the KS distance of the power-law fit gives \$560{,}627
+Selecting $x_{\min}$ by minimising the KS distance of the power-law fit gives \$280{,}314
 ($k = 3{,}104$, $\hat\alpha = 0.960$). A nonparametric bootstrap over 500 resamples puts a 95\%
-interval on that selection of $[\$193{,}877,\ \$986{,}963]$---\textbf{a factor of five}. The
+interval on that selection of $[\$96{,}753,\ \$495{,}762]$---\textbf{a factor of five}. The
 threshold is barely identified by the data, which is why we report the ranking across a grid of
 thresholds rather than at a single selected one.
 
@@ -529,9 +542,9 @@ against Weibull; $R<0$ favours Weibull.}
 \toprule
 $x_{\min}$ range & Vuong $R$ & verdict \\
 \midrule
-\$199k -- \$1.33M & $-2.74$ to $-3.67$ \ ($p<0.01$) & Weibull \\
-\$1.85M -- \$8.85M & $-1.86$ to $+0.36$ \ ($p>0.05$) & indistinguishable \\
-\$14.9k -- \$28.3k & $+13.42$ to $+15.92$ \ ($p \ll 0.001$) & lognormal \\
+\$100k -- \$663k & $-2.74$ to $-3.67$ \ ($p<0.01$) & Weibull \\
+\$926k -- \$4.42M & $-1.86$ to $+0.36$ \ ($p>0.05$) & indistinguishable \\
+\$7.5k -- \$14.1k & $+13.42$ to $+15.92$ \ ($p \ll 0.001$) & lognormal \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -544,7 +557,7 @@ We take this to be the substantive finding of the section rather than a gap in i
 
 \subsection{A band where nothing fits}
 
-Over $x_{\min} \in [\$49\mathrm{k},\ \$163\mathrm{k}]$, the two-parameter alternatives stop
+Over $x_{\min} \in [\$25\mathrm{k},\ \$81\mathrm{k}]$, the two-parameter alternatives stop
 being interpretable: the Weibull pins at the numerical bound on $\lambda$ and the lognormal
 wanders to extreme parameters ($\mu = -17$, $\sigma = 5.8$ at one threshold), each drifting
 toward the power-law limit of its own family, while the power law itself is rejected by KS.
@@ -616,7 +629,7 @@ claim about any specific paper.
 \section{Implications}
 
 \paragraph{For measurement.} Any statistic over crypto liquidation data should state its unit.
-On a fill-level record the correction is a factor of 5.72 on counts, but because the factor is
+On a fill-level record the correction is a factor of 2.86 on counts, but because the factor is
 size-dependent it cannot be applied as a scalar: the correct procedure is to reconstruct
 episodes, which requires an attributed record.
 
@@ -624,8 +637,8 @@ episodes, which requires an attributed record.
 event rates within a window. Both are inflated most during the large episodes that constitute
 cascades, so a fill-based cascade measure partly detects its own tranching.
 
-\paragraph{For risk models.} A size distribution fitted on fills is compressed by 4.58$\times$ at
-the 99th percentile and 10.0$\times$ at the 99.9th. A model calibrated on that distribution
+\paragraph{For risk models.} A size distribution fitted on fills is compressed by 2.29$\times$ at
+the 99th percentile and 5.01$\times$ at the 99.9th, while the median is untouched. A model calibrated on that distribution
 understates the size of the largest forced closes it is meant to survive.
 
 \paragraph{For the tail literature.} We would encourage reporting the model ranking across a
@@ -640,6 +653,10 @@ name would have been the threshold's.
 \item \textbf{The p99.9 and maximum rows are thin.} One in a thousand of 351{,}648 episodes
       is 352 observations, and the maximum is a single episode against a single fill, quoted
       without an uncertainty statement.
+\item \textbf{A collection bug survived two independent adversarial reviews.} Both
+      reviewers recomputed every headline figure from the derived datasets, correctly, and
+      neither could have found an error introduced before those datasets existed. Checks on
+      derived data cannot audit collection; only re-deriving from the source can.
 \item \textbf{Two collections of the same hours differed by 0.03\%} (108 episodes, 272 fills),
       most likely late-arriving blocks written after the first pass. It changes no figure here,
       but work needing exact reproducibility should pin an archive snapshot.
@@ -718,9 +735,10 @@ licensed MIT. Each experiment carries a pre-registration committed before its ru
 ordering of hypothesis and result is checkable in the version history.
 
 \paragraph{Use of AI tools.} Analysis code, figures and manuscript text were drafted with the
-assistance of a large language model under the author's direction. All results were computed from
-the cited data, and every figure quoted in this paper was recomputed from the versioned datasets
-at the time of writing. The author is responsible for the content.
+assistance of a large language model under the author's direction. All results were computed from the
+cited data, and every figure quoted in this paper was recomputed \emph{from the source archive}
+at the time of writing---not from an intermediate dataset, a distinction that matters here for
+the reason given in Section~\ref{sec:data}. The author is responsible for the content.
 
 \begin{thebibliography}{9}
 

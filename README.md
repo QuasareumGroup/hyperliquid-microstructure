@@ -35,20 +35,21 @@ replaced it.
 ### Counting liquidation fills misrepresents liquidations
 
 Hyperliquid's node-fills archive is a public record of liquidations that is complete *and*
-names the liquidated account, with its position size and realised loss — a combination no
-centralised venue publishes, and one whose order-book structure makes fill-tranching
-measurable at scale. Counting **fills**
-rather than liquidation episodes inflates event counts **5.72×** (95% CI [5.47, 5.99]) over a
-fixed-hour archive year
-— 351,540 episodes from 2,010,042 fills. The inflation grows with size: a typical liquidation is
-2 fills, those in the top percentile a median of **72**. The top 1% of episodes generate **23.1%
-of all fills** and carry **67.3%** of liquidated notional, so the bias is worst exactly where
-liquidation research concentrates.
+names the liquidated account — a combination no centralised venue publishes, and one whose
+order-book structure makes fill-tranching measurable at scale. Counting **fills** rather than
+liquidation episodes inflates event counts **2.86×** (95% CI [2.72, 3.00]) over a fixed-hour
+archive year — 351,648 episodes from 1,005,157 fills.
 
-It also compresses the size distribution — **4.58× at p99, 10.0× at p99.9** over the full year,
-so the largest single episode ($194M — 2,568 fills, BTC) appears in the fill record as pieces
-of at most $11.0M; the most-tranched liquidation is a distinct one, 4,776 fills ($32.4M, ZEC). The two instrument segments compress differently and cross over:
-majors more in the body, HIP-3 builder markets more in the tail.
+**The bias is not a multiplier — it is the top decile.** Below the 90th percentile a
+liquidation is a *single fill*, counted exactly right. In the top percentile the median is
+**36 fills**. That decile alone generates **23.1% of all fills** and carries **67.3%** of
+liquidated notional.
+
+Fill-counting also compresses the size distribution — **2.29× at p99, 5.01× at p99.9** — while
+leaving the median at **1.00×** [0.99, 1.01], undistorted. The largest episode ($97.1M, 1,284
+fills) appears in the fill record as pieces of at most $11.0M. The two instrument segments
+compress differently and cross over: majors more in the body, HIP-3 builder markets more in the
+tail.
 
 The tail is genuinely heavy (exponential is rejected decisively) but **not a power law**:
 lognormal and Weibull both beat Pareto at every estimable threshold, across nearly three orders
@@ -76,7 +77,10 @@ are.
   *before* the run, ordering checkable in the history. The four earliest experiment files
   (EXP-016, 018–020) entered the history with results included; that is stated rather than
   implied away.
-- **Retractions stay in the open.** More than a dozen claims have been withdrawn or requalified; each
+- **Retractions stay in the open**, including a headline. A collection bug double-counted every
+  liquidation fill and survived two adversarial reviews before being caught pre-publication;
+  the factor went 5.72× → 2.86×. The correction, its cause and its scope are documented in
+  place. More than a dozen claims have been withdrawn or requalified; each
   correction sits in the file that made the original claim, with the reason. Nothing is
   rewritten to have always been right.
 - **Estimators are validated against known answers before use.** This caught a sign inversion in
@@ -101,6 +105,7 @@ are.
 8. A fit on its constraint boundary is not a result.
 9. A mechanism read off the code is a hypothesis, not a measured effect.
 10. A ranking always returns a winner — check the winner actually fits.
+11. Reviews audit the analysis; nobody audits the collection.
 
 ---
 

@@ -80,6 +80,13 @@ def liquidation_fills(path: Path) -> list[dict]:
                 liq = fill.get("liquidation")
                 if not liq:
                     continue
+                # event[0] is the account whose fill this is. A liquidation trade is
+                # recorded TWICE — once for the liquidated account, once for the
+                # counterparty — and BOTH carry liquidation.liquidatedUser. Without
+                # this filter every fill was counted twice, inflating the factor by
+                # exactly 2.00. Same bug, same fix, as exp017_year_tail.py.
+                if event[0] != liq["liquidatedUser"]:
+                    continue
                 try:
                     out.append({
                         "ts": int(fill["time"]),
