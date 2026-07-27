@@ -21,13 +21,16 @@ Binance leads Hyperliquid by a median **575 ms** on BTC — in **100% of 191 mea
 hour in the window** — and in 100% of **758 asset-hours** across BTC, ETH, SOL and HYPE, with
 **zero reversals**. The same estimator returns **25 ms** between OKX and Binance, a factor of 23.
 
-It survives trade sparsity, liquidation cascades, and every asset the tape
-covers, with no material dependence on volatility. The CEX do not lead one another, which is what makes this Hyperliquid's property rather
-than Binance's. Measured with a grid-free Hayashi-Yoshida estimator validated to zero error
-against known lags.
+It survives trade sparsity, liquidation cascades, and every asset the tape covers, with no
+material dependence on volatility. The CEX do not lead one another, which is what makes this
+Hyperliquid's property rather than Binance's. Measured with a grid-free Hayashi-Yoshida
+estimator validated to zero error against known lags.
 
 **Open:** how much is mechanical (block cadence, network latency) versus genuine price
-discovery. Trade sparsity is ruled out as the explanation; nothing has replaced it.
+discovery. Trade sparsity is ruled out as the explanation, and the obvious replacement has now
+been measured and ruled out too: an instrument's print rate tracks its lag **across** assets
+(ρ = −0.66) but barely **within** one (partial ρ = −0.09 over 758 asset-hours). Nothing has
+replaced it.
 
 ### Counting liquidation fills misrepresents liquidations
 
