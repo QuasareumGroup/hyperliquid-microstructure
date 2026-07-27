@@ -68,9 +68,9 @@ check is now Section 4.2, and it exists because the docs were read properly.
 
 | | |
 |---|---|
-| author | Thomas Erhel — Quasareum — contact@quasareum.com |
+| author | Thomas Erhel — Quasareum, Paris, France — contact@quasareum.com |
 | ORCID | [0009-0007-1772-9892](https://orcid.org/0009-0007-1772-9892) |
-| affiliation | Quasareum — **add city and country before submitting**. arXiv accepts at most a city and a country, no street address, and asks that a claimed affiliation be current in the conventional sense. `Quasareum, <City>, <Country>`. |
+| affiliation | Quasareum, Paris, France — arXiv accepts at most a city and a country, no postal code or street address |
 | copyright | **Quasareum** — conditional on a written assignment of rights from the author to the company, which French law does not grant automatically to a non-salaried founder. Not a blocker for arXiv; worth executing once. |
 | licence | **CC BY 4.0** — stated on the title page, `paper/LICENSE`, and to be selected at arXiv submission |
 
