@@ -68,12 +68,27 @@ of the liquidation mechanism, not of the market.
 
 ### 3. The liquidation size tail is heavy, and it is not a power law
 
-Exponential is rejected decisively (Vuong R = +14.8 against Pareto), so the tail is genuinely
-heavy. But **lognormal and Weibull both beat Pareto** (R = −4.8 and −5.0, p < 0.001) and are
-indistinguishable from each other. A KS test with parametric-bootstrap p-values rejects Pareto
-at every threshold tried (p ≤ 0.01).
+Exponential is rejected decisively, so the tail is genuinely heavy. **Lognormal and Weibull
+both beat Pareto**, and a KS test with parametric-bootstrap p-values rejects Pareto at every
+threshold tried (p ≤ 0.01).
 
-→ EXP-019, EXP-020
+**Threshold-independent (EXP-022).** EXP-020 established this at one hand-fixed cut-off and
+listed the arbitrariness as a limit. Selecting `xmin` by minimising KS gives $560,627 — within
+a factor 1.79 of the hand choice, which sits inside the bootstrap 95% CI [$194k, $987k] — and
+the ranking holds at **all 14 estimable thresholds**, `xmin` from $14.9k to $8.85M. Nearly three
+orders of magnitude, same answer.
+
+**But the tail cannot be named**, and this is the closed form of what used to be open item 2.
+Lognormal and Weibull *do* separate — they simply separate in **opposite directions** depending
+on where the tail is cut: Weibull for `xmin` ∈ [$199k, $1.33M] (p < 0.01), lognormal decisively
+for `xmin` ≤ $28k (R > +13). Any name given to this tail would report the threshold, not the
+distribution.
+
+**Pareto-with-cutoff wins at the selected `xmin` and only there** — best likelihood of the five,
+beating both alternatives (p = 0.005 and 0.012) — but across the grid it wins at 2 of 14
+thresholds and loses decisively at the two lowest. A local result, recorded as such.
+
+→ EXP-019, EXP-020, EXP-022
 
 ---
 
@@ -99,8 +114,12 @@ only headline that survived the day without correction.
 
 1. **The mechanical/informational split** in the 550 ms. Needs an instrument that sees order
    *submission*, not execution — none of the current ones do.
-2. **What the liquidation tail actually is.** Lognormal and Weibull are not separated; xmin was
-   fixed by hand rather than selected.
+2. ~~What the liquidation tail actually is~~ — **closed by EXP-022, negatively.** `xmin` is now
+   selected rather than assumed, and the answer is that no name is available: the winner between
+   lognormal and Weibull reverses across the threshold range. What remains genuinely open is
+   narrower — over `xmin` ∈ [$49k, $163k] **no candidate fits**. Both alternatives degenerate
+   onto the power-law limit of their own family while KS rejects the power law itself. A fifth
+   family (generalised Pareto, log-gamma) might cover that band; none was tried.
 3. **Venue decoupling during cascades** — coupling roughly halves (EXP-015), on 8 windows. Needs
    many more, and a bounded coupling statistic.
 4. **The premium-sign regime flip** — measured, then explained by the market cycle (r = 0.786).
@@ -125,3 +144,7 @@ Each cost a real error, and each is recorded where it was paid.
 9. **A mechanism read off the code is a hypothesis, not a measured effect.** Knowing *why* a
    filter should bias a sample is not evidence that it did. (EXP-021: the bias was argued from
    `missed_ms = now − last_event`, sounded compelling, and measured to zero.)
+10. **A ranking always returns a winner — check the winner actually fits.** Model comparison is
+    relative and cannot say "none of these". (EXP-022: over a band of thresholds both
+    alternatives sat on a parameter bound, degenerate, while the reference they were being
+    compared against was itself rejected.)

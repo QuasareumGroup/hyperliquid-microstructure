@@ -75,6 +75,7 @@ are.
 7. Look at the values under a summary statistic.
 8. A fit on its constraint boundary is not a result.
 9. A mechanism read off the code is a hypothesis, not a measured effect.
+10. A ranking always returns a winner — check the winner actually fits.
 
 ---
 
