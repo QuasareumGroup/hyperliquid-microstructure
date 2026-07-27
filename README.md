@@ -112,6 +112,16 @@ on-chain derivatives ledger*. Draft, not submitted; [`paper/README.md`](paper/RE
 what remains before it could be. Every figure traces to a versioned dataset and a pre-registered
 experiment in this repository.
 
+## Licensing
+
+| | |
+|---|---|
+| code | **MIT** — [`LICENSE`](LICENSE) |
+| paper and reduced datasets | **CC BY 4.0** — [`paper/LICENSE`](paper/LICENSE) |
+
+The licence covers the reductions, analysis and text produced here. The underlying market data
+is published by Hyperliquid and by the venues named in the paper.
+
 ## Setup
 
 ```bash
