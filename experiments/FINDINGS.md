@@ -38,20 +38,29 @@ thin the follower to HL's real print times, and the estimator returns zero — e
 hour, on BTC, ETH and HYPE, and within 25 ms on the sparsest instrument. The lag is not
 manufactured by unequal observation rates.
 
-**A caveat on the magnitude, narrowed by EXP-027 but not lifted.** Thinning Binance to HL's
-cadence moves the measured peak *up* in all four assets (+25 ms on the densest, +212 on the
-sparsest), which raised the worry that HL's own sparsity inflates the 575 ms. EXP-027 attacked
-that on 92 asset-hours and **excluded two mechanisms with a reason each**: independent follower
-innovations cannot move the peak at all (a cross-covariance is blind to them — structural, not
-empirical), and follower density does not either, the bias curve being flat from half HL's
-cadence to Binance's full density at noise ratios up to 80× the leader's variance.
+**The sparsity caveat is closed (EXP-027, EXP-028).** Thinning Binance to HL's cadence moves the
+measured peak up (+25 ms on the densest asset, +212 on the sparsest), and across assets
+ρ(trade frequency, lag) = −0.656 — both the signature of a density effect on the magnitude. Three
+candidate mechanisms were pre-registered and tested on 92 asset-hours, and none survives:
 
-**But the synthetic pair failed its validation**: it does not reproduce the leader-thinning
-inflation that the real pair shows. So those exclusions describe a model the real pair
-demonstrably is not, and the caveat stands — better characterised, not removed. The leading
-suspect is **endogenous sampling**: Hyperliquid prints *because* a trade happened, so its
-observation times correlate with its own price innovations, a coupling no synthetic follower here
-reproduces. 575 ms is the measured value; whether it is the true one is open.
+| mechanism | verdict | basis |
+|---|---|---|
+| independent follower innovations | **excluded** | structural — a cross-covariance is blind to them at every lag |
+| follower observation density | **excluded** | bias flat from 0.5× HL's cadence to Binance's full density |
+| endogenous sampling times | **excluded** | zero shift under a *maximally* price-coupled sampler |
+
+With no estimator-side explanation left, the cross-asset association is attributed to market
+structure — sparser instruments really are slower — and **575 ms stands unqualified on the
+sparsity axis.**
+
+**Still unexplained, on a different measurement:** no synthetic pair reproduces the leader-thinning
+inflation (EXP-027 P5). But that manipulation degrades the *leader*, which Result 1 never does.
+
+**New, from EXP-028 Part 1 — the two venues run on different clocks.** Binance prints markedly
+more when the market moves (Spearman with |return| +0.28 to +0.77); Hyperliquid barely does
+(+0.06 to +0.17). Its quotes update ~7.9×/s on BTC, about once per block, so its trade arrival
+looks gated by block production rather than by price events. Consistent with two measurements,
+not yet tested directly.
 **Open:** how much is mechanical (block cadence, network) versus price discovery. Observability
 is ruled out as the explanation for the *level* (EXP-014); nothing has replaced it.
 

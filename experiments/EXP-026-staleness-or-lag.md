@@ -192,6 +192,33 @@ narrows it: observation density is out, so what remains is block cadence, networ
 genuine price discovery. And it adds a new caveat, that the *magnitude* is inflated by an
 unmeasured amount.
 
+### Test C is now sized — 2026-07-28
+
+`exp026_bbo_probe.py` opened both native BBO channels for 120 s and counted, writing nothing to
+disk. Per second, and per day if run continuously:
+
+| | HL `bbo` | Binance `bookTicker` | quote asymmetry | trade asymmetry |
+|---|---|---|---|---|
+| BTC | 7.9/s | 183.5/s | **23×** | 2.9× |
+| ETH | 7.2 | 285.7 | **40×** | 5.1× |
+| SOL | 4.8 | 125.5 | **26×** | 2.9× |
+| HYPE | 6.4 | 96.9 | **15×** | 2.4× |
+
+**Cost.** 718 msg/s combined, 12.5 GB/day arriving as JSON, **≈2.0 GB/day encoded** at 32 B per
+record and before compression — 60 GB/month, or **28 GB for a two-week window**. Tractable, and
+worth sizing rather than assuming on a machine with a history of filling up.
+
+**A warning the sizing produced for free.** Quotes are far *more* asymmetric between the two
+venues than trades are — 15× to 40× against 2.4× to 5.1×. Test C will therefore measure a much
+sparser follower against a much denser leader than Result 1 does. That is survivable rather than
+fatal, because EXP-027 and EXP-028 have since established that follower sparsity does not bias
+this estimator, but it is the reason Test C should not be read as the *easier* measurement.
+
+**Hyperliquid's quotes update about 7.9 times a second on BTC**, roughly once per block. That is
+one update per ~127 ms, against a 575 ms lag — so block cadence is not on its own an explanation,
+and it is the likely reason Hyperliquid's trade arrival is so weakly coupled to price movement
+(EXP-028 Part 1).
+
 **Test C was not launched**, and it is smaller than §3 implied. It does not need a new recorder:
 `perplog-recorder` already has the venue-shard machinery, and what is missing is two
 subscriptions — HL `bbo` and Binance `bookTicker`, both push-on-change. It is still calendar-

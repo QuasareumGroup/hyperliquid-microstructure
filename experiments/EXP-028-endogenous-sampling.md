@@ -1,6 +1,9 @@
 # EXP-028 — Does endogenous sampling inflate the 575 ms?
 
-**Status:** pre-registered, not yet run
+**Status:** run. **P2 confirmed; P1, P3 and P4 rejected.** Endogenous sampling does not move the
+peak — tested with a sampler *more* coupled to price than Hyperliquid actually is. With noise and
+density already excluded, **no estimator-side explanation for the cross-asset pattern survives**,
+and the EXP-026 caveat on Result 1's magnitude closes.
 **Registered:** 2026-07-28
 **Author:** Thomas Erhel / Quasareum
 **Data:** perplog tape, BTC/ETH/SOL/HYPE, 2026-07-18 → 07-26 — already on disk, no new download.
@@ -114,4 +117,72 @@ review.
 
 ## 7. Results
 
-*(empty until the experiment runs)*
+92 asset-hours, same sample as EXP-027.
+
+### Part 1 — P1 rejected, P2 confirmed, and the asymmetry is the finding
+
+Spearman(prints per second, |Binance return| that second):
+
+| | Hyperliquid | Binance | ratio |
+|---|---|---|---|
+| HYPE | +0.167 | **+0.771** | 4.6× |
+| BTC | +0.126 | **+0.447** | 3.5× |
+| ETH | +0.112 | **+0.618** | 5.5× |
+| SOL | +0.057 | **+0.280** | 4.9× |
+
+P2 holds everywhere: Binance prints markedly more when the market moves. **P1 fails everywhere** —
+Hyperliquid's coupling is +0.06 to +0.17, below the +0.2 registered as the threshold for calling
+its sampling endogenous.
+
+So the two venues are sampled by different clocks. Binance's trade arrival tracks price directly;
+Hyperliquid's barely does. The BBO probe run for EXP-026 Test C offers the likely reason and is
+recorded there: Hyperliquid's quotes update about 7.9 times a second on BTC, roughly one update
+per block. **Trade arrival on Hyperliquid is gated by block production, not by price events.**
+That is a hypothesis consistent with two measurements, not something this experiment tested.
+
+### Part 2 — P3 rejected, on every asset, at every sampler
+
+Same latent follower, true lag 575 ms, identical observation count, four selection rules:
+
+| sampler | BTC | ETH | SOL | HYPE |
+|---|---|---|---|---|
+| endogenous (TV clock) | 575 | 575 | 575 | 575 |
+| exogenous random | 575 | 575 | 575 | 575 |
+| exogenous evenly spaced | 575 | 575 | 575 | 575 |
+| HL's real print times | 575 | 575 | 575 | 575 |
+
+Not a grid step between any of them, anywhere. P4 is not evaluable: there is no inflation to scale
+with sparsity.
+
+### Why P1's rejection strengthens this rather than weakening it
+
+§5 registered that a false P1 would make Part 2 "a sampler that does not describe the venue", to
+be reported as a null model rather than a correction. That reading needs one refinement, and the
+direction matters. The total-variation clock is **maximally** endogenous — it samples on nothing
+*but* the series' own movement — while Hyperliquid measures at +0.06 to +0.17. Part 2 therefore
+tested a condition considerably harsher than reality and found nothing. The mismatch runs in the
+conservative direction, so the null is an upper bound rather than an inapplicable model.
+
+## 8. What this closes
+
+Three candidate mechanisms have now been tested for a sparsity-driven bias on Result 1:
+
+| mechanism | verdict | basis |
+|---|---|---|
+| independent follower innovations | **excluded** | structural — a cross-covariance is blind to them at every lag (EXP-027) |
+| follower observation density | **excluded** | flat from 0.5× HL to full Binance, 92 asset-hours (EXP-027) |
+| endogenous sampling times | **excluded** | zero shift under a maximally coupled sampler (EXP-028) |
+
+No estimator-side explanation for EXP-023's cross-asset ρ = −0.656 survives. By the registration
+in §5 this attributes it to market structure — sparser instruments really are slower — and
+**575 ms stands unqualified on the sparsity axis.** The EXP-026 caveat closes.
+
+**What remains open is narrower and belongs to a different measurement.** EXP-027's P5 found that
+no synthetic pair reproduces EXP-026 Test B's leader-thinning inflation, and that is still
+unexplained. But Test B degrades the *leader*, and Result 1 does not: Binance enters at full
+density. It is an unexplained property of a deliberately degraded measurement, not of the
+reported one.
+
+**Not settled, and not settleable from trades:** whether the remaining 575 ms is mechanical or
+informational. That needs quotes — and EXP-026 Test C now has a sizing, plus a warning about what
+it will face.
