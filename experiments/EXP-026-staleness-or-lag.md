@@ -192,24 +192,38 @@ narrows it: observation density is out, so what remains is block cadence, networ
 genuine price discovery. And it adds a new caveat, that the *magnitude* is inflated by an
 unmeasured amount.
 
-### Test C is now sized — 2026-07-28
+### Test C is sized, and **launched 2026-07-28**
+
+The capture is live on the recorder box for BTC/ETH/SOL/HYPE at
+`RECORDER_QUOTE_INTERVAL_MS=0`, writing `quote/v1/{venue}/{coin}/{date}/{hh}.pbq` to R2. The
+first sealed hour was fetched back and decoded rather than assumed: `avg levels 1.0/1.0
+(bid/ask), crossed 0, non-monotonic 0` on all eight streams. The only clock in this repository
+that cannot be rewound is now running.
 
 `exp026_bbo_probe.py` opened both native BBO channels for 120 s and counted, writing nothing to
 disk. Per second, and per day if run continuously:
 
+Rates from a sealed hour of real capture (30.9 min), which supersede the 120 s probe:
+
 | | HL `bbo` | Binance `bookTicker` | quote asymmetry | trade asymmetry |
 |---|---|---|---|---|
-| BTC | 7.9/s | 183.5/s | **23×** | 2.9× |
-| ETH | 7.2 | 285.7 | **40×** | 5.1× |
-| SOL | 4.8 | 125.5 | **26×** | 2.9× |
-| HYPE | 6.4 | 96.9 | **15×** | 2.4× |
+| BTC | 7.3/s | 137/s | **18.7×** | 2.9× |
+| ETH | 4.8 | 162 | **33.8×** | 5.1× |
+| SOL | 3.9 | 49 | **12.6×** | 2.9× |
+| HYPE | 4.1 | 51 | **12.4×** | 2.4× |
 
-**Cost.** 718 msg/s combined, 12.5 GB/day arriving as JSON, **≈2.0 GB/day encoded** at 32 B per
-record and before compression — 60 GB/month, or **28 GB for a two-week window**. Tractable, and
-worth sizing rather than assuming on a machine with a history of filling up.
+**Cost.** 718 msg/s combined, 12.5 GB/day arriving as JSON. Storage is **far smaller than that
+probe implied**: measured on the first sealed hour in R2, the codec writes 9.6 B/record on
+Binance and 13.7–14.8 on Hyperliquid, giving **15.5 MB/hour, 0.37 GB/day, 11.2 GB/month, and
+5.2 GB for a two-week window**.
+
+> The first version of this line said 2.0 GB/day and 28 GB for two weeks. That multiplied the
+> wire probe by an **assumed** 32 B/record and was 5.4× too high. The wire rate itself was
+> measured and stands — it is bandwidth, not storage, and conflating the two produced the error.
+> Recorded rather than quietly edited, because the wrong figure was stated as measured.
 
 **A warning the sizing produced for free.** Quotes are far *more* asymmetric between the two
-venues than trades are — 15× to 40× against 2.4× to 5.1×. Test C will therefore measure a much
+venues than trades are — 12.4× to 33.8× against 2.4× to 5.1×. Test C will therefore measure a much
 sparser follower against a much denser leader than Result 1 does. That is survivable rather than
 fatal, because EXP-027 and EXP-028 have since established that follower sparsity does not bias
 this estimator, but it is the reason Test C should not be read as the *easier* measurement.
