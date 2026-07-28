@@ -56,6 +56,21 @@ sparsity axis.**
 **Still unexplained, on a different measurement:** no synthetic pair reproduces the leader-thinning
 inflation (EXP-027 P5). But that manipulation degrades the *leader*, which Result 1 never does.
 
+**Deliberately left open, with a trigger — decided 2026-07-28.** P5 is a question about a model,
+and the exclusion that matters most (independent noise) rests on algebra rather than on that
+model. Test C's quote capture started the same day and attacks the same question with a different
+instrument, so a fourth synthetic robustness check would be work on the wrong object — and past
+some point, insistence reads as motivated rather than rigorous. It stands as a limitation in the
+paper, stated plainly.
+
+**Reopen if Test C disagrees** — if quotes give a magnitude materially different from 575 ms.
+The model's failure would then stop being a loose end and become a lead, since the two anomalies
+would likely share a cause. The diagnostic to run at that point is *the shape of the HY curve*,
+real pair against synthetic: if the real lag is a **distribution** where the synthetic has a sharp
+peak, that explains P5 in one plot, and "median 575 ms" and "a lag distribution centred on 575 ms"
+are not the same claim. Worth more with quotes in hand than on trades alone. Enough quote data to
+judge: on or after **2026-08-11**.
+
 **New, from EXP-028 Part 1 — the two venues run on different clocks.** Binance prints markedly
 more when the market moves (Spearman with |return| +0.28 to +0.77); Hyperliquid barely does
 (+0.06 to +0.17). Its quotes update ~7.9×/s on BTC, about once per block, so its trade arrival
