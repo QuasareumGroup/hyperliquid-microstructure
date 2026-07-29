@@ -233,6 +233,35 @@ one update per ~127 ms, against a 575 ms lag — so block cadence is not on its 
 and it is the likely reason Hyperliquid's trade arrival is so weakly coupled to price movement
 (EXP-028 Part 1).
 
+### Test C's pipeline is validated — 2026-07-29, and no result was looked at
+
+Built and checked while waiting on unrelated compute, so that 11 August is a measurement rather
+than a first attempt at writing one.
+
+**A decode path now exists.** `tools/pbq-dump` is the quote twin of `pfr-dump`: PBS1 frames →
+`venue,coin,ts_ms,bid,ask,mid`. Crossed and empty-sided snapshots are **dropped and counted**, not
+repaired — a crossed book is either a venue artefact or a decode fault, and quietly fixing one
+would put a fabricated midpoint into a measurement. On a real hour of BTC it dropped **zero** from
+either venue, timestamps are monotone, and the median spread is $1.00 on HL against $0.10 on
+Binance with mids agreeing to 0.03%.
+
+**The estimator was validated at the real quote densities, which are far more asymmetric than the
+trades ever were** — 720.6 quotes/s on Binance against 10.5 on HL, a ratio of **69×** where the
+trade case that EXP-026 validated ran at 2.9×. Imposing a known lag on Binance, thinning to HL's
+real quote times, and requiring recovery:
+
+| imposed | 0 | 100 | 300 | 575 | 1000 ms |
+|---|---|---|---|---|---|
+| recovered | **0** | **100** | **300** | **575** | **1000** |
+
+Exact at every point, including zero. The instrument survives an asymmetry 24× worse than the one
+it was previously checked at.
+
+**What was deliberately not computed: the real HL-versus-Binance quote peak.** That is Test C's
+registered measurement and it waits for the full window. Validating on known lags gives the
+instrument check without seeing the answer, which is the only way to do this without spending the
+pre-registration.
+
 **Test C was not launched**, and it is smaller than §3 implied. It does not need a new recorder:
 `perplog-recorder` already has the venue-shard machinery, and what is missing is two
 subscriptions — HL `bbo` and Binance `bookTicker`, both push-on-change. It is still calendar-

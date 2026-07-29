@@ -1,0 +1,11 @@
+[package]
+name = "pbq-dump"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+perplog-archive = { path = "../../../perplog/rust/crates/archive" }
+
+[[bin]]
+name = "pbq-dump"
+path = "src/main.rs"
