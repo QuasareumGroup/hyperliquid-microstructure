@@ -22,9 +22,11 @@
 % on results already established and defended in the public pre-registered
 % record, and is written to stand whatever Section 8 returns.
 %
-% Literature pass done 2026-07-29. Every reference was retrieved and read; the
-% Lehar-Parlour authorship should be re-checked against the published version
-% before submission, as it was taken from a listing rather than the article.
+% Literature pass done 2026-07-29; both full-text flags closed the same day,
+% in-browser. Lehar-Parlour published byline is "Alfred Lehar, Christine
+% Parlour" (no middle initial), J. Finance 80(1):321-374 -- the listing-derived
+% "C. A." was wrong, which is what the flag existed to catch. Zhivkov et al.
+% full text read: the 25%/13% funding-rate windows figure is verbatim.
 % ============================================================================
 
 \title{\bfseries An on-chain venue trails the centralised market\\
@@ -164,14 +166,12 @@ lead--lag is a statement about order-driven price formation rather than about ar
 bonding curve. To our knowledge the sub-second lead--lag of an \emph{on-chain order-book} venue
 has not been measured against centralised venues on a complete public tape.
 
-% The pair-level prevalence figure below (DEX-to-CEX direction in roughly a quarter of windows)
-% is taken from the article body via an indexed excerpt; the MDPI page rejects automated
-% retrieval. Open and read the full text before submission.
 One published result points, on its face, the other way, and the apparent conflict is worth
 resolving rather than footnoting. Zhivkov, Todorov and Georgiev~\cite{zhivkov2026} run rolling
 seven-day Granger-causality tests on \emph{hourly funding-rate} series across 26 perpetual-futures
 venues and report that mid-tier venues Granger-cause Binance more often than the reverse---for the
-Binance--Hyperliquid pair, the DEX-to-CEX direction in roughly a quarter of weekly windows. There
+Binance--Hyperliquid pair, Hyperliquid Granger-causes Binance's funding rate in 25\% of weekly
+windows, against 13\% for the reverse direction. There
 is no tension with the present result, for three separable reasons. The \emph{variable} differs:
 funding rates are a settlement mechanism computed hourly from clamped premia against an oracle,
 not transaction prices; on Hyperliquid the formula additionally embeds a fixed interest-rate
@@ -521,9 +521,8 @@ J.~Plazuelo Pascual, C.~Tard\'on Rubio, J.~Toro Cebada, and A.~Hernando Veciana.
 Price discovery in cryptocurrency markets.
 arXiv:2506.08718, 2025. \url{https://arxiv.org/abs/2506.08718}.
 
-% Verified 2026-07-29 against the RePEc abstract page (gam/jijfss v14 i5 p103); the
-% pair-level windows figure is from the article body and should be re-checked in the
-% full text, which resists automated retrieval.
+% Verified 2026-07-29 against the RePEc abstract page and the full text, read
+% in-browser: the 25%/13% pair-level windows figure is verbatim from the body.
 \bibitem{zhivkov2026}
 P.~Zhivkov, V.~Todorov, and S.~Georgiev.
 Temporal dynamics of market microstructure in cryptocurrency perpetual futures: econometric
@@ -537,9 +536,10 @@ Price discovery on decentralized exchanges.
 Working paper, SSRN 4236993. \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4236993}.
 
 \bibitem{lehar2025}
-A.~Lehar and C.~A.~Parlour.
+A.~Lehar and C.~Parlour.
 Decentralized exchange: the Uniswap automated market maker.
-\emph{The Journal of Finance}, 2025. \url{https://onlinelibrary.wiley.com/doi/10.1111/jofi.13405}.
+\emph{The Journal of Finance}, 80(1):321--374, 2025.
+\url{https://onlinelibrary.wiley.com/doi/10.1111/jofi.13405}.
 
 \bibitem{hyperliquid}
 Hyperliquid. Documentation. \url{https://hyperliquid.gitbook.io/hyperliquid-docs}.
