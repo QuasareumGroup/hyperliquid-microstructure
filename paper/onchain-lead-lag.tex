@@ -164,6 +164,26 @@ lead--lag is a statement about order-driven price formation rather than about ar
 bonding curve. To our knowledge the sub-second lead--lag of an \emph{on-chain order-book} venue
 has not been measured against centralised venues on a complete public tape.
 
+% The pair-level prevalence figure below (DEX-to-CEX direction in roughly a quarter of windows)
+% is taken from the article body via an indexed excerpt; the MDPI page rejects automated
+% retrieval. Open and read the full text before submission.
+One published result points, on its face, the other way, and the apparent conflict is worth
+resolving rather than footnoting. Zhivkov, Todorov and Georgiev~\cite{zhivkov2026} run rolling
+seven-day Granger-causality tests on \emph{hourly funding-rate} series across 26 perpetual-futures
+venues and report that mid-tier venues Granger-cause Binance more often than the reverse---for the
+Binance--Hyperliquid pair, the DEX-to-CEX direction in roughly a quarter of weekly windows. There
+is no tension with the present result, for three separable reasons. The \emph{variable} differs:
+funding rates are a settlement mechanism computed hourly from clamped premia against an oracle,
+not transaction prices; on Hyperliquid the formula additionally embeds a fixed interest-rate
+component and hard clamps~\cite{hyperliquid}, so its innovations are partially decoupled from
+tick-scale price formation by construction. The \emph{frequency} differs: at hourly sampling a 575\,ms lead is entirely
+within-bar and can only appear as contemporaneous correlation; Granger tests at hourly lags speak
+to predictability at horizons of hours, about which our estimator says nothing. And the
+\emph{estimand} differs: prevalence of a significance test across overlapping windows is a count,
+not a signed magnitude, while the cross-covariance argmax is a signed magnitude per asset-hour.
+A venue can lag by half a second in event time while its funding process carries hour-scale
+information about another venue's; the two claims do not meet, and ours is confined to the first.
+
 \subsection{What is new here}
 
 Narrowly: a lag measured on a complete, attributable, public tape at 25\,ms resolution, whose
@@ -500,6 +520,16 @@ High frequency lead/lag relationships---empirical facts.
 J.~Plazuelo Pascual, C.~Tard\'on Rubio, J.~Toro Cebada, and A.~Hernando Veciana.
 Price discovery in cryptocurrency markets.
 arXiv:2506.08718, 2025. \url{https://arxiv.org/abs/2506.08718}.
+
+% Verified 2026-07-29 against the RePEc abstract page (gam/jijfss v14 i5 p103); the
+% pair-level windows figure is from the article body and should be re-checked in the
+% full text, which resists automated retrieval.
+\bibitem{zhivkov2026}
+P.~Zhivkov, V.~Todorov, and S.~Georgiev.
+Temporal dynamics of market microstructure in cryptocurrency perpetual futures: econometric
+evidence from centralized and decentralized exchanges.
+\emph{International Journal of Financial Studies}, 14(5):103, 2026.
+\url{https://www.mdpi.com/2227-7072/14/5/103}.
 
 \bibitem{capponi2022}
 A.~Capponi, R.~Jia, and S.~Yu.
