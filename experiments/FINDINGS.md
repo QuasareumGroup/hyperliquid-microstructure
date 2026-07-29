@@ -282,3 +282,11 @@ Each cost a real error, and each is recorded where it was paid.
     books; the real obstacles are a 2 s write-side thinning and, decisively, Binance's fixed
     500 ms depth grid). A wrong reason is not a harmless slip: it points the next experiment at
     the wrong fix. Here it hid that the answer is two `bbo` subscriptions, not a new recorder.
+
+13. **A denominator is infrastructure — one hour of it poisons everything downstream.** Twice now
+    a daily figure has been extrapolated from a single hour (storage projections, then venue
+    maker volume), and the second time the hour happened to be the day's peak: 14:00 UTC at
+    \$1,012M against a \$152M trough, 6.6× apart. The first error was embarrassing and local.
+    The second sat in a *denominator*, so it silently scaled the thresholds in two later
+    experiments and made a business look 5.1× harder to enter than it is
+    (`hyperliquid-alpha` EXP-A007). Sample a rate across the cycle before dividing anything by it.
