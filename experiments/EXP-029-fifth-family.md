@@ -116,4 +116,68 @@ Any improvement to those would be a second variable moving.
 
 ## 7. Results
 
-*(empty until the experiment runs)*
+Run 2026-07-29, 3h07, 200 bootstrap replicates with refit at each. 351,648 episodes, band
+$25,000–$81,000, eight thresholds `k ∈ [11,252, 29,519]`.
+
+| family | params | fits | unfitted (on bound) | verdict |
+|---|---|---|---|---|
+| generalised Pareto | 2 | **0/8** | 0 | rejected at every threshold |
+| Burr XII | 3 | **0/8** | 0 | rejected at every threshold |
+| log-gamma | 2 | **0/8** | 3 | rejected at the five lower thresholds |
+| generalised gamma | 3 | **0/8** | **8** | **never fitted — not a result** |
+
+Every `p` is 0.000. KS distances fall monotonically as the threshold drops — GPD from 0.0542 to
+0.0368 — which is the sample growing, not the fit improving.
+
+### The positive control passed, and it is not P1
+
+Each family was tested against its own synthetic draws at `n = 19,525`: GPD `p = 0.440`, log-gamma
+0.660, Burr XII 0.300, generalised gamma 0.540. **The bootstrap does not over-reject at this
+sample size**, so the rejections above are real and not an artefact of `n`.
+
+**But P1 was registered as a port check against EXP-022's original four families, and that was not
+run.** The control answers a different question — "does the machinery reject anything at
+n ≈ 20,000?" — than the one P1 asked, which is "does this machinery reproduce EXP-022's
+rejections?" The two are not substitutes. P1 is untested, and the comparison with EXP-022 rests on
+the shared band and construction rather than on a demonstrated reproduction.
+
+### P2 rejected, and this is the interesting one
+
+**The generalised Pareto survives at 0 of 8 thresholds.** It was registered as *expected to
+survive*, because Pickands–Balkema–de Haan makes GPD close to the generic outcome above a high
+threshold for a very broad class of distributions.
+
+It does not survive anywhere in the band. The honest reading is not that PBdH fails — the theorem
+is asymptotic in the threshold, and this band evidently is not in that regime. **It is that the
+band is not a tail in the extreme-value sense at all.** Exceedances there still carry too much body
+for the limit to have taken hold. That is a sharper statement about the band than the experiment
+set out to make, and it is consistent with the mixture reading §6 declines to test.
+
+### P3 confirmed
+
+Every fully parametric family is rejected across the band, exactly as registered. Nesting the
+degenerate cases of EXP-022 bought nothing: Burr XII and generalised gamma have three parameters
+each and neither describes the data.
+
+### P4 — satisfied in the reporting, not tested as a prediction
+
+No family survived, so nothing could survive *by pinning*. What rule 8 did do is keep two families
+from being miscounted: generalised gamma sat on its constraint boundary at **all eight** thresholds
+and log-gamma at **three**, and both are reported as unfitted rather than as fits.
+
+## 8. What this establishes
+
+**The band is still empty, and the count is seven families, not eight.** EXP-022's four, plus
+generalised Pareto, Burr XII and log-gamma. **Generalised gamma is not among them** — it never
+converged off its bound, so it was never tested, and claiming it as a rejection would be exactly
+the error rule 8 exists to prevent. Log-gamma's rejection covers the five lower thresholds only.
+
+**The paper's claim strengthens without needing a correction.** *"No candidate here describes the
+data"* was written on four families and now stands on seven, including two with three parameters
+and the one that extreme-value theory hands you for almost any underlying distribution. That is a
+harder claim to attack than it was this morning, and the revision needs a sentence, not a rewrite.
+
+**What it does not establish** is why. Seven failures locate the problem without naming it, and the
+mixture hypothesis — a body and a tail with different generating mechanisms — remains the obvious
+next question and remains untested. P2's failure is now the strongest hint available that this is
+the right place to look.
