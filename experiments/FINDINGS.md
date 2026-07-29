@@ -310,3 +310,11 @@ Each cost a real error, and each is recorded where it was paid.
     A010.) The related trap: those markouts were also **equal-weighted per fill** while P&L is
     weighted by notional — and the smallest fifth of fills carried 0.1% of the money against the
     largest fifth's 91%, which alone flipped the sign.
+
+16. **A diagnostic that cannot rank is not a diagnostic.** Rule 15 said a markout is not a P&L.
+    Worse: across 139 market-making books, the cross-sectional correlation between markout and
+    realised P&L is −0.024 at τ=0 and never exceeds 0.07 in magnitude out to 30 s. Given two
+    books and their complete markout curves you cannot tell which one makes money — 99% of the
+    difference happens later. (`hyperliquid-alpha` EXP-A016.) Before building on a statistic,
+    check it separates the outcomes you care about; a quantity everyone agrees is standard can
+    still be orthogonal to the question.
