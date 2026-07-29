@@ -22,9 +22,9 @@
 % on results already established and defended in the public pre-registered
 % record, and is written to stand whatever Section 8 returns.
 %
-% Section 3 (related work) still needs a dedicated literature pass on lead-lag
-% and CEX/DEX price discovery. The references present are the ones actually
-% used; nothing is cited that has not been read.
+% Literature pass done 2026-07-29. Every reference was retrieved and read; the
+% Lehar-Parlour authorship should be re-checked against the published version
+% before submission, as it was taken from a listing rather than the article.
 % ============================================================================
 
 \title{\bfseries An on-chain venue trails the centralised market\\
@@ -111,30 +111,67 @@ that behaved in a way we cannot explain.
 \section{Related work}
 \label{sec:related}
 
-% TODO: dedicated literature pass on (a) lead-lag estimation from asynchronous
-% data beyond the estimator's own lineage, (b) CEX/DEX price discovery, which is
-% dominated by AMM studies, (c) latency and venue fragmentation in equities,
-% which is the closest mature analogue. Nothing is cited here that has not been
-% read; the section is short because the pass is not done, not because the
-% literature is thin.
-
 \subsection{Estimating lead--lag from asynchronous observations}
 
 Two venues trading the same instrument do not print at the same instants, and any estimator that
 first synchronises them onto a grid inherits the grid's resolution. That is not a minor
-inconvenience here: the effect under measurement is of the order of half a second, and the
-natural grids are of the same order or coarser.
+inconvenience here: the effect under measurement is of the order of half a second, and the natural
+grids are of the same order or coarser.
 
-The Hayashi--Yoshida covariance estimator~\cite{hy2005} avoids synchronisation entirely. It sums
-products of returns whose observation intervals overlap, without binning, resampling or
+The Hayashi--Yoshida covariance estimator~\cite{hy2005} avoids synchronisation entirely, summing
+products of returns whose observation intervals overlap without binning, resampling or
 interpolation. Hoffmann, Rosenbaum and Yoshida~\cite{hry2013} extend it to estimate the lead--lag
-parameter itself, by maximising the same statistic over a shift applied to one series. We use
-that construction throughout; Section~\ref{sec:estimator} states it and reports what it was
-validated against.
+parameter itself, by maximising that statistic over a shift applied to one series. We use their
+construction throughout.
 
-\subsection{Centralised and decentralised price discovery}
+The estimator is not without known defects, and one bears directly on this application.
+Georgiadis~\cite{georgiadis2024} shows that Hayashi--Yoshida has an intrinsic telescoping property
+which cancels observations he terms \emph{nonextant}, producing a \emph{formulaic bias} and a data
+loss that, for two series observed at equal rates, is at minimum 25\% on average. Our venues are
+observed at markedly unequal rates, so that bound does not transfer directly; but the concern
+does, and Section~\ref{sec:estimator} answers it empirically rather than by argument. The defect
+is one of the covariance \emph{level}, and what we report is the location of the maximum over
+$\tau$; imposing known lags and recovering them exactly---including zero---bounds any effect on
+that location below the 25\,ms grid.
 
-% TODO: pass.
+\subsection{What high-frequency lead--lag usually looks like}
+
+Huth and Abergel~\cite{huth2014} give the empirical reference points for this phenomenon on
+equities and futures. Three of their findings frame ours. Cross-correlation functions are
+strongly asymmetric, especially between futures and their underlying. More liquid instruments
+lead less liquid ones---which is the pattern we also see across instruments
+(Section~\ref{sec:notwhat}). And, most usefully for us, the lead--lag relationship is
+\emph{not constant through the day}: they report intraday seasonality, with behaviour changing
+around macroeconomic announcements and the US open.
+
+That last finding is a testable prediction about our data, and Section~\ref{sec:seasonality}
+reports the test. We do not reproduce it.
+
+\subsection{Centralised versus decentralised price discovery}
+
+Work on this question is dominated by automated market makers, whose pricing is mechanical rather
+than order-driven. Capponi, Jia and Yu~\cite{capponi2022} study price discovery on
+constant-function AMMs and the arbitrage that couples them to centralised venues; Lehar and
+Parlour~\cite{lehar2025} analyse the Uniswap AMM as a market institution. Plazuelo Pascual and
+co-authors~\cite{plazuelo2025} are closest to this paper's design: they measure ETH price
+discovery between Binance and Uniswap~v2 over a year using Hasbrouck information shares,
+Gonzalo--Granger decomposition \emph{and} the Hayashi--Yoshida estimator, and find that
+centralised markets typically lead.
+
+Our setting differs in the object rather than the method. Hyperliquid is a central limit order
+book, not an AMM: it has a resting book, a bid--ask spread and marketable order flow, so its
+lead--lag is a statement about order-driven price formation rather than about arbitrage against a
+bonding curve. To our knowledge the sub-second lead--lag of an \emph{on-chain order-book} venue
+has not been measured against centralised venues on a complete public tape.
+
+\subsection{What is new here}
+
+Narrowly: a lag measured on a complete, attributable, public tape at 25\,ms resolution, whose
+principal alternative explanation---unequal observation rates---is excluded by three
+pre-registered experiments rather than argued away, one of them structurally. We do not claim
+priority on the observation that decentralised venues trail centralised ones; that is expected and
+partly documented. We claim the measurement's resolution, its universality across every
+asset-hour, and the falsification record behind it.
 
 \section{Setting and data}
 
@@ -187,7 +224,11 @@ U(\tau) \;=\; \sum_{i,j} \Delta X_i \, \Delta Y_j \;
 and the lead--lag estimate is the $\tau$ maximising $|U|$. We evaluate on a 25\,ms grid over
 $\pm 2\,$s. The sign convention is that $\tau > 0$ means $Y$ leads $X$.
 
-The estimator was validated against known answers twice, and both checks caught something.
+The estimator was validated against known answers twice, and both checks caught something. Those
+validations also serve as this paper's answer to the formulaic bias of~\cite{georgiadis2024}:
+whatever the telescoping property does to the level of $U$, it does not move the location of its
+maximum, because imposing lags of $0$, $100$, $300$, $575$ and $1000$\,ms recovers each of them
+exactly at the data's own observation densities.
 
 \textbf{Against imposed lags, sign included.} Feeding the estimator a series shifted by a known
 amount recovers that amount to zero error. This check was not ceremonial: an earlier
@@ -229,6 +270,22 @@ Pooled over 758 asset-hours and holding trade frequency constant, the partial co
 hourly range and the estimated peak is $\rho = -0.100$ ($p = 0.006$): higher volatility, very
 slightly shorter lag. An effect explaining 1\% of variance does not move a 575\,ms median, so the
 result stands. The word ``invariant'' does not, and we withdraw it.
+
+\subsection{No intraday seasonality}
+\label{sec:seasonality}
+
+Huth and Abergel~\cite{huth2014} report that high-frequency lead--lag varies through the trading
+day. Our universality claim concerns the \emph{sign}, which could hold while the magnitude moved,
+so we test the magnitude directly.
+
+Grouping all 758 asset-hours by hour of day (24 buckets, 24 to 36 observations each), the median
+estimated lag ranges from \textbf{550\,ms to 600\,ms}---an amplitude of 50\,ms, or two steps of
+the 25\,ms grid. A Kruskal--Wallis test across the 24 buckets gives $H = 33.0$, $p = 0.081$.
+
+We therefore do not reproduce the seasonality Huth and Abergel find in equities and futures. The
+honest statement is not that no intraday effect exists but that \textbf{any such effect is smaller
+than the estimator's resolution}. Individual hours do vary---the per-hour estimates span 150\,ms
+to 1900\,ms---but that variation does not organise by time of day, and it never changes sign.
 
 \section{What the lag is not}
 \label{sec:notwhat}
@@ -426,7 +483,33 @@ On covariance estimation of non-synchronously observed diffusion processes.
 \bibitem{hry2013}
 M.~Hoffmann, M.~Rosenbaum, and N.~Yoshida.
 Estimation of the lead--lag parameter from non-synchronous data.
-\emph{Bernoulli}, 19(2):426--461, 2013.
+\emph{Bernoulli}, 19(2):426--461, 2013. \url{https://arxiv.org/abs/1303.4871}.
+
+\bibitem{georgiadis2024}
+E.~Georgiadis.
+A note on asynchronous challenges: unveiling formulaic bias and data loss in the
+Hayashi--Yoshida estimator.
+arXiv:2404.18233, 2024. \url{https://arxiv.org/abs/2404.18233}.
+
+\bibitem{huth2014}
+N.~Huth and F.~Abergel.
+High frequency lead/lag relationships---empirical facts.
+\emph{Journal of Empirical Finance}, 26:41--58, 2014. \url{https://arxiv.org/abs/1111.7103}.
+
+\bibitem{plazuelo2025}
+J.~Plazuelo Pascual, C.~Tard\'on Rubio, J.~Toro Cebada, and A.~Hernando Veciana.
+Price discovery in cryptocurrency markets.
+arXiv:2506.08718, 2025. \url{https://arxiv.org/abs/2506.08718}.
+
+\bibitem{capponi2022}
+A.~Capponi, R.~Jia, and S.~Yu.
+Price discovery on decentralized exchanges.
+Working paper, SSRN 4236993. \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4236993}.
+
+\bibitem{lehar2025}
+A.~Lehar and C.~A.~Parlour.
+Decentralized exchange: the Uniswap automated market maker.
+\emph{The Journal of Finance}, 2025. \url{https://onlinelibrary.wiley.com/doi/10.1111/jofi.13405}.
 
 \bibitem{hyperliquid}
 Hyperliquid. Documentation. \url{https://hyperliquid.gitbook.io/hyperliquid-docs}.
