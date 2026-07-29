@@ -17,15 +17,14 @@
 \usepgfplotslibrary{groupplots}
 
 % ============================================================================
-% SKELETON — 2026-07-29. Sections marked [TEST C] wait on the BBO capture that
-% began 2026-07-28 and needs roughly two weeks. Everything else rests on results
-% already established and defended in the repository's pre-registered record.
+% DRAFT — 2026-07-29. Section 8 waits on the BBO capture begun 2026-07-28;
+% roughly two weeks of quote data lands around 11 August. Everything else rests
+% on results already established and defended in the public pre-registered
+% record, and is written to stand whatever Section 8 returns.
 %
-% The claim this paper can make WITHOUT Test C: the lag exists, it is universal
-% across every asset-hour measured, and three pre-registered experiments exclude
-% the one explanation that would make it an artefact. What Test C adds is the
-% mechanism — whether Hyperliquid's QUOTES trail or only its PRINTS — which
-% decides whether anything is takeable. It is a section, not the paper.
+% Section 3 (related work) still needs a dedicated literature pass on lead-lag
+% and CEX/DEX price discovery. The references present are the ones actually
+% used; nothing is cited that has not been read.
 % ============================================================================
 
 \title{\bfseries An on-chain venue trails the centralised market\\
@@ -46,19 +45,28 @@ by half a second, in every hour measured}
 
 \begin{abstract}
 \noindent
-% TARGET: under 1920 characters — arXiv's limit, which paper 1 hit at 1931 and
-% had to be trimmed at submission. Check before submitting anywhere.
-%
-% Must contain, in this order:
-%   1. What: Binance leads Hyperliquid, median 575 ms.
-%   2. How universal: 100\% of 758 asset-hours, zero reversals. OKX--Binance 25 ms
-%      with the same estimator (factor 23) — so it is Hyperliquid's property.
-%   3. What was excluded, and this is the contribution: three pre-registered
-%      experiments rule out observation sparsity as the explanation. One of the
-%      exclusions is structural rather than empirical.
-%   4. The new structural observation: the two venues run on different clocks.
-%   5. [TEST C] quotes or prints.
-%   6. Data, code and pre-registrations are public.
+Price discovery between centralised and decentralised venues is usually studied on automated
+market makers. We measure it on an order-book venue: Hyperliquid, an on-chain perpetual-futures
+exchange whose entire trade tape is public. A grid-free Hayashi--Yoshida estimator over 758
+asset-hours and four instruments puts Binance ahead of Hyperliquid by a median \textbf{575\,ms}
+(bootstrap 95\% CI $[550, 575]$), in \textbf{100\% of asset-hours measured, with zero reversals}.
+The same estimator returns 25\,ms between OKX and Binance---a factor of 23---so the lag is a
+property of Hyperliquid rather than of Binance.
+
+The contribution is what the lag is \emph{not}. Three pre-registered experiments exclude the
+explanation that would make it an artefact of unequal observation rates. Imposing a known lag and
+thinning the follower to Hyperliquid's real print times recovers that lag exactly, zero included.
+Independent price innovations in the follower cannot move the estimate at all---a cross-covariance
+is blind to them at every lag, which makes that exclusion structural rather than empirical. And a
+sampler coupled to price far more strongly than either venue actually is moves the peak by not one
+grid step. Each falsifier was written before its run, and every prediction that failed is reported
+as failed.
+
+We also report a structural asymmetry between the two venues: they run on different clocks.
+Binance's trade arrival tracks price movement (Spearman $+0.28$ to $+0.77$ against absolute
+return); Hyperliquid's barely does ($+0.06$ to $+0.17$), and its quotes update roughly once per
+block. Whether the remaining lag is mechanical or informational is not settled here, and we state
+precisely what would settle it. All data, code and pre-registrations are public.
 \end{abstract}
 
 \medskip
@@ -67,173 +75,368 @@ exchange; perpetual futures; Hayashi--Yoshida.\\
 \textbf{JEL:} G14, G15, C58, C81.
 
 \section{Introduction}
-% The one-paragraph version: an on-chain venue follows the centralised market by
-% half a second, and the interesting part is not the number but that it survives
-% every attempt made here to explain it away.
-%
-% Frame against the obvious objection FIRST, because a referee will raise it in
-% paragraph two: "lead--lag between venues is a saturated genre". What is not
-% saturated:
-%   (a) an on-chain venue whose entire order flow is public and attributable;
-%   (b) a lag defended by pre-registered falsification rather than by robustness
-%       checks chosen after seeing the result;
-%   (c) 100\% of asset-hours with zero reversals, which is not a typical
-%       lead--lag finding and needs its own explanation.
-%
-% State plainly what this paper does NOT claim: no tradeability claim without
-% Test C, and none even then without fee accounting.
+
+An on-chain perpetual-futures venue follows the centralised market by half a second. That
+sentence, on its own, is not a contribution: lead--lag between trading venues is among the most
+worked subjects in market microstructure, and finding that a newer venue trails an older one
+surprises nobody.
+
+Three things make the measurement worth reporting anyway.
+
+The first is the venue. Hyperliquid runs a central limit order book on its own chain, and its
+entire trade tape is public, complete and attributable---no licence, no sampling, no vendor
+between the analyst and the record. Most work on centralised-versus-decentralised price discovery
+studies automated market makers, whose pricing is mechanical rather than order-driven and whose
+lead--lag is therefore a different object.
+
+The second is the universality. The lag holds in \emph{every} asset-hour we measure---758 of
+them, across four instruments---with not one reversal. A lead--lag estimate that never changes
+sign over a month of hourly windows is not the usual shape of such a finding, and it needs an
+explanation of its own.
+
+The third, and the reason this paper exists, is what the lag is not. A lag between a densely
+printing venue and a sparse one invites one obvious objection: that the estimator is reporting
+the difference in observation rates rather than a difference in information. We take that
+objection seriously enough to have pre-registered three experiments against it, each with its
+falsifier written down before the run, on a repository whose commit history dates every
+prediction before its result. All three exclude it. One of them excludes it \emph{structurally},
+by an argument about cross-covariance that holds whatever the data does.
+
+We are explicit about what this paper does not claim. It does not claim the lag is exploitable:
+that requires knowing whether Hyperliquid's \emph{quotes} trail or only its \emph{prints}, which
+is a different measurement on different data, reported in Section~\ref{sec:quotes}. It does not
+separate mechanical latency from price discovery. And it reports, in full, one robustness check
+that behaved in a way we cannot explain.
 
 \section{Related work}
+\label{sec:related}
 
-\subsection{Lead--lag estimation between venues}
-% Hayashi--Yoshida and why grid-free matters here: the two venues print at
-% incomparable rates, and any synchronisation grid imposes a resolution floor
-% above the effect being measured. Cite the estimator's original derivation and
-% the asynchronous-data literature.
+% TODO: dedicated literature pass on (a) lead-lag estimation from asynchronous
+% data beyond the estimator's own lineage, (b) CEX/DEX price discovery, which is
+% dominated by AMM studies, (c) latency and venue fragmentation in equities,
+% which is the closest mature analogue. Nothing is cited here that has not been
+% read; the section is short because the pass is not done, not because the
+% literature is thin.
 
-\subsection{Centralised versus decentralised price discovery}
-% What exists on CEX--DEX price discovery, mostly on AMMs rather than on an
-% order-book venue. Position the contribution narrowly: not "DEXs lag" but
-% "this venue's trade prints lag by a stable half second, and here is what that
-% is not".
+\subsection{Estimating lead--lag from asynchronous observations}
 
-\subsection{What is new here}
-% Narrow claim, in the paper-1 style: a lag measured on a complete public tape,
-% with the sparsity explanation excluded by pre-registered experiment rather
-% than argued away. Say explicitly what is NOT claimed.
+Two venues trading the same instrument do not print at the same instants, and any estimator that
+first synchronises them onto a grid inherits the grid's resolution. That is not a minor
+inconvenience here: the effect under measurement is of the order of half a second, and the
+natural grids are of the same order or coarser.
+
+The Hayashi--Yoshida covariance estimator~\cite{hy2005} avoids synchronisation entirely. It sums
+products of returns whose observation intervals overlap, without binning, resampling or
+interpolation. Hoffmann, Rosenbaum and Yoshida~\cite{hry2013} extend it to estimate the lead--lag
+parameter itself, by maximising the same statistic over a shift applied to one series. We use
+that construction throughout; Section~\ref{sec:estimator} states it and reports what it was
+validated against.
+
+\subsection{Centralised and decentralised price discovery}
+
+% TODO: pass.
 
 \section{Setting and data}
 
-\subsection{Hyperliquid and the comparison venues}
-% Order-book perpetuals on-chain; Binance and OKX as the centralised comparison.
-% OKX is not decoration — it is the control that makes the result Hyperliquid's
-% property rather than Binance's.
+\subsection{Venues}
+
+Hyperliquid is a perpetual-futures exchange running a central limit order book on a purpose-built
+chain~\cite{hyperliquid}. Order flow, fills and liquidations are recorded on-chain and published
+without restriction. Binance and OKX are the centralised comparison venues~\cite{binance,okx},
+chosen because they are the two largest by perpetual volume on the instruments studied.
+
+OKX is not decoration. A lag measured only against Binance would be consistent with Binance being
+unusually fast rather than Hyperliquid being slow. Measuring OKX against Binance with the identical
+estimator, window and code separates those two readings, and Section~\ref{sec:control} reports the
+result.
 
 \subsection{The tape}
-% perplog's multi-venue capture. Trade prints, hourly artefacts, per-venue.
-% Coverage derived FROM THE TAPE rather than from a recorder flag: EXP-021 found
-% the flag fired on reconnects and 95.9\% of flagged hours were complete, and the
-% dropped hours were an unbiased subset. Say so — it is the kind of detail that
-% decides whether a referee believes the sample.
+
+Trade prints for all three venues come from a continuous multi-venue capture, written to hourly
+per-venue artefacts. Every print carries the venue's own timestamp; no clock is imposed by the
+recorder.
+
+Coverage is derived \emph{from the tape} rather than from the recorder's own status flag, and the
+distinction mattered. An earlier analysis dropped 49 of 193 hours on a flag that, on inspection,
+fired on transport reconnects rather than on recording holes. Re-deriving completeness from the
+data---a venue was down only if another venue kept printing through its silence---showed that
+\textbf{95.9\% of flagged hours were in fact complete}, and that the flag is uncorrelated with
+market activity (Spearman $+0.034$ with volatility, $-0.015$ with event count; Mann--Whitney
+$p = 0.635$). The dropped hours were an unbiased subset. Recovering them widened the sample's
+volatility range by 38\% at the top and left the headline unchanged.
 
 \subsection{Sample}
-% BTC/ETH/SOL/HYPE, the window, 758 asset-hours. State the median inter-print
-% gap per venue, because every sparsity argument later depends on it.
+
+Four instruments---BTC, ETH, SOL and HYPE---over a one-month window, giving 758 asset-hours after
+the tape-derived completeness filter, of which 191 are BTC.
+
+The observation rates differ by roughly a factor of three, and every sparsity argument in
+Section~\ref{sec:notwhat} depends on that number: Hyperliquid's median inter-print gap on BTC is
+266\,ms against Binance's much shorter one. The disparity is the objection this paper has to
+answer, so we state it before the result rather than after.
 
 \section{The estimator, and what it was checked against}
-% Hayashi--Yoshida on the tau grid. Validated to zero error against known lags
-% (EXP-010), including sign — EXP-010 caught a sign inversion that would have
-% read as "Hyperliquid leads".
-%
-% Re-validated at Hyperliquid's own observation density (EXP-026): impose zero,
-% thin the follower to HL's real print times, recover zero exactly.
-% [TEST C] and again at the quote densities, which are 69x asymmetric.
+\label{sec:estimator}
+
+For price series observed at $\{t_i\}$ and $\{s_j\}$, the Hayashi--Yoshida statistic at shift
+$\tau$ is
+\begin{equation}
+U(\tau) \;=\; \sum_{i,j} \Delta X_i \, \Delta Y_j \;
+\mathbf{1}\!\left\{ (t_{i-1}, t_i] \cap (s_{j-1} - \tau,\; s_j - \tau] \neq \emptyset \right\},
+\end{equation}
+and the lead--lag estimate is the $\tau$ maximising $|U|$. We evaluate on a 25\,ms grid over
+$\pm 2\,$s. The sign convention is that $\tau > 0$ means $Y$ leads $X$.
+
+The estimator was validated against known answers twice, and both checks caught something.
+
+\textbf{Against imposed lags, sign included.} Feeding the estimator a series shifted by a known
+amount recovers that amount to zero error. This check was not ceremonial: an earlier
+implementation returned the correct magnitude with the sign inverted, which would have been
+reported as \emph{Hyperliquid leads}.
+
+\textbf{At Hyperliquid's own observation density.} Validation against a known lag says nothing
+about behaviour at the observation rates of the actual data. Imposing a lag of zero on a series
+thinned to Hyperliquid's real print times returns \emph{zero}---exactly, in every hour, on three
+of the four instruments, and within one grid step on the sparsest. The estimator does not
+manufacture a lag from unequal observation rates. Section~\ref{sec:notwhat} takes that further.
 
 \section{Result: a stable half-second lag}
 
 \subsection{Magnitude and universality}
-% 575 ms median, bootstrap CI [550, 575], mean 607. 100\% of 191 BTC hours and
-% 100\% of 758 asset-hours, zero reversals. Per asset: BTC 575, ETH 550,
-% HYPE 550, SOL 650.
+
+Binance leads Hyperliquid by a median \textbf{575\,ms} on BTC (bootstrap 95\% CI on the median
+$[550, 575]$; mean 607\,ms), in \textbf{100\% of 191 measured hours}. Pooling the four
+instruments, the lag holds in \textbf{100\% of 758 asset-hours, with zero reversals}.
+
+Per instrument the medians are BTC 575\,ms, ETH 550\,ms, HYPE 550\,ms and SOL 650\,ms---a spread
+of 100\,ms across instruments whose liquidity differs by more than an order of magnitude.
 
 \subsection{The control that makes it Hyperliquid's}
-% OKX--Binance at 25 ms with the identical estimator and window — a factor of 23.
-% The centralised venues do not lead one another (EXP-007).
+\label{sec:control}
+
+Run on OKX against Binance, over the same window with the same code, the estimator returns
+\textbf{25\,ms}---a factor of 23 smaller. The centralised venues do not lead one another to any
+material degree. Whatever produces the 575\,ms is a property of Hyperliquid, not an artefact of
+using Binance as the reference.
 
 \subsection{Volatility}
-% No material dependence, but NOT literal invariance, and say which: pooled over
-% 758 asset-hours holding trade frequency constant, rho = -0.100, p = 0.006.
-% An effect explaining 1\% of variance does not move a 575 ms median; the word
-% "invariant" is withdrawn. This is the sort of correction that buys credibility
-% rather than costing it.
+
+The lag shows no material dependence on volatility, but it is not literally invariant, and the
+distinction is worth making precisely because an earlier version of this work claimed the
+stronger form.
+
+Pooled over 758 asset-hours and holding trade frequency constant, the partial correlation between
+hourly range and the estimated peak is $\rho = -0.100$ ($p = 0.006$): higher volatility, very
+slightly shorter lag. An effect explaining 1\% of variance does not move a 575\,ms median, so the
+result stands. The word ``invariant'' does not, and we withdraw it.
 
 \section{What the lag is not}
-% The core of the paper. Three pre-registered experiments, each with its
-% falsifier written before the run.
+\label{sec:notwhat}
+
+Hyperliquid prints roughly three times less often than Binance. The objection this invites is
+that the estimator reports that disparity rather than any difference in information. This section
+answers it with three experiments, each pre-registered with its falsifier written before the run.
 
 \subsection{Not an artefact of unequal observation rates}
-% EXP-026. Shift the leader by a KNOWN lag, thin to HL's real print times,
-% require recovery. Exact in every hour on three of four assets, within 25 ms on
-% the sparsest. The line that decides it is L = 0, where the estimator returns
-% zero rather than drifting toward 575.
+
+Take Binance's own series, shift it by a \emph{known} lag $L$, and then thin it to Hyperliquid's
+observed print times for the same hour---producing a follower exactly as sparse as Hyperliquid,
+with a lag we chose. The unmodified estimator must return $L$.
+
+It does, for $L \in \{0, 100, 300, 575, 1000\}$\,ms, exactly and in every hour on BTC, ETH and
+HYPE, and within one 25\,ms grid step on SOL, the sparsest instrument.
+
+The line that decides it is $L = 0$. Imposing no lag and thinning to Hyperliquid's cadence returns
+zero---not a drift toward 575\,ms, not a drift toward anything. Whatever produces the measured lag,
+it is not the estimator inventing one from unequal observation rates.
 
 \subsection{Not the follower's own price innovations}
-% EXP-027. Structural, not empirical: Hayashi--Yoshida is a cross-covariance, so
-% an independent additive component contributes zero at every lag. Verified flat
-% at noise ratios up to 80x the leader's variance.
-%
-% Report the honest limitation too: the synthetic follower does not reproduce a
-% leader-thinning behaviour the real pair shows (P5). That manipulation degrades
-% the LEADER, which the reported measurement never does — but say it, do not
-% hide it.
+
+Thinning a deterministic copy of the leader is a weaker test than it looks: the follower there has
+no price of its own. Hyperliquid does. We therefore repeat the construction with a follower that
+carries an independent price component of calibrated size, and vary that size.
+
+The estimate does not move---at noise ratios up to eighty times the leader's own variance.
+
+This exclusion is \emph{structural} rather than empirical, and that is the point. The statistic is
+a cross-covariance, so if the follower is $X(t - L) + W$ with $W$ independent of $X$, then
+$\mathbb{E}[\Delta X \cdot \Delta W] = 0$ at every lag and $W$ contributes nothing to $U(\tau)$ at
+any $\tau$. Independent noise moves the estimator's variance, never its peak. The measurement
+confirms an algebraic fact rather than establishing an empirical one.
 
 \subsection{Not endogenous sampling}
-% EXP-028. A total-variation clock samples on nothing but the series' own
-% movement — a condition harsher than the venue's actual +0.06 to +0.17 coupling
-% — and moves the peak by not one grid step at any asset or dimension.
+
+Both constructions above share a defect: their observation times are independent of the follower's
+own price movements, by construction. Real venues are not sampled that way---a venue prints
+\emph{because} a trade happened, and trades happen when the price is moving.
+
+We therefore sample the synthetic follower on a total-variation clock: an observation is emitted
+whenever cumulative absolute log-price movement on the follower's own path crosses a threshold,
+with the threshold set so the count matches Hyperliquid's real count for that hour. Same sparsity,
+different reason for it.
+
+The peak does not move---not one 25\,ms grid step, at any instrument or dimension. And the test is
+harsher than reality: the total-variation clock samples on nothing \emph{but} the series' own
+movement, where Hyperliquid's measured coupling to price is between $+0.06$ and $+0.17$
+(Section~\ref{sec:clocks}). The null is an upper bound.
 
 \subsection{What that leaves}
-% Block cadence, network latency, genuine price discovery. Observation density
-% is out, and the cross-asset association (rho = -0.656) is attributed to market
-% structure: sparser instruments really are slower.
+
+Observation density is excluded on three independent constructions, one of them structurally.
+What remains as candidate explanations is block cadence, network latency, and genuine price
+discovery. Across instruments the correlation between trade frequency and lag is $\rho = -0.656$,
+which has the signature of a density effect; with no estimator-side mechanism surviving, we
+attribute it to market structure---sparser instruments are genuinely slower---rather than to the
+measurement.
+
+\subsection{One check we cannot explain}
+
+Honesty requires reporting the following. Thinning the \emph{leader} to Hyperliquid's cadence
+moves the measured peak upward on the real pair, by between 25 and 212\,ms depending on
+instrument. No synthetic construction we built reproduces that behaviour.
+
+That manipulation degrades the leader, and the reported measurement never does---Binance enters at
+full density throughout. So this is an unexplained property of a deliberately degraded
+measurement, not of the result. We state it because it is unexplained, and we say what would
+reopen it: a quote-based measurement returning a materially different magnitude.
 
 \section{Two venues, two clocks}
-% EXP-028 Part 1, and this is a finding in its own right rather than a robustness
-% check. Spearman between prints-per-second and |return|:
-%   Binance +0.28 to +0.77 ; Hyperliquid +0.06 to +0.17.
-% Binance's trade arrival tracks price directly. Hyperliquid's barely does.
-%
-% The likely reason, measured: HL's quotes update ~7.9 times a second on BTC,
-% about once per block. Trade arrival looks gated by block production rather than
-% by price events. State it as consistent with two measurements, not as tested —
-% an honest hedge that a referee will respect more than a confident mechanism.
+\label{sec:clocks}
 
-\section{[TEST C] Quotes or prints?}
-% RESERVED. The BBO capture began 2026-07-28; two weeks of quote/v1 data lands
-% around 11 August.
-%
-% The question: if Hyperliquid's QUOTES trail Binance's by ~575 ms, resting
-% orders sit at stale prices. If only its PRINTS trail, the last traded price is
-% merely old and there is nothing to take. Trades and quotes answer different
-% questions.
-%
-% Already established and reportable regardless of the outcome:
-%   - the recorded depth books CANNOT answer it: Binance publishes partial depth
-%     on a venue-imposed 500 ms grid, so no recorder setting reaches 575 ms;
-%   - the BBO channels can — both push on change with no interval;
-%   - quotes are 15x to 40x more asymmetric between the venues than trades are,
-%     so this is the harder measurement, not the easier one;
-%   - the estimator recovers known lags exactly at those densities (69x).
+The endogenous-sampling test above required measuring how strongly each venue's printing couples
+to price movement. That measurement is a finding in its own right.
+
+For each one-second bin we correlate a venue's print count with the absolute log return over the
+same second, using Binance's return as the movement proxy for both venues so that no venue's
+activity is measured against its own observed returns:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+ & Hyperliquid & Binance \\
+\midrule
+HYPE & $+0.167$ & $+0.771$ \\
+BTC  & $+0.126$ & $+0.447$ \\
+ETH  & $+0.112$ & $+0.618$ \\
+SOL  & $+0.057$ & $+0.280$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Binance prints markedly more when the market moves. Hyperliquid barely does---its coupling is
+three to five times weaker on every instrument.
+
+A likely reason is measurable and we report it as consistent rather than as tested: Hyperliquid's
+quotes update about 7.9 times a second on BTC, roughly once per block. Trade arrival on an on-chain
+venue is gated by block production; on a centralised venue it is gated by order flow. The two
+venues are sampled by different clocks, and that is a structural difference between on-chain and
+off-chain market structure rather than a property of this window.
+
+\section{Quotes or prints?}
+\label{sec:quotes}
+
+% ================= RESERVED FOR TEST C =================
+% BBO capture began 2026-07-28; ~2 weeks lands around 11 August. Written to be
+% completable without restructuring whatever it returns.
+% =======================================================
+
+Everything above is measured on trade prints. Trades and quotes answer different questions, and
+the difference decides what the result means.
+
+If Hyperliquid's \emph{quotes} trail Binance's by half a second, then resting orders sit at stale
+prices and the lag is something an informed participant could act on, subject to fees. If only its
+\emph{prints} trail, then the last traded price is merely old---the book may be perfectly
+current---and there is nothing there to take.
+
+Three facts about that measurement are already established and hold whatever it returns.
+
+\textbf{Recorded depth books cannot answer it.} Binance publishes partial order-book depth on a
+venue-imposed 500\,ms grid. A lag of the order of 575\,ms cannot be resolved against a series
+published on a 500\,ms clock, whatever the recording cadence downstream.
+
+\textbf{The best-bid-offer channels can.} Both venues publish a BBO stream that pushes on every
+change with no interval. A capture of those channels began on 2026-07-28.
+
+\textbf{It is the harder measurement, not the easier one.} On quotes the two venues differ in
+observation rate by a factor of 15 to 40, against roughly 3 on trades. The estimator recovers
+known lags exactly at those densities, including zero, so the instrument is validated for the
+regime; but the asymmetry the result must survive is an order of magnitude worse than the one
+addressed in Section~\ref{sec:notwhat}.
 
 \section{Implications}
-% Deliberately restrained. What follows for:
-%   - empirical work using on-chain prices as a clean price series;
-%   - the mechanical-versus-informational question, which this does not settle;
-%   - execution, ONLY if Test C shows stale quotes AND the move exceeds fees —
-%     HL's taker fee at tier 0 is 4.5 bps, which is the number that decides it.
-% Do not overclaim. Paper 1's credibility came from what it refused to say.
+
+For empirical work, the practical consequence is narrow and concrete: an on-chain trade price is
+not a contemporaneous observation of the market price. Any study using such a series alongside
+centralised data---realised volatility, correlation, event studies around announcements---inherits
+a half-second offset that is stable enough to correct for and large enough to matter at intraday
+horizons.
+
+For market structure, the two-clocks result is the more interesting one. It says the difference
+between these venues is not only speed but the \emph{sampling mechanism}: one venue's tape is
+driven by order flow, the other's by block production. That distinction survives whatever the
+quote measurement returns.
+
+We deliberately do not draw an execution implication. That requires Section~\ref{sec:quotes} to
+show stale quotes \emph{and} the move to exceed costs; Hyperliquid's taker fee at the base tier is
+4.5 basis points, which is the number any such claim would have to clear.
 
 \section{Limitations}
-% 1. EXP-027's P5, unexplained, stated in full.
-% 2. One estimator. Validated hard, but one.
-% 3. The window and the four instruments.
-% 4. Trade prints only [TEST C removes this one].
-% 5. No submission-level instrument: nothing here sees order submission, so
-%    "price discovery" is inferred from execution timing.
+
+\textbf{The unexplained check.} Leader-thinning inflates the measured peak on the real pair and no
+synthetic construction reproduces it. Stated in Section~\ref{sec:notwhat}; unresolved.
+
+\textbf{One estimator.} Hayashi--Yoshida is validated here against known answers, at the data's own
+observation density, and under three adversarial samplings. It remains one estimator, and a
+result confirmed by a second family would be stronger.
+
+\textbf{Scope.} Four instruments, one venue pair plus one control, one month. The universality
+claim is over that sample and no wider.
+
+\textbf{Trade prints only}, until Section~\ref{sec:quotes} is complete.
+
+\textbf{No submission-level instrument.} Nothing in this data sees an order being submitted, only
+executed. ``Price discovery'' is therefore inferred from execution timing, and the mechanical
+component---block cadence, propagation---is not separated from the informational one.
 
 \section{Reproducibility}
-% Public repository, pre-registrations dated before each run, the data files, the
-% decoder sources. Say that every prediction that failed is reported as failed —
-% and point at the ones that did, because that is the claim's collateral.
+
+Every experiment behind this paper is pre-registered in a public repository, in a file dated and
+committed before the corresponding run. Predictions that failed are reported as failed, and
+several did: an estimator sign inversion, a claim of volatility invariance now withdrawn, a
+sample-selection concern that measured to zero, and a mechanism attribution retracted when its
+timing signature did not appear. The data files, the decoders and the analysis code are public.
 
 \section*{Declarations}
-% Funding, competing interests, data availability, author contribution. Mirror
-% paper 1 exactly.
-%
-% COMPETING INTERESTS: disclose the perplog relationship — the tape used here is
-% recorded by infrastructure the author operates. Paper 1 set the wording.
 
-\bibliographystyle{plain}
-% \bibliography{...}
+\textbf{Funding.} None.
+
+\textbf{Competing interests.} The trade tape analysed here is recorded by market-data
+infrastructure the author operates. No trading position was held in any instrument studied during
+the window.
+
+\textbf{Data availability.} All data, code and pre-registrations are public.
+
+\begin{thebibliography}{9}
+
+\bibitem{hy2005}
+T.~Hayashi and N.~Yoshida.
+On covariance estimation of non-synchronously observed diffusion processes.
+\emph{Bernoulli}, 11(2):359--379, 2005.
+
+\bibitem{hry2013}
+M.~Hoffmann, M.~Rosenbaum, and N.~Yoshida.
+Estimation of the lead--lag parameter from non-synchronous data.
+\emph{Bernoulli}, 19(2):426--461, 2013.
+
+\bibitem{hyperliquid}
+Hyperliquid. Documentation. \url{https://hyperliquid.gitbook.io/hyperliquid-docs}.
+
+\bibitem{binance}
+Binance. USD-M futures API documentation. \url{https://developers.binance.com}.
+
+\bibitem{okx}
+OKX. API documentation. \url{https://www.okx.com/docs-v5/}.
+
+\end{thebibliography}
 
 \end{document}
