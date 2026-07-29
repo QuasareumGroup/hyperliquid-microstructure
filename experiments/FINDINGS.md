@@ -299,3 +299,14 @@ Each cost a real error, and each is recorded where it was paid.
     Variance grew four-fold from 100 ms to 30 s while the mean grew less than twice.
     (`hyperliquid-alpha` EXP-A009, correcting A004 and A008.) Where a mean stabilises and
     where it can be measured are different questions, and only the second licenses a conclusion.
+
+15. **A markout is not a P&L — and when the realised quantity is in the data, read it before
+    modelling it.** Six experiments modelled market-maker revenue as `rebate − markout` and got
+    +0.028 bps a fill. The fills carried `closedPnl` the whole time; it says +0.9 bps, a factor
+    of thirty. A markout prices a position as if closed **at the mid, at a time the analyst
+    picks**, so it omits the second half-spread a passive exit captures and ignores that fills
+    sit across a ladder. It measures adverse selection, which is real and useful, and it is not
+    revenue. (`hyperliquid-alpha` EXP-A012/A013, invalidating the economics of A007, A008 and
+    A010.) The related trap: those markouts were also **equal-weighted per fill** while P&L is
+    weighted by notional — and the smallest fifth of fills carried 0.1% of the money against the
+    largest fifth's 91%, which alone flipped the sign.
