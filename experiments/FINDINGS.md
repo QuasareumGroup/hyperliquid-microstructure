@@ -290,3 +290,12 @@ Each cost a real error, and each is recorded where it was paid.
     The second sat in a *denominator*, so it silently scaled the thresholds in two later
     experiments and made a business look 5.1× harder to enter than it is
     (`hyperliquid-alpha` EXP-A007). Sample a rate across the cycle before dividing anything by it.
+
+14. **A saturating mean is not a usable estimator — pick the horizon on signal-to-noise.**
+    A markout was quoted at 30 s because that is where the mean stopped growing, and two
+    experiments built economics on it. Over 26 hours its between-hour standard deviation is
+    0.224 bps against a mean of 0.272, and the hourly value changes sign — because at that
+    horizon the statistic is mostly measuring where the market went, not what the fill cost.
+    Variance grew four-fold from 100 ms to 30 s while the mean grew less than twice.
+    (`hyperliquid-alpha` EXP-A009, correcting A004 and A008.) Where a mean stabilises and
+    where it can be measured are different questions, and only the second licenses a conclusion.
