@@ -215,6 +215,13 @@ only headline that survived the day without correction.
    their own family), and a direct GoF test rejects every fitted candidate in the band
    (parametric-bootstrap KS, p ≤ 0.01) while KS rejects the power law itself. A fifth family
    (generalised Pareto, log-gamma) might cover that band; none was tried.
+   **Pre-registered as EXP-029 (2026-07-29), and urgent rather than merely open**: the paper in
+   SSRN's approval queue states "cannot be named" in its abstract and twice in its body, so a
+   submitted claim rests on four families with the named fifth candidate never run. If a *fully
+   parametric* family (log-gamma, Burr XII, generalised gamma) fits the band interior, the
+   wording is corrected in the revision before the paper is public. A generalised Pareto fitting
+   would **not** count: Pickands–Balkema–de Haan makes convergence to a GPD the generic outcome
+   for exceedances, so it names nothing about liquidations.
 3. **Venue decoupling during cascades** — coupling roughly halves (EXP-015), on 8 windows. Needs
    many more, and a bounded coupling statistic.
 4. **The premium-sign regime flip** — measured, then explained by the market cycle (r = 0.786).
