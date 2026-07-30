@@ -318,3 +318,10 @@ Each cost a real error, and each is recorded where it was paid.
     difference happens later. (`hyperliquid-alpha` EXP-A016.) Before building on a statistic,
     check it separates the outcomes you care about; a quantity everyone agrees is standard can
     still be orthogonal to the question.
+17. **Skip one bar before believing any thin-book reversal.** Across 174 instruments, minute
+    reversal measured against last-trade prints shows median daily ICs of 0.33 (most liquid
+    quartile) to 0.50 (least liquid) — and 99% of it vanishes when the target skips the
+    adjacent bar (0.006–0.007 residue; individual cases: IC +0.632 → +0.032, one sign flip).
+    Bid–ask bounce grows with spread, so the mirage is largest exactly where "neglected asset"
+    stories want to look. (`hyperliquid-alpha` EXP-A022, which also measured the neglect
+    hypothesis itself dead: response rates flat across a 70× liquidity gradient.)
