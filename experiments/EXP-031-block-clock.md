@@ -85,4 +85,20 @@ robustness.
 
 ## 6. Amendments
 
-*(none yet)*
+**2026-07-30, at implementation, before any data was read** — H3 as first
+written ("each correlated with its own venue's *within-minute* absolute
+return") is scale-invariant under per-minute averaging: Spearman ranks are
+unchanged by dividing a minute's fill count by a near-constant block count,
+so the registered construction would collapse into exactly the minute-scale
+coupling paper 2 already publishes — a tautology, not a test.
+
+Operationalization, fixed now: **H3 runs at the native tick.** Per unit —
+one block for Hyperliquid, one 68-ms bucket for Binance — Spearman between
+the unit's event count and the absolute last-price change across that unit,
+pooled over the window, restricted to units with at least one event on that
+venue (zero-event units are 80%+ of HL blocks and would inject a mechanical
+(0,0) tie mass that differs across venues; their shares are reported as
+descriptives instead). Same committed ratio: HL under 50% of Binance in
+≥ 3 of 4 coins. The minute-scale construction is still computed, as a
+sample check that this window reproduces paper 2's published ranges — not
+as a hypothesis.
