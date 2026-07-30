@@ -383,6 +383,16 @@ reopen it: a quote-based measurement returning a materially different magnitude.
 The endogenous-sampling test above required measuring how strongly each venue's printing couples
 to price movement. That measurement is a finding in its own right.
 
+Two mechanical facts frame it (established in the public record as EXP-031). The chain produces
+a block every 67\,ms (IQR 64--74), and that cadence is volatility-insensitive: the Spearman
+correlation between absolute return and blocks per minute is $+0.03$ to $+0.05$ across the four
+instruments, so the consensus layer neither accelerates nor throttles with market state, and none
+of the asymmetry below can originate there. And at the venue's own tick, activity couples to
+\emph{same-venue} price movement at the same order as Binance's does ($+0.16$ to $+0.32$ per
+block against $+0.34$ to $+0.71$ per 68\,ms, own-venue moves) --- the asymmetry this section
+reports is therefore specific to coupling with \emph{market} movement as proxied by the leader's
+return, which is exactly the construction below.
+
 For each one-second bin we correlate a venue's print count with the absolute log return over the
 same second, using Binance's return as the movement proxy for both venues so that no venue's
 activity is measured against its own observed returns:

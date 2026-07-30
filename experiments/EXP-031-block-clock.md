@@ -1,6 +1,6 @@
 # EXP-031 — the anatomy of Hyperliquid's clock
 
-**Status: PRE-REGISTERED, not yet run.** Registered 2026-07-30.
+**Status: run 2026-07-30. H1 confirmed — the chain is exonerated. H2 and H3 infirmed: at a symmetric native-tick construction the venues couple comparably, so my 70/30 informational bet was wrong, and the asymmetry paper 2 reports is specific to its cross-venue movement proxy — which its own text states, and which nothing here contradicts.**
 **Author:** Thomas Erhel / Quasareum
 
 > Paper 2's "two venues, two clocks" section reports that Hyperliquid's trade
@@ -102,3 +102,71 @@ descriptives instead). Same committed ratio: HL under 50% of Binance in
 ≥ 3 of 4 coins. The minute-scale construction is still computed, as a
 sample check that this window reproduces paper 2's published ranges — not
 as a hypothesis.
+
+---
+
+## 7. Results (2026-07-30)
+
+### D1 — the venue's pulse, measured
+
+6,045,296 blocks over the five days. **Median gap 67 ms** (IQR 64–74,
+p99 136) — the ~15 blocks/second of the probe, confirmed at scale. The
+archive node observes blocks **194 ms after block time** (p99 231 ms) — a
+useful bound on observation latency for any consumer of this archive. Empty
+blocks per coin: BTC 89.3%, ETH 95.2%, SOL 97.6%, HYPE 94.4%.
+
+### H1 CONFIRMED — the chain is exonerated
+
+Spearman(|return|, blocks/min): **+0.028 / +0.042 / +0.047 / +0.037** — all
+four inside the registered [−0.10, +0.10] band. Block production does not
+respond to market state. Whatever the two-clocks asymmetry is, the consensus
+layer is not it.
+
+### H2 INFIRMED (2/4)
+
+The intensive margin (fills per non-empty block) beats the extensive
+(non-empty blocks per minute) on BTC and HYPE only; ETH and SOL run the
+other way, and all eight correlations sit in a narrow +0.28–0.50 band. No
+clean margin story — the coupling spreads across both.
+
+### H3 INFIRMED (2/4) — and my 70/30 was wrong
+
+At the native tick, own-venue moves, active units only:
+
+| | HL per block | BN per 68 ms | ratio |
+|---|---|---|---|
+| BTC | +0.219 | +0.339 | 0.65 |
+| ETH | +0.160 | +0.471 | **0.34** |
+| SOL | +0.199 | +0.055 | 3.63 |
+| HYPE | +0.319 | +0.707 | **0.45** |
+
+Only ETH and HYPE clear the <0.5 ratio. Under a symmetric construction,
+Hyperliquid's activity couples to its own price movement at the same order
+as Binance's — **the "informational asymmetry" reading I registered at 70/30
+does not hold.** (SOL's Binance-side coupling of +0.055 is its own oddity,
+reported, not explained.)
+
+### The sample check failed — and the failure was mine, resolved
+
+The minute-scale check returned HL couplings of +0.37 to +0.54 against paper
+2's published +0.06–0.17. Before touching the paper, its construction was
+read: **paper 2 uses one-second bins and the leader's return as the movement
+proxy for both venues** — deliberately, "so that no venue's activity is
+measured against its own observed returns." The check as implemented here
+used minutes and own-venue returns: a different estimand, mechanically
+inflated for the sparse venue. **No replication failure occurred; the check
+was mis-specified**, and this is recorded as amendment-grade rather than
+silently dropped.
+
+### What this settles
+
+Assembled: the chain's pulse is exogenous (H1); at its own tick the venue's
+activity tracks its own price formation about as well as Binance's does
+(H3's failure); and paper 2's asymmetry lives precisely where its text puts
+it — in the coupling of each venue's activity to *market* movement as
+measured at the leader. Hyperliquid's clock is locally coupled and
+market-decoupled; its chain is innocent. Paper 2 gains two sentences of
+mechanism (cadence + exoneration) and needs no correction.
+
+The wrong bet is the record's point: registered at 70/30 for
+"informational", measured to "comparable under symmetric construction."
