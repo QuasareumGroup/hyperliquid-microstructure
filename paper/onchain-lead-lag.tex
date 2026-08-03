@@ -184,6 +184,15 @@ not a signed magnitude, while the cross-covariance argmax is a signed magnitude 
 A venue can lag by half a second in event time while its funding process carries hour-scale
 information about another venue's; the two claims do not meet, and ours is confined to the first.
 
+The design sensitivity is visible inside that work rather than only across it. The rolling-window
+study revisits an earlier static snapshot of the same 26 venues~\cite{zhivkov2026funding}, which
+reported the opposite direction on the same variable: all significant information flow running from
+centralised to decentralised venues, with no reverse causality. The two designs differ in more than
+one respect---window structure, sampling frequency, symbol count and sample length---so we do not
+attribute the reversal to any single one of them. The reversal itself is the point: the direction of
+funding-rate causality on these venues is not stable across estimation designs, which is a reason to
+keep a funding-rate result and a transaction-price result separate rather than to reconcile them.
+
 \subsection{What is new here}
 
 Narrowly: a lag measured on a complete, attributable, public tape at 25\,ms resolution, whose
@@ -545,6 +554,17 @@ Temporal dynamics of market microstructure in cryptocurrency perpetual futures: 
 evidence from centralized and decentralized exchanges.
 \emph{International Journal of Financial Studies}, 14(5):103, 2026.
 \url{https://www.mdpi.com/2227-7072/14/5/103}.
+
+% VERIFY: published abstract (Crossref/OpenAlex, verbatim) and Crossref
+% reference list only — MDPI 403s non-browser clients despite gold OA. The
+% CEX-to-DEX direction and the zero-reverse-causality claim are from that
+% abstract; the self-citation is confirmed (this paper is ref. 20 of
+% zhivkov2026). Single author, NOT the three-author IJFS team. Read in-browser
+% before this flag comes off.
+\bibitem{zhivkov2026funding}
+P.~Zhivkov.
+The two-tiered structure of cryptocurrency funding rate markets.
+\emph{Mathematics}, 14(2):346, 2026. \url{https://doi.org/10.3390/math14020346}.
 
 \bibitem{capponi2022}
 A.~Capponi, R.~Jia, and S.~Yu.
