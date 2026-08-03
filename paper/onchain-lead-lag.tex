@@ -494,11 +494,13 @@ claim is over that sample and no wider.
 submitted, only executed. ``Price discovery'' is therefore inferred from execution timing, and the
 mechanical component---block cadence, propagation---is not separated from the informational one.
 We note the route a follow-up would take: Albers et al.~\cite{albers2026openbook} publish
-Hyperliquid order-lifecycle records that include rejected orders and a submission-timestamp field,
-openly licensed, for December 2025. That is one venue's internal view rather than a cross-venue
-instrument, and its millisecond resolution is coarse against a 575\,ms effect, so it does not
-settle the split on its own---but the claim in this paper is a limitation of our instrument, not of
-the field.
+Hyperliquid order-lifecycle records that include rejected orders, event timestamps in nanoseconds,
+and a field giving each event's offset from its order's submission time in milliseconds, openly
+licensed, for December 2025. The resolution is ample for a 575\,ms effect. What that record is not
+is a cross-venue instrument: it sees one venue's own order flow, so it can characterise
+Hyperliquid's internal timing but cannot by itself time Hyperliquid against a centralised venue,
+which is what separating the mechanical component from the informational one requires. The claim in
+this paper is a limitation of our instrument, not of the field.
 
 \section{Reproducibility}
 
