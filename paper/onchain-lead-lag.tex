@@ -481,9 +481,15 @@ claim is over that sample and no wider.
 
 \textbf{Trade prints only}, until Section~\ref{sec:quotes} is complete.
 
-\textbf{No submission-level instrument.} Nothing in this data sees an order being submitted, only
-executed. ``Price discovery'' is therefore inferred from execution timing, and the mechanical
-component---block cadence, propagation---is not separated from the informational one.
+\textbf{No submission-level instrument \emph{here}.} Nothing in \emph{our} data sees an order being
+submitted, only executed. ``Price discovery'' is therefore inferred from execution timing, and the
+mechanical component---block cadence, propagation---is not separated from the informational one.
+We note the route a follow-up would take: Albers et al.~\cite{albers2026openbook} publish
+Hyperliquid order-lifecycle records that include rejected orders and a submission-timestamp field,
+openly licensed, for December 2025. That is one venue's internal view rather than a cross-venue
+instrument, and its millisecond resolution is coarse against a 575\,ms effect, so it does not
+settle the split on its own---but the claim in this paper is a limitation of our instrument, not of
+the field.
 
 \section{Reproducibility}
 
@@ -550,6 +556,16 @@ A.~Lehar and C.~Parlour.
 Decentralized exchange: the Uniswap automated market maker.
 \emph{The Journal of Finance}, 80(1):321--374, 2025.
 \url{https://onlinelibrary.wiley.com/doi/10.1111/jofi.13405}.
+
+% VERIFY: characterised 2026-08-03 from the authors' own BibTeX (Cucuringu's
+% publications page), Crossref metadata, and the accompanying Zenodo deposit's
+% README/SCHEMA (which document the rejected-order stream and the
+% timestampDiff = ts - submission field). SSRN full text NOT read: SSRN 403s
+% non-browser clients. Read in-browser before this bibitem loses its flag.
+\bibitem{albers2026openbook}
+J.~Albers, M.~Cucuringu, S.~Howison, and A.~Y.~Shestopaloff.
+An open book: level 4 order book data from the Hyperliquid exchange.
+Working paper, SSRN 6465720, 2026. Dataset: \url{https://doi.org/10.5281/zenodo.18184441}.
 
 \bibitem{hyperliquid}
 Hyperliquid. Documentation. \url{https://hyperliquid.gitbook.io/hyperliquid-docs}.
